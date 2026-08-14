@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	const closeBtn = document.getElementById('modal-close');
 
 	let currentMemberId = null;
+	let allAssignments = {};
+	let allUsers = [];
 
 	function loadMembers() {
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
@@ -20,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				fetch(OC.generateUrl('/apps/weinsteigfinance/api/users'))
 					.then(r => r.json())
 					.then(users => {
+						allUsers = users;
 						loadAssignments(members, users);
 					});
 			});
@@ -50,18 +53,41 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(r => r.json())
 			.then(data => {
 				if (data.assignments) {
-					const assignments = {};
+					allAssignments = {};
 					data.assignments.forEach(a => {
-						if (!assignments[a.member_id]) {
-							assignments[a.member_id] = [];
+						if (!allAssignments[a.member_id]) {
+							allAssignments[a.member_id] = [];
 						}
-						assignments[a.member_id].push(a.user_id);
+						allAssignments[a.member_id].push(a.user_id);
 					});
 
-					Object.keys(assignments).forEach(memberId => {
+					Object.keys(allAssignments).forEach(memberId => {
 						const cell = document.querySelector('.users-col-' + memberId);
 						if (cell) {
-							cell.innerHTML = assignments[memberId].join('<br>');
+							const userList = allAssignments[memberId].map(uid => {
+								return `<div>${escapeHtml(uid)} <button class="remove-btn" data-member="${memberId}" data-user="${escapeHtml(uid)}" style="font-size: 0.8em;">✕</button></div>`;
+							}).join('');
+							cell.innerHTML = userList;
+
+							// Remove-Button Handler
+							cell.querySelectorAll('.remove-btn').forEach(btn => {
+								btn.addEventListener('click', function(e) {
+									e.stopPropagation();
+									const mId = this.dataset.member;
+									const uId = this.dataset.user;
+									fetch(OC.generateUrl('/apps/weinsteigfinance/api/unassign'), {
+										method: 'POST',
+										headers: {'Content-Type': 'application/json'},
+										body: JSON.stringify({memberId: mId, userId: uId})
+									})
+										.then(r => r.json())
+										.then(data => {
+											if (data.success) {
+												loadMembers();
+											}
+										});
+								});
+							});
 						}
 					});
 				}
@@ -72,10 +98,13 @@ document.addEventListener('DOMContentLoaded', function() {
 						currentMemberId = this.dataset.id;
 						modalAddress.textContent = this.dataset.addr;
 
-						// Benutzer-Liste füllen
+						// Benutzer-Liste füllen (ausser bereits zugeordnete)
+						const assigned = allAssignments[currentMemberId] || [];
 						userSelect.innerHTML = '<option value="">-- Bitte wählen --</option>';
-						users.forEach(user => {
-							userSelect.innerHTML += `<option value="${escapeHtml(user.uid)}">${escapeHtml(user.displayName || user.uid)}</option>`;
+						allUsers.forEach(user => {
+							if (!assigned.includes(user.uid)) {
+								userSelect.innerHTML += `<option value="${escapeHtml(user.uid)}">${escapeHtml(user.displayName || user.uid)}</option>`;
+							}
 						});
 
 						modal.style.display = 'block';
