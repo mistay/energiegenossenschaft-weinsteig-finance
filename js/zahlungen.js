@@ -136,32 +136,37 @@ document.addEventListener('DOMContentLoaded', function() {
 					});
 				}
 
-				// Assign Button Handlers
-				document.querySelectorAll('.assign-btn').forEach(btn => {
-					btn.addEventListener('click', function() {
-						const zahlungId = this.dataset.id;
-						const select = document.getElementById('select-' + zahlungId);
-						const memberId = select.value;
+				// Assign Button Handlers (für beide Tabellen)
+				setTimeout(() => {
+					document.querySelectorAll('.assign-btn').forEach(btn => {
+						btn.onclick = function(e) {
+							e.preventDefault();
+							const zahlungId = this.dataset.id;
+							const select = document.getElementById('select-' + zahlungId);
+							const memberId = select ? select.value : null;
 
-						if (!memberId) {
-							alert('Bitte wähle ein Haus');
-							return;
-						}
+							if (!memberId) {
+								alert('Bitte wähle ein Haus');
+								return false;
+							}
 
-						fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/' + zahlungId + '/assign/' + memberId), {
-							method: 'POST',
-							headers: {'Content-Type': 'application/json'}
-						})
-							.then(r => r.json())
-							.then(data => {
-								if (data.success) {
-									load();
-								} else {
-									alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
-								}
-							});
+							fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/' + zahlungId + '/assign/' + memberId), {
+								method: 'POST',
+								headers: {'Content-Type': 'application/json'}
+							})
+								.then(r => r.json())
+								.then(data => {
+									if (data.success) {
+										load();
+									} else {
+										alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+									}
+								})
+								.catch(err => alert('Fehler: ' + err.message));
+							return false;
+						};
 					});
-				});
+				}, 100);
 			})
 			.catch(err => {
 				container.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(err.message) + '</p>';
