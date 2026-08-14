@@ -113,7 +113,10 @@ document.addEventListener('DOMContentLoaded', function() {
 					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
 					<td>${escapeHtml(m.iban || '-')}</td>
 					<td>${mandatInfo}</td>
-					<td><button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button></td>
+					<td>
+						<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>
+						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 PDF</a>
+					</td>
 				</tr>`;
 			});
 		}
