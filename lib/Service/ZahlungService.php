@@ -91,7 +91,7 @@ class ZahlungService {
 			}
 		}
 
-		// 2. Partnername gegen zahlungspflichtig
+		// 2a. Partnername exakt gegen zahlungspflichtig
 		foreach ($members as $member) {
 			$zahl = strtolower($member['zahlungspflichtig'] ?? '');
 			$partner = strtolower($zahlung['partnername']);
@@ -100,6 +100,33 @@ class ZahlungService {
 					'member_id' => $member['id'],
 					'type' => 'auto_partnername',
 					'confidence' => 90
+				];
+			}
+		}
+
+		// 2b. Partnername: Alle Wörter müssen vorkommen (aber nicht in Reihenfolge)
+		foreach ($members as $member) {
+			$zahl = strtolower($member['zahlungspflichtig'] ?? '');
+			$partner = strtolower($zahlung['partnername']);
+			if (empty($zahl)) continue;
+
+			$partnerWords = preg_split('/[\s,;\/\-]+/', $partner, -1, PREG_SPLIT_NO_EMPTY);
+			$zahlWords = preg_split('/[\s,;\/\-]+/', $zahl, -1, PREG_SPLIT_NO_EMPTY);
+
+			// Alle Wörter aus Partner müssen in Zahl vorkommen
+			$allMatch = true;
+			foreach ($partnerWords as $word) {
+				if (strlen($word) > 2 && !in_array($word, $zahlWords)) {
+					$allMatch = false;
+					break;
+				}
+			}
+
+			if ($allMatch && count($partnerWords) >= 2) {
+				return [
+					'member_id' => $member['id'],
+					'type' => 'auto_partnername_words',
+					'confidence' => 88
 				];
 			}
 		}
