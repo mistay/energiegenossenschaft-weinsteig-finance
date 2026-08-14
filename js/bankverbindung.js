@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 
-		// Prüfe für jedes Mitglied, ob ein unterschriebenes Formular existiert
+		// Prüfe für jedes Mitglied, ob unterschriebene Formulare existieren
 		const rows = document.querySelectorAll('tr');
 		rows.forEach(row => {
 			const editBtn = row.querySelector('.edit-btn');
@@ -172,16 +172,26 @@ document.addEventListener('DOMContentLoaded', function() {
 			fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed'), {method: 'GET'})
 				.then(r => r.json())
 				.then(data => {
-					if (data.exists && data.downloadUrl) {
+					if (data.exists && data.files && data.files.length > 0) {
 						const actionCol = row.querySelector('td:last-child');
-						const link = document.createElement('a');
-						link.href = data.downloadUrl;
-						link.target = '_blank';
-						link.style.marginLeft = '10px';
-						link.style.color = '#28a745';
-						link.style.textDecoration = 'none';
-						link.innerHTML = '✅ Unterschriebenes';
-						actionCol.appendChild(link);
+						const container = document.createElement('div');
+						container.style.marginTop = '5px';
+
+						data.files.forEach(f => {
+							const link = document.createElement('a');
+							link.href = f.downloadUrl;
+							link.style.display = 'inline-block';
+							link.style.marginRight = '5px';
+							link.style.marginTop = '3px';
+							link.style.color = '#28a745';
+							link.style.textDecoration = 'none';
+							link.style.fontSize = '12px';
+							const date = new Date(f.mtime * 1000).toLocaleDateString('de-AT');
+							link.innerHTML = `✅ v${f.version} (${date})`;
+							container.appendChild(link);
+						});
+
+						actionCol.appendChild(container);
 					}
 				});
 		});

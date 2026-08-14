@@ -273,10 +273,17 @@ class ApiController extends Controller {
 			// Im Nextcloud data/-Verzeichnis speichern
 			$dataDir = $this->config->getSystemValue('datadirectory');
 			$folderPath = "$dataDir/generated/{$address}/sepa";
-			$filePath = "$folderPath/mandat_unterschrieben.pdf";
 
 			// Ordner erstellen
 			@mkdir($folderPath, 0750, true);
+
+			// Versionsnummer ermitteln
+			$v = 1;
+			while (file_exists("$folderPath/mandat_unterschrieben_v{$v}.pdf")) {
+				$v++;
+			}
+
+			$filePath = "$folderPath/mandat_unterschrieben_v{$v}.pdf";
 
 			// Datei speichern
 			file_put_contents($filePath, $pdfContent);
@@ -313,11 +320,26 @@ class ApiController extends Controller {
 
 			$address = $member['address'];
 			$dataDir = $this->config->getSystemValue('datadirectory');
-			$filePath = "$dataDir/generated/{$address}/sepa/mandat_unterschrieben.pdf";
+			$folderPath = "$dataDir/generated/{$address}/sepa";
 
-			if (file_exists($filePath)) {
-				$downloadUrl = \OCP\Util::linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id]);
-				return new DataResponse(['exists' => true, 'downloadUrl' => $downloadUrl]);
+			// Alle Versionen sammeln
+			$files = [];
+			if (is_dir($folderPath)) {
+				$dir = scandir($folderPath, SCANDIR_SORT_DESCENDING);
+				foreach ($dir as $file) {
+					if (preg_match('/^mandat_unterschrieben_v(\d+)\.pdf$/', $file, $m)) {
+						$files[] = [
+							'version' => (int)$m[1],
+							'filename' => $file,
+							'downloadUrl' => \OCP\Util::linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id, 'v' => (int)$m[1]]),
+							'mtime' => filemtime("$folderPath/$file")
+						];
+					}
+				}
+			}
+
+			if (count($files) > 0) {
+				return new DataResponse(['exists' => true, 'files' => $files]);
 			} else {
 				return new DataResponse(['exists' => false]);
 			}
@@ -328,7 +350,7 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function downloadSignedMandate(int $id) {
+	public function downloadSignedMandate(int $id, ?int $v = null) {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
@@ -351,14 +373,32 @@ class ApiController extends Controller {
 
 			$address = $member['address'];
 			$dataDir = $this->config->getSystemValue('datadirectory');
-			$filePath = "$dataDir/generated/{$address}/sepa/mandat_unterschrieben.pdf";
+			$folderPath = "$dataDir/generated/{$address}/sepa";
+
+			// Versionsnummer bestimmen (default: neueste)
+			if ($v === null) {
+				$highestV = 0;
+				if (is_dir($folderPath)) {
+					foreach (scandir($folderPath) as $file) {
+						if (preg_match('/^mandat_unterschrieben_v(\d+)\.pdf$/', $file, $m)) {
+							$highestV = max($highestV, (int)$m[1]);
+						}
+					}
+				}
+				if ($highestV === 0) {
+					return new DataResponse(['error' => 'File not found'], 404);
+				}
+				$v = $highestV;
+			}
+
+			$filePath = "$folderPath/mandat_unterschrieben_v{$v}.pdf";
 
 			if (!file_exists($filePath)) {
 				return new DataResponse(['error' => 'File not found'], 404);
 			}
 
 			header('Content-Type: application/pdf');
-			header('Content-Disposition: attachment; filename="' . urlencode($address) . '_unterschriebenes_mandat.pdf"');
+			header('Content-Disposition: attachment; filename="' . urlencode($address) . '_mandat_v' . $v . '.pdf"');
 			readfile($filePath);
 			exit;
 		} catch (\Throwable $e) {
