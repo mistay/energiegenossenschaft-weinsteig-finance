@@ -68,6 +68,7 @@ class ApiController extends Controller {
 	}
 
 	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function assignUser(int $memberId, string $userId): DataResponse {
 		if (!$this->groupManager->isInGroup($this->userId, 'obpersonen')) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
@@ -85,6 +86,7 @@ class ApiController extends Controller {
 	}
 
 	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function unassignUser(int $memberId, string $userId): DataResponse {
 		if (!$this->groupManager->isInGroup($this->userId, 'obpersonen')) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
