@@ -525,11 +525,23 @@ class ApiController extends Controller {
 	private function generateVorschreibungPdf(array $member, int $year, int $month): string {
 		$address = $member['address'];
 		$iban = $member['iban'] ?? '';
+		$mandateGrantedDate = $member['mandate_granted_date'] ?? null;
 
 		// Deutsche Monatsnamen
 		$months = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 		$monthName = $months[$month] . ' ' . $year;
 		$today = (new DateTime())->format('d.m.Y');
+
+		// Format mandate granted date
+		$mandateDateText = '';
+		if ($mandateGrantedDate) {
+			try {
+				$mandateDate = new DateTime($mandateGrantedDate);
+				$mandateDateText = 'Mandatserteilung: ' . $mandateDate->format('d.m.Y');
+			} catch (\Exception) {
+				$mandateDateText = 'Mandatserteilung: ' . $mandateGrantedDate;
+			}
+		}
 
 		// Belastungskonto: Immer Genossenschaft anzeigen, plus optional Mitglied-IBAN
 		$bankAccount = '<strong>Der fällige Betrag wird von folgendem Konto eingezogen:</strong><br><br>';
@@ -594,6 +606,8 @@ Energiegenossenschaft Weinsteig
 </div>
 
 <div class="note">
+<strong>Mandatsinformation:</strong><br>
+{$mandateDateText}<br><br>
 <strong>Widerrufsrecht:</strong> Das SEPA-Lastschrift-Mandat kann jederzeit online über das Kundencenter der Energiegenossenschaft Weinsteig widerrufen werden.
 </div>
 
