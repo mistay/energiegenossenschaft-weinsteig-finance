@@ -243,10 +243,10 @@ class ZahlungService {
 		$qb->select('z.*', 'm.address')
 			->from('weinsteig_zahlungen', 'z')
 			->leftJoin('z', 'weinsteig_members', 'm', $qb->expr()->eq('z.member_id', 'm.id'))
-			->where($qb->expr()->in('z.status', [
-				$qb->createNamedParameter('pending'),
-				$qb->createNamedParameter('matched')
-			]))
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('z.status', $qb->createNamedParameter('pending')),
+				$qb->expr()->eq('z.status', $qb->createNamedParameter('matched'))
+			))
 			->orderBy('z.status', 'ASC')
 			->orderBy('z.valutadatum', 'DESC');
 		return $qb->executeQuery()->fetchAll();
