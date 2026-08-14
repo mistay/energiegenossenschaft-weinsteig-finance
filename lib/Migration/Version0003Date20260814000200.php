@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace OCA\WeinsteigFinance\Migration;
 
+use Closure;
+use OCP\DB\ISchemaTools;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
-use OCP\Migration\IRepairStep;
+use OCP\Migration\IMigrationStep;
 
-class Version0003Date20260814000200 implements IRepairStep {
+class Version0003Date20260814000200 implements IMigrationStep {
 	public function __construct(private IDBConnection $db) {}
 
-	public function getName(): string {
-		return 'Seed weinsteig_members with 22 houses';
-	}
-
-	public function run(IOutput $output): void {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, ISchemaTools $schemaTools): void {
 		$addresses = [
 			'Weinsteig 2a', 'Weinsteig 2b', 'Weinsteig 4', 'Weinsteig 6a', 'Weinsteig 6b',
 			'Weinsteig 8a', 'Weinsteig 8b', 'Weinsteig 8c', 'Weinsteig 10', 'Weinsteig 12',
@@ -34,7 +32,5 @@ class Version0003Date20260814000200 implements IRepairStep {
 				// Already exists
 			}
 		}
-
-		$output->info('Seeded ' . count($addresses) . ' houses');
 	}
 }
