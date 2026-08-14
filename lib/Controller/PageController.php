@@ -66,4 +66,18 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'bankverbindung');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function vorschreibungen(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || (!$this->groupManager->isInGroup($user->getUID(), 'obpersonen') && !$this->groupManager->isInGroup($user->getUID(), 'mitglieder'))) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'vorschreibungen');
+
+		return new TemplateResponse(Application::APP_ID, 'vorschreibungen');
+	}
 }

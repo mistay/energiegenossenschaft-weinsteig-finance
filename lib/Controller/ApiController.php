@@ -427,4 +427,166 @@ class ApiController extends Controller {
 
 		return new DataResponse($row ?: ['error' => 'Not found']);
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function getVorschreibungen(): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		// Berechne alle Monate von Mai 2026 bis heute
+		$months = [];
+		$startDate = new DateTime('2026-05-01');
+		$endDate = new DateTime();
+		$endDate->modify('last day of this month');
+
+		$current = clone $startDate;
+		while ($current <= $endDate) {
+			$months[] = [
+				'year' => (int)$current->format('Y'),
+				'month' => (int)$current->format('m'),
+				'label' => $current->format('F Y') // Mai 2026, Juni 2026, etc.
+			];
+			$current->modify('first day of next month');
+		}
+
+		// Obpersonen sehen alle Häuser
+		if ($this->isObperson()) {
+			$qb = $this->db->getQueryBuilder();
+			$members = $qb->select('*')
+				->from('weinsteig_members')
+				->orderBy('address')
+				->executeQuery()
+				->fetchAll();
+			return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => true]);
+		}
+
+		// Mitglieder sehen nur ihr Haus
+		$userId = $this->getUserId();
+		$qb = $this->db->getQueryBuilder();
+		$member = $qb->select('m.*')
+			->from('weinsteig_members', 'm')
+			->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
+			->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
+			->setMaxResults(1)
+			->executeQuery()
+			->fetch();
+
+		if (!$member) {
+			return new DataResponse(['error' => 'Member not found'], 404);
+		}
+
+		return new DataResponse(['months' => $months, 'members' => [$member], 'isObperson' => false]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function vorschreibungPdf(int $id, string $month) {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot access other members'], 403);
+		}
+
+		try {
+			// Parse month (format: 2026-05 oder 202605)
+			$parts = preg_split('/[-\/]/', $month);
+			if (count($parts) !== 2) {
+				return new DataResponse(['error' => 'Invalid month format'], 400);
+			}
+			$year = (int)$parts[0];
+			$m = (int)$parts[1];
+
+			// Mitglied laden
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('*')
+				->from('weinsteig_members')
+				->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+				->executeQuery()
+				->fetch();
+
+			if (!$member) {
+				return new DataResponse(['error' => 'Member not found'], 404);
+			}
+
+			$pdf = $this->generateVorschreibungPdf($member, $year, $m);
+			header('Content-Type: application/pdf');
+			header('Content-Disposition: attachment; filename="vorschreibung_' . $year . sprintf('%02d', $m) . '.pdf"');
+			echo $pdf;
+			exit;
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	private function generateVorschreibungPdf(array $member, int $year, int $month): string {
+		$address = $member['address'];
+		$monthName = (new DateTime("$year-$month-01"))->format('F Y');
+		$today = (new DateTime())->format('d.m.Y');
+
+		$html = <<<HTML
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; margin: 20px; }
+h2 { font-size: 14pt; margin-bottom: 10px; }
+.section { margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+td { padding: 5px; border: 1px solid #ddd; }
+.label { font-weight: bold; }
+.amount { font-size: 14pt; font-weight: bold; color: #d9534f; }
+</style>
+</head>
+<body>
+
+<h2>Vorschreibung</h2>
+
+<div class="section">
+<strong>Energiegenossenschaft Weinsteig</strong><br>
+Weinsteig 19a<br>
+5082 Glanegg<br>
+Austria
+</div>
+
+<div class="section">
+<strong>Rechnungsempfänger</strong><br>
+{$address}
+</div>
+
+<div class="section">
+<strong>Rechnungszeitraum</strong><br>
+{$monthName}
+</div>
+
+<table>
+<tr><td class="label">Abschlagszahlung für Energieversorgung</td><td style="text-align: right; width: 150px;">€ 60,00</td></tr>
+<tr style="background: #f5f5f5;"><td class="label" style="border-top: 2px solid black; padding-top: 10px;"><strong>Gesamtbetrag fällig</strong></td><td style="border-top: 2px solid black; padding-top: 10px; text-align: right;"><span class="amount">€ 60,00</span></td></tr>
+</table>
+
+<div class="section" style="margin-top: 20px;">
+<strong>Zahlungsanweisung</strong><br>
+Bitte überweisen Sie den fälligen Betrag innerhalb von 14 Tagen nach Rechnungsdatum auf folgendes Konto:
+<br><br>
+<strong>Kontoinhaber:</strong> Energiegenossenschaft Weinsteig<br>
+<strong>IBAN:</strong> AT80ZZZ00000086863<br>
+<strong>BIC:</strong> GENSTAT<br>
+<strong>Referenz:</strong> {$address} - {$monthName}
+</div>
+
+<div style="margin-top: 30px; font-size: 9pt; color: #666;">
+Ausgestellt: {$today}
+</div>
+
+</body>
+</html>
+HTML;
+
+		$mpdf = new \Mpdf\Mpdf(['default_font_size' => 11, 'default_font' => 'Arial']);
+		$mpdf->WriteHTML($html);
+		return $mpdf->Output('', 'S');
+	}
 }
