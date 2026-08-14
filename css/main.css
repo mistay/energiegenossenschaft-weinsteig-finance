@@ -1,27 +1,231 @@
+/* Modern, flat design for WeinsteigFinance */
+
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+	overflow-x: hidden;
+}
+
 .app-weinsteigfinance {
-	padding: 24px;
-	max-width: 100%;
+	padding: 16px;
+	max-width: 1400px;
+	margin: 0 auto;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.app-weinsteigfinance h1 {
+	font-size: 28px;
+	font-weight: 600;
+	margin: 0 0 20px 0;
+	color: #2c3e50;
 }
 
 .app-weinsteigfinance h2 {
-	font-size: 20px;
-	font-weight: bold;
-	margin-bottom: 8px;
+	font-size: 22px;
+	font-weight: 600;
+	margin: 24px 0 16px 0;
+	color: #2c3e50;
+	border-bottom: 2px solid #ecf0f1;
+	padding-bottom: 12px;
 }
 
+.app-weinsteigfinance h3 {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 16px 0 12px 0;
+	color: #34495e;
+}
+
+/* Tables */
+.app-weinsteigfinance table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 16px;
+	background: white;
+	border: 1px solid #ecf0f1;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.app-weinsteigfinance table thead {
+	background: #f8f9fa;
+	font-weight: 600;
+	color: #2c3e50;
+}
+
+.app-weinsteigfinance table th {
+	padding: 12px;
+	text-align: left;
+	border-bottom: 2px solid #ecf0f1;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.app-weinsteigfinance table td {
+	padding: 12px;
+	border-bottom: 1px solid #ecf0f1;
+	font-size: 13px;
+	color: #555;
+}
+
+.app-weinsteigfinance table tbody tr:hover {
+	background: #f8f9fa;
+	transition: background 0.2s ease;
+}
+
+.app-weinsteigfinance table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+/* Buttons */
+.app-weinsteigfinance button,
+.app-weinsteigfinance .button {
+	padding: 8px 14px;
+	font-size: 13px;
+	font-weight: 500;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	display: inline-block;
+	text-decoration: none;
+	background: #0082c9;
+	color: white;
+	margin-right: 6px;
+	margin-bottom: 6px;
+}
+
+.app-weinsteigfinance button:hover,
+.app-weinsteigfinance .button:hover {
+	background: #006ba3;
+	transform: translateY(-1px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.app-weinsteigfinance button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none;
+}
+
+/* Button variants */
+.app-weinsteigfinance button.primary { background: #0082c9; }
+.app-weinsteigfinance button.primary:hover { background: #006ba3; }
+
+.app-weinsteigfinance button.success { background: #28a745; }
+.app-weinsteigfinance button.success:hover { background: #218838; }
+
+.app-weinsteigfinance button.warning { background: #ff9800; }
+.app-weinsteigfinance button.warning:hover { background: #e68900; }
+
+.app-weinsteigfinance button.danger { background: #dc3545; }
+.app-weinsteigfinance button.danger:hover { background: #c82333; }
+
+/* Links */
+.app-weinsteigfinance a {
+	color: #0082c9;
+	text-decoration: none;
+	transition: color 0.2s ease;
+	font-size: 13px;
+}
+
+.app-weinsteigfinance a:hover {
+	color: #006ba3;
+	text-decoration: underline;
+}
+
+/* Forms */
+.app-weinsteigfinance input[type="text"],
+.app-weinsteigfinance input[type="email"],
+.app-weinsteigfinance input[type="password"],
+.app-weinsteigfinance input[type="number"],
+.app-weinsteigfinance textarea,
+.app-weinsteigfinance select {
+	width: 100%;
+	max-width: 500px;
+	padding: 8px 12px;
+	font-size: 13px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	margin-bottom: 8px;
+	font-family: inherit;
+	transition: border-color 0.2s ease;
+}
+
+.app-weinsteigfinance input[type="text"]:focus,
+.app-weinsteigfinance input[type="email"]:focus,
+.app-weinsteigfinance input[type="password"]:focus,
+.app-weinsteigfinance input[type="number"]:focus,
+.app-weinsteigfinance textarea:focus,
+.app-weinsteigfinance select:focus {
+	outline: none;
+	border-color: #0082c9;
+	box-shadow: 0 0 0 3px rgba(0, 130, 201, 0.1);
+}
+
+/* Status badges */
+.app-weinsteigfinance .status-open { color: #ff9800; font-weight: 600; }
+.app-weinsteigfinance .status-paid { color: #28a745; font-weight: 600; }
+.app-weinsteigfinance .status-matched { color: #28a745; font-weight: 600; }
+.app-weinsteigfinance .status-pending { color: #ff9800; font-weight: 600; }
+
+/* Info/Alert boxes */
+.app-weinsteigfinance .info-box,
+.app-weinsteigfinance .alert {
+	padding: 16px;
+	border-radius: 6px;
+	margin-bottom: 16px;
+	border-left: 4px solid;
+	background: #f8f9fa;
+}
+
+.app-weinsteigfinance .info-box { border-left-color: #0082c9; }
+.app-weinsteigfinance .alert.success { border-left-color: #28a745; }
+.app-weinsteigfinance .alert.warning { border-left-color: #ff9800; }
+.app-weinsteigfinance .alert.error { border-left-color: #dc3545; }
+
+/* Grid layouts */
 .app-weinsteigfinance .grid {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 	font-size: 13px;
 	overflow-x: auto;
 }
 
-.app-weinsteigfinance button {
-	font-size: 12px;
-	padding: 4px 8px;
-	white-space: nowrap;
-	margin-right: 5px;
-}
+@media (max-width: 768px) {
+	.app-weinsteigfinance {
+		padding: 12px;
+	}
 
-.app-weinsteigfinance a {
-	font-size: 12px;
-	white-space: nowrap;
+	.app-weinsteigfinance h2 {
+		font-size: 18px;
+		margin: 16px 0 12px 0;
+	}
+
+	.app-weinsteigfinance table {
+		font-size: 12px;
+	}
+
+	.app-weinsteigfinance table th,
+	.app-weinsteigfinance table td {
+		padding: 8px;
+	}
+
+	.app-weinsteigfinance button {
+		padding: 6px 10px;
+		font-size: 12px;
+	}
+
+	.app-weinsteigfinance input,
+	.app-weinsteigfinance textarea,
+	.app-weinsteigfinance select {
+		max-width: 100%;
+	}
 }
