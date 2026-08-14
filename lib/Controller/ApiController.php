@@ -63,7 +63,8 @@ class ApiController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function members(): DataResponse {
-		if (!$this->canEdit()) {
+		// Nur obpersonen dürfen alle Häuser sehen
+		if (!$this->isObperson()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
