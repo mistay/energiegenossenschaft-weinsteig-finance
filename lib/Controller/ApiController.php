@@ -115,6 +115,8 @@ class ApiController extends Controller {
 		$qb->update('weinsteig_members')
 			->set('zahlungspflichtig', $qb->createNamedParameter($zahlungspflichtig))
 			->set('iban', $qb->createNamedParameter($iban))
+			->set('mandate_withdrawn_date', $qb->createNamedParameter(null))
+			->set('mandate_withdrawn_reason', $qb->createNamedParameter(null))
 			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
 			->executeStatement();
 
