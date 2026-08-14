@@ -930,4 +930,90 @@ HTML;
 		$mpdf->WriteHTML($html);
 		return $mpdf->Output('', 'S');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function memberJournal(?int $memberId = null): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// Mitglieder sehen nur ihre eigenen Daten
+			if (!$this->isObperson()) {
+				$userId = $this->getUserId();
+				$qb = $this->db->getQueryBuilder();
+				$member = $qb->select('m.id')
+					->from('weinsteig_members', 'm')
+					->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
+					->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
+					->setMaxResults(1)
+					->executeQuery()
+					->fetch();
+				if (!$member) {
+					return new DataResponse(['error' => 'Not found'], 404);
+				}
+				$memberId = $member['id'];
+			}
+
+			if (!$memberId) {
+				return new DataResponse(['error' => 'memberId required'], 400);
+			}
+
+			// Lade alle Vorschreibungen
+			$vorschreibungen = $this->db->getQueryBuilder()
+				->select('*')
+				->from('weinsteig_vorschreibungen')
+				->where($this->db->getQueryBuilder()->expr()->eq('member_id', $this->db->getQueryBuilder()->createNamedParameter($memberId)))
+				->orderBy('year', 'DESC')
+				->addOrderBy('month', 'DESC')
+				->executeQuery()
+				->fetchAll();
+
+			// Lade alle Zahlungen
+			$zahlungen = $this->db->getQueryBuilder()
+				->select('*')
+				->from('weinsteig_zahlungen')
+				->where($this->db->getQueryBuilder()->expr()->eq('member_id', $this->db->getQueryBuilder()->createNamedParameter($memberId)))
+				->orderBy('valutadatum', 'DESC')
+				->executeQuery()
+				->fetchAll();
+
+			// Berechne Statistiken
+			$totalVorschreibungen = 0;
+			$paidVorschreibungen = 0;
+			$openVorschreibungen = 0;
+
+			foreach ($vorschreibungen as $v) {
+				$totalVorschreibungen += (float)$v['amount'];
+				if ($v['status'] === 'paid') {
+					$paidVorschreibungen += (float)$v['amount'];
+				} else {
+					$openVorschreibungen += (float)$v['amount'];
+				}
+			}
+
+			$totalZahlungen = 0;
+			foreach ($zahlungen as $z) {
+				$totalZahlungen += (float)$z['betrag'];
+			}
+
+			// Saldo = eingegangene Zahlungen - ausstehende Vorschreibungen
+			$saldo = $totalZahlungen - $openVorschreibungen;
+
+			return new DataResponse([
+				'vorschreibungen' => $vorschreibungen,
+				'zahlungen' => $zahlungen,
+				'stats' => [
+					'totalVorschreibungen' => round($totalVorschreibungen, 2),
+					'paidVorschreibungen' => round($paidVorschreibungen, 2),
+					'openVorschreibungen' => round($openVorschreibungen, 2),
+					'totalZahlungen' => round($totalZahlungen, 2),
+					'saldo' => round($saldo, 2),
+				]
+			]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
+		}
+	}
 }

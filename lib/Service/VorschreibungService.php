@@ -16,7 +16,7 @@ class VorschreibungService {
 	) {}
 
 	/**
-	 * Generiert alle Vorschreibungs-PDFs für einen bestimmten Monat
+	 * Generiert alle Vorschreibungs-PDFs für einen bestimmten Monat und speichert sie in der DB
 	 */
 	public function generateAllForMonth(int $year, int $month): array {
 		$qb = $this->db->getQueryBuilder();
@@ -28,9 +28,38 @@ class VorschreibungService {
 
 		$generated = [];
 		$dataDir = $this->config->getSystemValue('datadirectory');
+		$now = new DateTime();
 
 		foreach ($members as $member) {
 			try {
+				$memberId = $member['id'];
+				$amount = 60.00; // Akontozahlung
+
+				// Speichere in DB (nur wenn noch nicht vorhanden)
+				$existing = $this->db->getQueryBuilder()
+					->select('id')
+					->from('weinsteig_vorschreibungen')
+					->where($this->db->getQueryBuilder()->expr()->eq('member_id', $this->db->getQueryBuilder()->createNamedParameter($memberId)))
+					->andWhere($this->db->getQueryBuilder()->expr()->eq('year', $this->db->getQueryBuilder()->createNamedParameter($year)))
+					->andWhere($this->db->getQueryBuilder()->expr()->eq('month', $this->db->getQueryBuilder()->createNamedParameter($month)))
+					->executeQuery()
+					->fetch();
+
+				if (!$existing) {
+					$this->db->getQueryBuilder()
+						->insert('weinsteig_vorschreibungen')
+						->values([
+							'member_id' => $this->db->getQueryBuilder()->createNamedParameter($memberId),
+							'year' => $this->db->getQueryBuilder()->createNamedParameter($year),
+							'month' => $this->db->getQueryBuilder()->createNamedParameter($month),
+							'amount' => $this->db->getQueryBuilder()->createNamedParameter($amount),
+							'status' => $this->db->getQueryBuilder()->createNamedParameter('open'),
+							'created_at' => $this->db->getQueryBuilder()->createNamedParameter($now->format('Y-m-d H:i:s')),
+						])
+						->execute();
+				}
+
+				// PDF generieren und speichern
 				$pdf = $this->generateVorschreibungPdf($member, $year, $month);
 				$address = $member['address'];
 				$folderPath = "$dataDir/generated/{$address}/vorschreibungen";
@@ -43,9 +72,11 @@ class VorschreibungService {
 				// PDF speichern
 				file_put_contents($filePath, $pdf);
 				$generated[] = [
+					'member_id' => $memberId,
 					'address' => $address,
 					'filename' => $filename,
 					'path' => $filePath,
+					'amount' => $amount,
 				];
 			} catch (\Exception $e) {
 				// Fehler loggen, aber weitermachen
