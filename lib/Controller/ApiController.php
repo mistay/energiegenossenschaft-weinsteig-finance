@@ -590,7 +590,10 @@ class ApiController extends Controller {
 				->fetch();
 
 			if (!$member) {
-				return new DataResponse(['error' => 'Not found'], 404);
+				return new DataResponse([
+					'error' => 'Kein Haus zugewiesen',
+					'message' => 'Sie sind noch nicht mit einem Haus verknüpft. Bitte kontaktieren Sie einen Administrator.'
+				], 404);
 			}
 
 			$memberId = $member['id'];
@@ -610,11 +613,11 @@ class ApiController extends Controller {
 			$unzugeordnet = 0;
 
 			foreach ($zahlungen as $z) {
-				$gesamt += $z['betrag'];
+				$gesamt += (float)$z['betrag'];
 				if ($z['status'] === 'matched') {
-					$zugeordnet += $z['betrag'];
+					$zugeordnet += (float)$z['betrag'];
 				} else {
-					$unzugeordnet += $z['betrag'];
+					$unzugeordnet += (float)$z['betrag'];
 				}
 			}
 
@@ -622,14 +625,14 @@ class ApiController extends Controller {
 				'member' => $member,
 				'zahlungen' => $zahlungen,
 				'stats' => [
-					'gesamt' => $gesamt,
-					'zugeordnet' => $zugeordnet,
-					'unzugeordnet' => $unzugeordnet,
+					'gesamt' => round($gesamt, 2),
+					'zugeordnet' => round($zugeordnet, 2),
+					'unzugeordnet' => round($unzugeordnet, 2),
 					'count' => count($zahlungen)
 				]
 			]);
 		} catch (\Exception $e) {
-			return new DataResponse(['error' => $e->getMessage()], 400);
+			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
 		}
 	}
 

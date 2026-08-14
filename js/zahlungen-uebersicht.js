@@ -12,7 +12,11 @@ function load() {
 		.then(r => r.json())
 		.then(data => {
 			if (data.error) {
-				container.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error) + '</p>';
+				let errorHtml = '<p style="color: red; font-weight: bold;">❌ ' + escapeHtml(data.error) + '</p>';
+				if (data.message) {
+					errorHtml += '<p style="color: #666;">' + escapeHtml(data.message) + '</p>';
+				}
+				container.innerHTML = errorHtml;
 				return;
 			}
 
