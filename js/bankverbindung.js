@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			return;
 		}
 
-		let html = '<table class="grid" style="width:100%"><thead><tr>' +
+		let html = '<table><thead><tr>' +
 			'<th>Haus</th><th>Zahlungspflichtig</th><th>IBAN</th><th>Mandat</th><th>Unterschriebene Mandate</th><th>Aktion</th>' +
 			'</tr></thead><tbody>';
 
@@ -113,11 +113,11 @@ document.addEventListener('DOMContentLoaded', function() {
 					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
 					<td>${escapeHtml(m.iban || '-')}</td>
 					<td>${mandatInfo}</td>
-					<td class="downloads-cell-${m.id}"><span style="font-size: 12px; color: #999;">lädt...</span></td>
+					<td class="downloads-cell-${m.id}">lädt...</td>
 					<td>
 						<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>
-						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 Vorlage</a>
-						<button class="upload-signed-btn" data-id="${m.id}" style="margin-left: 10px; background: #17a2b8; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">📤 Upload</button>
+						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank">📄 Vorlage</a>
+						<button class="upload-signed-btn" data-id="${m.id}">📤 Upload</button>
 					</td>
 				</tr>`;
 			});
