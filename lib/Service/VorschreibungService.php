@@ -36,25 +36,25 @@ class VorschreibungService {
 				$amount = 60.00; // Akontozahlung
 
 				// Speichere in DB (nur wenn noch nicht vorhanden)
-				$existing = $this->db->getQueryBuilder()
-					->select('id')
+				$checkQb = $this->db->getQueryBuilder();
+				$existing = $checkQb->select('id')
 					->from('weinsteig_vorschreibungen')
-					->where($this->db->getQueryBuilder()->expr()->eq('member_id', $this->db->getQueryBuilder()->createNamedParameter($memberId)))
-					->andWhere($this->db->getQueryBuilder()->expr()->eq('year', $this->db->getQueryBuilder()->createNamedParameter($year)))
-					->andWhere($this->db->getQueryBuilder()->expr()->eq('month', $this->db->getQueryBuilder()->createNamedParameter($month)))
+					->where($checkQb->expr()->eq('member_id', $checkQb->createNamedParameter($memberId)))
+					->andWhere($checkQb->expr()->eq('year', $checkQb->createNamedParameter($year)))
+					->andWhere($checkQb->expr()->eq('month', $checkQb->createNamedParameter($month)))
 					->executeQuery()
 					->fetch();
 
 				if (!$existing) {
-					$this->db->getQueryBuilder()
-						->insert('weinsteig_vorschreibungen')
+					$insertQb = $this->db->getQueryBuilder();
+					$insertQb->insert('weinsteig_vorschreibungen')
 						->values([
-							'member_id' => $this->db->getQueryBuilder()->createNamedParameter($memberId),
-							'year' => $this->db->getQueryBuilder()->createNamedParameter($year),
-							'month' => $this->db->getQueryBuilder()->createNamedParameter($month),
-							'amount' => $this->db->getQueryBuilder()->createNamedParameter($amount),
-							'status' => $this->db->getQueryBuilder()->createNamedParameter('open'),
-							'created_at' => $this->db->getQueryBuilder()->createNamedParameter($now->format('Y-m-d H:i:s')),
+							'member_id' => $insertQb->createNamedParameter($memberId),
+							'year' => $insertQb->createNamedParameter($year),
+							'month' => $insertQb->createNamedParameter($month),
+							'amount' => $insertQb->createNamedParameter($amount),
+							'status' => $insertQb->createNamedParameter('open'),
+							'created_at' => $insertQb->createNamedParameter($now->format('Y-m-d H:i:s')),
 						])
 						->execute();
 				}
