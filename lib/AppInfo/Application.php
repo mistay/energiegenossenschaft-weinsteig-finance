@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+namespace OCA\WeinsteigFinance\AppInfo;
+
 // Load vendor autoloader for mPDF
 @require_once __DIR__ . '/../../vendor/autoload.php';
-
-namespace OCA\WeinsteigFinance\AppInfo;
 
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
