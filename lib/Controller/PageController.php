@@ -94,4 +94,18 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'zahlungen');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungenUebersicht(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || (!$this->groupManager->isInGroup($user->getUID(), 'obpersonen') && !$this->groupManager->isInGroup($user->getUID(), 'mitglieder'))) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'zahlungen-uebersicht');
+
+		return new TemplateResponse(Application::APP_ID, 'zahlungen-uebersicht');
+	}
 }

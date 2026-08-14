@@ -9,6 +9,7 @@ return [
 		['name' => 'page#bankverbindung', 'url' => '/bankverbindung', 'verb' => 'GET'],
 		['name' => 'page#vorschreibungen', 'url' => '/vorschreibungen', 'verb' => 'GET'],
 		['name' => 'page#zahlungen', 'url' => '/zahlungen', 'verb' => 'GET'],
+		['name' => 'page#zahlungenUebersicht', 'url' => '/zahlungen-uebersicht', 'verb' => 'GET'],
 		['name' => 'api#members', 'url' => '/api/members', 'verb' => 'GET'],
 		['name' => 'api#users', 'url' => '/api/users', 'verb' => 'GET'],
 		['name' => 'api#getMember', 'url' => '/api/member/{id}', 'verb' => 'GET'],
@@ -30,5 +31,6 @@ return [
 		['name' => 'api#zahlungenAssign', 'url' => '/api/zahlungen/{zahlungId}/assign/{memberId}', 'verb' => 'POST'],
 		['name' => 'api#zahlungenUnassign', 'url' => '/api/zahlungen/{zahlungId}/unassign', 'verb' => 'POST'],
 		['name' => 'api#zahlungenGet', 'url' => '/api/zahlungen', 'verb' => 'GET'],
+		['name' => 'api#zahlungenUebersicht', 'url' => '/api/zahlungen-uebersicht', 'verb' => 'GET'],
 	],
 ];

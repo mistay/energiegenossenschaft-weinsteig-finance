@@ -572,6 +572,69 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function zahlungenUebersicht(?int $month = null): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// Mitglieder sehen nur ihre eigenen Zahlungen
+			$userId = $this->getUserId();
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('m.*')
+				->from('weinsteig_members', 'm')
+				->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
+				->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
+				->setMaxResults(1)
+				->executeQuery()
+				->fetch();
+
+			if (!$member) {
+				return new DataResponse(['error' => 'Not found'], 404);
+			}
+
+			$memberId = $member['id'];
+
+			// Lade alle Zahlungen für dieses Mitglied
+			$qb = $this->db->getQueryBuilder();
+			$zahlungen = $qb->select('*')
+				->from('weinsteig_zahlungen')
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+				->orderBy('valutadatum', 'DESC')
+				->executeQuery()
+				->fetchAll();
+
+			// Berechne Statistik
+			$gesamt = 0;
+			$zugeordnet = 0;
+			$unzugeordnet = 0;
+
+			foreach ($zahlungen as $z) {
+				$gesamt += $z['betrag'];
+				if ($z['status'] === 'matched') {
+					$zugeordnet += $z['betrag'];
+				} else {
+					$unzugeordnet += $z['betrag'];
+				}
+			}
+
+			return new DataResponse([
+				'member' => $member,
+				'zahlungen' => $zahlungen,
+				'stats' => [
+					'gesamt' => $gesamt,
+					'zugeordnet' => $zugeordnet,
+					'unzugeordnet' => $unzugeordnet,
+					'count' => count($zahlungen)
+				]
+			]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function myMember(): DataResponse {
 		$userId = $this->getUserId();
 		if (!$userId || !$this->groupManager->isInGroup($userId, 'mitglieder')) {
