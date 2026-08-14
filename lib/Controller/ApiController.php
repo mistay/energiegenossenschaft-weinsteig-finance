@@ -37,6 +37,29 @@ class ApiController extends Controller {
 		return $this->groupManager->isInGroup($userId, 'obpersonen') || $this->groupManager->isInGroup($userId, 'mitglieder');
 	}
 
+	private function isObperson(): bool {
+		return $this->groupManager->isInGroup($this->getUserId(), 'obpersonen');
+	}
+
+	private function canEditMember(int $memberId): bool {
+		// Obpersonen dürfen alles bearbeiten
+		if ($this->isObperson()) {
+			return true;
+		}
+
+		// Mitglieder nur ihr eigenes Haus
+		$userId = $this->getUserId();
+		$qb = $this->db->getQueryBuilder();
+		$exists = $qb->select('id')
+			->from('weinsteig_user_members')
+			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)))
+			->andWhere($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+			->executeQuery()
+			->fetchOne();
+
+		return $exists !== false;
+	}
+
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function members(): DataResponse {
@@ -103,6 +126,10 @@ class ApiController extends Controller {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot edit other members'], 403);
+		}
+
 		// Trim whitespace
 		$zahlungspflichtig = $zahlungspflichtig ? trim($zahlungspflichtig) : null;
 		$iban = $iban ? preg_replace('/\s+/', '', trim($iban)) : null;
@@ -162,6 +189,10 @@ class ApiController extends Controller {
 	public function withdrawMandate(int $id, ?string $reason = null): DataResponse {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot edit other members'], 403);
 		}
 
 		$now = (new DateTime())->format('Y-m-d H:i:s');
