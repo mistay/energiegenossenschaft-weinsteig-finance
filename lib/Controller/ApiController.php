@@ -122,7 +122,7 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function updateMember(int $id, ?string $zahlungspflichtig = null, ?string $iban = null): DataResponse {
+	public function updateMember(int $id, ?string $zahlungspflichtig = null, ?string $iban = null, ?int $force = null): DataResponse {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
@@ -135,7 +135,7 @@ class ApiController extends Controller {
 		$zahlungspflichtig = $zahlungspflichtig ? trim($zahlungspflichtig) : null;
 		$iban = $iban ? preg_replace('/\s+/', '', trim($iban)) : null;
 
-		if ($iban && !IbanValidator::validate($iban)) {
+		if (!$force && $iban && !IbanValidator::validate($iban)) {
 			return new DataResponse(['error' => 'IBAN invalid'], 400);
 		}
 

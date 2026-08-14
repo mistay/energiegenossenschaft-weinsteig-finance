@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
 				zahlungspflichtig: editZahlungspflichtig.value.trim(),
-				iban: iban
+				iban: iban,
+				force: skipValidation ? 1 : 0
 			})
 		})
 			.then(r => r.json())
