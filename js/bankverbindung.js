@@ -60,6 +60,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	saveBtn.addEventListener('click', function() {
 		if (!currentMemberId) return;
 
+		const iban = editIban.value.trim();
+		if (iban && !validateIBAN(iban)) {
+			alert('IBAN ungültig. Bitte prüfen.');
+			return;
+		}
+
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + currentMemberId), {
 			method: 'PUT',
 			headers: {'Content-Type': 'application/json'},

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\WeinsteigFinance\Controller;
 
 use OCA\WeinsteigFinance\AppInfo\Application;
+use OCA\WeinsteigFinance\Util\IbanValidator;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -99,6 +100,10 @@ class ApiController extends Controller {
 	public function updateMember(int $id, ?string $zahlungspflichtig = null, ?string $iban = null): DataResponse {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if ($iban && !IbanValidator::validate($iban)) {
+			return new DataResponse(['error' => 'IBAN invalid'], 400);
 		}
 
 		$qb = $this->db->getQueryBuilder();
