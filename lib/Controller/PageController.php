@@ -31,7 +31,7 @@ class PageController extends Controller {
 
 		// Mitglieder direkt zur IBAN-Verwaltung
 		if ($user && $this->groupManager->isInGroup($user->getUID(), 'mitglieder') && !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
-			return new RedirectResponse(\OCP\Util::linkTo('', '/index.php/apps/weinsteigfinance/bankverbindung'));
+			return new RedirectResponse('/index.php/apps/weinsteigfinance/bankverbindung');
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
@@ -44,7 +44,7 @@ class PageController extends Controller {
 	public function admin(): TemplateResponse|RedirectResponse {
 		$user = $this->userSession->getUser();
 		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
-			return new RedirectResponse(\OCP\Util::linkTo('', 'index.php'));
+			return new RedirectResponse('/index.php');
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
@@ -58,7 +58,7 @@ class PageController extends Controller {
 	public function bankverbindung(): TemplateResponse|RedirectResponse {
 		$user = $this->userSession->getUser();
 		if (!$user || (!$this->groupManager->isInGroup($user->getUID(), 'obpersonen') && !$this->groupManager->isInGroup($user->getUID(), 'mitglieder'))) {
-			return new RedirectResponse(\OCP\Util::linkTo('', 'index.php'));
+			return new RedirectResponse('/index.php');
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
