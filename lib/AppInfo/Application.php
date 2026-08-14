@@ -17,6 +17,7 @@ class Application extends App implements IBootstrap {
 	}
 
 	public function register(IRegistrationContext $context): void {
+		$context->registerService('UserId', fn() => \OCP\Server::get(\OCP\IUserSession::class)->getUser()?->getUID() ?? '');
 	}
 
 	public function boot(IBootContext $context): void {
