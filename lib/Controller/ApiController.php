@@ -551,8 +551,7 @@ class ApiController extends Controller {
 		}
 
 		// Belastungskonto: Immer Genossenschaft anzeigen, plus optional Mitglied-IBAN
-		$bankAccount = '<strong>Der fällige Betrag wird von folgendem Konto eingezogen:</strong><br><br>';
-		$bankAccount .= '<strong>Energiegenossenschaft Weinsteig</strong><br>';
+		$bankAccount = '<strong>Energiegenossenschaft Weinsteig</strong><br>';
 		$bankAccount .= 'IBAN: AT822011185788107800<br>';
 		$bankAccount .= 'BIC: GIBATWWXXX<br>';
 
@@ -561,6 +560,9 @@ class ApiController extends Controller {
 			$bankAccount .= $address . '<br>';
 			$bankAccount .= 'IBAN: ' . $iban;
 		}
+
+		// Ausgestellt: 1. des Monats der Vorschreibung (rechtlich korrekt)
+		$issuedDate = (new DateTime("$year-$month-01"))->format('d.m.Y');
 
 		$html = <<<HTML
 <html>
@@ -609,6 +611,7 @@ Energiegenossenschaft Weinsteig
 </table>
 
 <div class="section" style="margin-top: 20px;">
+<strong>Der fällige Betrag wird von folgendem Konto eingezogen:</strong><br><br>
 {$bankAccount}
 </div>
 
@@ -619,7 +622,7 @@ Energiegenossenschaft Weinsteig
 </div>
 
 <div style="margin-top: 30px; font-size: 9pt; color: #666;">
-Ausgestellt: {$today}
+Ausgestellt: {$issuedDate}
 </div>
 
 </body>
