@@ -19,6 +19,6 @@ function validateIBAN(iban) {
 		numeric += char.charCodeAt(0) > 57 ? (char.charCodeAt(0) - 55) : char;
 	}
 
-	// mod 97 check
-	return parseInt(numeric) % 97 === 1;
+	// mod 97 check (using BigInt for large numbers)
+	return BigInt(numeric) % BigInt(97) === BigInt(1);
 }
