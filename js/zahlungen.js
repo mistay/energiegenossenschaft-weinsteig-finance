@@ -49,13 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
 						html += '<td style="text-align: right;">' + parseFloat(z.betrag).toFixed(2) + ' ' + escapeHtml(z.waehrung) + '</td>';
 						html += '<td><span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + '</span></td>';
 						html += '<td>';
-						html += '<select class="assign-select" id="select-' + z.id + '">';
+						html += '<select class="assign-select" id="select-' + z.id + '" style="padding: 6px; margin-right: 5px;">';
 						html += '<option value="">-- Wähle Haus --</option>';
 						members.forEach(m => {
 							html += '<option value="' + m.id + '">' + escapeHtml(m.address) + '</option>';
 						});
 						html += '</select>';
-						html += '<button class="assign-btn" data-id="' + z.id + '">✓ Zuordnen</button>';
+						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold;">✓ Zuordnen</button>';
 						html += '</td>';
 						html += '</tr>';
 					});
@@ -80,14 +80,14 @@ document.addEventListener('DOMContentLoaded', function() {
 						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + (currentMember ? escapeHtml(currentMember.address) : '—') + '</td>';
 						html += '<td style="border: 1px solid #ddd; padding: 8px;"><span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + ' (' + z.match_confidence + '%)</span></td>';
 						html += '<td style="border: 1px solid #ddd; padding: 8px;">';
-						html += '<select class="assign-select" id="select-' + z.id + '">';
+						html += '<select class="assign-select" id="select-' + z.id + '" style="padding: 6px; margin-right: 5px;">';
 						html += '<option value="">-- Ändern --</option>';
 						members.forEach(m => {
 							const selected = m.id == z.member_id ? ' selected' : '';
 							html += '<option value="' + m.id + '"' + selected + '>' + escapeHtml(m.address) + '</option>';
 						});
 						html += '</select>';
-						html += '<button class="assign-btn" data-id="' + z.id + '">✓ Ändern</button>';
+						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold;">✓ Ändern</button>';
 						html += '</td>';
 						html += '</tr>';
 					});
