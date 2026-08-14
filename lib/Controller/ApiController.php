@@ -13,6 +13,7 @@ use OCP\IDBConnection;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUserManager;
+use OCP\IUserSession;
 
 class ApiController extends Controller {
 	public function __construct(
@@ -20,15 +21,24 @@ class ApiController extends Controller {
 		private IDBConnection $db,
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
-		private string $userId,
+		private IUserSession $userSession,
 	) {
 		parent::__construct(Application::APP_ID, $request);
+	}
+
+	private function getUserId(): string {
+		return $this->userSession->getUser()?->getUID() ?? '';
+	}
+
+	private function canEdit(): bool {
+		$userId = $this->getUserId();
+		return $this->groupManager->isInGroup($userId, 'obpersonen') || $this->groupManager->isInGroup($userId, 'mitglieder');
 	}
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function members(): DataResponse {
-		if (!$this->groupManager->isInGroup($this->userId, 'obpersonen')) {
+		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
@@ -54,7 +64,7 @@ class ApiController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function users(): DataResponse {
-		if (!$this->groupManager->isInGroup($this->userId, 'obpersonen')) {
+		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
@@ -69,8 +79,42 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function getMember(int $id): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		$qb = $this->db->getQueryBuilder();
+		$row = $qb->select('*')
+			->from('weinsteig_members')
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+			->executeQuery()
+			->fetch();
+
+		return new DataResponse($row ?: ['error' => 'Not found']);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function updateMember(int $id, ?string $zahlungspflichtig = null, ?string $iban = null): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		$qb = $this->db->getQueryBuilder();
+		$qb->update('weinsteig_members')
+			->set('zahlungspflichtig', $qb->createNamedParameter($zahlungspflichtig))
+			->set('iban', $qb->createNamedParameter($iban))
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+			->executeStatement();
+
+		return new DataResponse(['success' => true]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function assignUser(int $memberId, string $userId): DataResponse {
-		if (!$this->groupManager->isInGroup($this->userId, 'obpersonen')) {
+		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
@@ -88,7 +132,7 @@ class ApiController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function unassignUser(int $memberId, string $userId): DataResponse {
-		if (!$this->groupManager->isInGroup($this->userId, 'obpersonen')) {
+		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 

@@ -8,6 +8,8 @@ return [
 		['name' => 'page#admin', 'url' => '/admin', 'verb' => 'GET'],
 		['name' => 'api#members', 'url' => '/api/members', 'verb' => 'GET'],
 		['name' => 'api#users', 'url' => '/api/users', 'verb' => 'GET'],
+		['name' => 'api#getMember', 'url' => '/api/member/{id}', 'verb' => 'GET'],
+		['name' => 'api#updateMember', 'url' => '/api/member/{id}', 'verb' => 'PUT'],
 		['name' => 'api#assignUser', 'url' => '/api/assign', 'verb' => 'POST'],
 		['name' => 'api#unassignUser', 'url' => '/api/unassign', 'verb' => 'POST'],
 	],

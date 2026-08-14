@@ -7,4 +7,6 @@ declare(strict_types=1);
 <div id="weinsteigfinance" class="app-weinsteigfinance">
 	<h2>Hello, Weinsteig!</h2>
 	<p><?php p($l->t('Die App läuft. Hier entstehen Vorschreibungen, SEPA-Mandate und Zahlungen.')); ?></p>
+	<hr>
+	<p><a href="<?php p(\OCP\Util::linkToRoute('weinsteigfinance.page.admin')); ?>"><?php p($l->t('→ Admin: Mitglieder verwalten')); ?></a></p>
 </div>
