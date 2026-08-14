@@ -13,11 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
 				}
 
 				unmatched = data.unmatched || [];
+				const matched = data.matched || [];
+				const stats = data.stats || {};
 				members = data.members || [];
 
 				let html = '';
 
-				// CSV Import Section (nur obpersonen)
+				// CSV Import Section
 				html += '<div id="zahlungen-import">';
 				html += '<h3>CSV-Import</h3>';
 				html += '<textarea id="csv-input" placeholder="Füge hier den CSV-Inhalt ein (mit Semikolon-Trennzeichen)..."></textarea>';
@@ -25,15 +27,22 @@ document.addEventListener('DOMContentLoaded', function() {
 				html += '<div id="import-status" style="margin-top: 10px;"></div>';
 				html += '</div>';
 
+				// Statistik
+				if (stats.total > 0) {
+					html += '<div style="background: #f0f8ff; padding: 10px; border-radius: 3px; margin-bottom: 20px; font-size: 12px;">';
+					html += '📊 Total: <strong>' + stats.total + '</strong> | ✓ Zugeordnet: <strong style="color: #28a745;">' + stats.matched + '</strong> | ⚠️ Ausstehend: <strong style="color: #ff9800;">' + stats.pending + '</strong>';
+					html += '</div>';
+				}
+
 				// Unmatched Zahlungen
 				if (unmatched.length > 0) {
-					html += '<h3>Unzugeordnete Zahlungen (' + unmatched.length + ')</h3>';
+					html += '<h3 style="color: #ff9800;">⚠️ Unzugeordnete Zahlungen (' + unmatched.length + ')</h3>';
 					html += '<table id="zahlungen-table"><thead><tr>';
 					html += '<th>Datum</th><th>Partner</th><th>Zweck</th><th>Betrag</th><th>Match</th><th>Aktion</th>';
 					html += '</tr></thead><tbody>';
 
 					unmatched.forEach(z => {
-						html += '<tr>';
+						html += '<tr style="background: #fffbea;">';
 						html += '<td>' + escapeHtml(z.valutadatum) + '</td>';
 						html += '<td>' + escapeHtml(z.partnername) + '</td>';
 						html += '<td style="font-size: 11px;">' + escapeHtml(z.verwendungszweck) + '</td>';
@@ -52,8 +61,38 @@ document.addEventListener('DOMContentLoaded', function() {
 					});
 
 					html += '</tbody></table>';
-				} else {
-					html += '<p style="color: #28a745;">✓ Alle Zahlungen zugeordnet!</p>';
+				}
+
+				// Matched Zahlungen (editierbar)
+				if (matched.length > 0) {
+					html += '<h3 style="margin-top: 30px; color: #28a745;">✓ Zugeordnete Zahlungen (' + matched.length + ')</h3>';
+					html += '<table id="zahlungen-matched-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;"><thead><tr>';
+					html += '<th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Datum</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Partner</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Zweck</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Betrag</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Haus</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Match</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Aktion</th>';
+					html += '</tr></thead><tbody>';
+
+					matched.forEach(z => {
+						const currentMember = members.find(m => m.id == z.member_id);
+						html += '<tr style="background: #f0fdf4;">';
+						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + escapeHtml(z.valutadatum) + '</td>';
+						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + escapeHtml(z.partnername) + '</td>';
+						html += '<td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">' + escapeHtml(z.verwendungszweck) + '</td>';
+						html += '<td style="border: 1px solid #ddd; padding: 8px; text-align: right;">' + parseFloat(z.betrag).toFixed(2) + ' ' + escapeHtml(z.waehrung) + '</td>';
+						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + (currentMember ? escapeHtml(currentMember.address) : '—') + '</td>';
+						html += '<td style="border: 1px solid #ddd; padding: 8px;"><span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + ' (' + z.match_confidence + '%)</span></td>';
+						html += '<td style="border: 1px solid #ddd; padding: 8px;">';
+						html += '<select class="assign-select" id="select-' + z.id + '">';
+						html += '<option value="">-- Ändern --</option>';
+						members.forEach(m => {
+							const selected = m.id == z.member_id ? ' selected' : '';
+							html += '<option value="' + m.id + '"' + selected + '>' + escapeHtml(m.address) + '</option>';
+						});
+						html += '</select>';
+						html += '<button class="assign-btn" data-id="' + z.id + '">✓ Ändern</button>';
+						html += '</td>';
+						html += '</tr>';
+					});
+
+					html += '</tbody></table>';
 				}
 
 				container.innerHTML = html;

@@ -447,7 +447,7 @@ class ApiController extends Controller {
 		}
 
 		try {
-			$unmatched = $this->zahlungService->getUnmatched('pending');
+			$allZahlungen = $this->zahlungService->getAllPendingAndMatched();
 			$qb = $this->db->getQueryBuilder();
 			$members = $qb->select('*')
 				->from('weinsteig_members')
@@ -455,7 +455,20 @@ class ApiController extends Controller {
 				->executeQuery()
 				->fetchAll();
 
-			return new DataResponse(['unmatched' => $unmatched, 'members' => $members]);
+			// Gruppiere nach Status
+			$pending = array_filter($allZahlungen, fn($z) => $z['status'] === 'pending');
+			$matched = array_filter($allZahlungen, fn($z) => $z['status'] === 'matched');
+
+			return new DataResponse([
+				'unmatched' => $pending,
+				'matched' => $matched,
+				'members' => $members,
+				'stats' => [
+					'pending' => count($pending),
+					'matched' => count($matched),
+					'total' => count($allZahlungen)
+				]
+			]);
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}

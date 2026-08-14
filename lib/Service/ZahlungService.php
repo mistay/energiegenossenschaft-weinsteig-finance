@@ -236,7 +236,24 @@ class ZahlungService {
 	}
 
 	/**
-	 * Unmatched und ambiguous Zahlungen laden
+	 * Alle Zahlungen (pending und matched) für Übersicht
+	 */
+	public function getAllPendingAndMatched(): array {
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('z.*', 'm.address')
+			->from('weinsteig_zahlungen', 'z')
+			->leftJoin('z', 'weinsteig_members', 'm', $qb->expr()->eq('z.member_id', 'm.id'))
+			->where($qb->expr()->in('z.status', [
+				$qb->createNamedParameter('pending'),
+				$qb->createNamedParameter('matched')
+			]))
+			->orderBy('z.status', 'ASC')
+			->orderBy('z.valutadatum', 'DESC');
+		return $qb->executeQuery()->fetchAll();
+	}
+
+	/**
+	 * Nur unmatched Zahlungen
 	 */
 	public function getUnmatched(string $status = 'pending'): array {
 		$qb = $this->db->getQueryBuilder();
