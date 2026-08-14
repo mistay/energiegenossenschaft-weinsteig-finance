@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const container = document.getElementById('vorschreibungen-container');
+	let currentData = {};
 
 	function load() {
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/vorschreibungen'))
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					return;
 				}
 
+				currentData = data;
 				const months = data.months || [];
 				const members = data.members || [];
 				const isObperson = data.isObperson || false;
@@ -19,8 +21,26 @@ document.addEventListener('DOMContentLoaded', function() {
 					return;
 				}
 
+				// Generate-Button für obpersonen
+				let html = '';
+				if (isObperson && months.length > 0) {
+					const latestMonth = months[months.length - 1];
+					html += '<div style="margin-bottom: 20px;">';
+					html += '<label>Monat generieren: ';
+					html += '<select id="month-select" style="padding: 5px; margin-right: 10px;">';
+					months.forEach((m, idx) => {
+						const selected = idx === months.length - 1 ? ' selected' : '';
+						html += '<option value="' + m.year + '-' + String(m.month).padStart(2, '0') + '"' + selected + '>' + escapeHtml(m.label) + '</option>';
+					});
+					html += '</select>';
+					html += '<button id="generate-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">✨ Alle generieren</button>';
+					html += '</label>';
+					html += '<div id="generate-status" style="margin-top: 10px;"></div>';
+					html += '</div><hr>';
+				}
+
 				// Tabelle aufbauen: Spalten = Monate, Zeilen = Häuser
-				let html = '<table id="vorschreibungen-table"><thead><tr><th>Haus</th>';
+				html += '<table id="vorschreibungen-table"><thead><tr><th>Haus</th>';
 				months.forEach(m => {
 					html += '<th>' + escapeHtml(m.label) + '</th>';
 				});
@@ -38,6 +58,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
 				html += '</tbody></table>';
 				container.innerHTML = html;
+
+				// Generate-Button Handler
+				if (isObperson) {
+					const generateBtn = document.getElementById('generate-btn');
+					const statusDiv = document.getElementById('generate-status');
+					const monthSelect = document.getElementById('month-select');
+
+					if (generateBtn) {
+						generateBtn.addEventListener('click', function() {
+							const month = monthSelect.value;
+							const [year, m] = month.split('-');
+							generateBtn.disabled = true;
+							statusDiv.innerHTML = '<p style="color: #0082c9;">⏳ Generiere ' + months.length + ' Vorschreibungen...</p>';
+
+							fetch(OC.generateUrl('/apps/weinsteigfinance/api/vorschreibungen/' + year + '/' + m + '/generate'), {
+								method: 'POST',
+								headers: {'Content-Type': 'application/json'}
+							})
+								.then(r => r.json())
+								.then(data => {
+									if (data.success) {
+										statusDiv.innerHTML = '<p style="color: #28a745;">✓ ' + escapeHtml(data.message) + '</p>';
+										setTimeout(() => load(), 1000);
+									} else {
+										statusDiv.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error || 'Unbekannter Fehler') + '</p>';
+										generateBtn.disabled = false;
+									}
+								})
+								.catch(err => {
+									statusDiv.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(err.message) + '</p>';
+									generateBtn.disabled = false;
+								});
+						});
+					}
+				}
 			})
 			.catch(err => {
 				container.innerHTML = '<p style="color: red;">Fehler beim Laden: ' + escapeHtml(err.message) + '</p>';

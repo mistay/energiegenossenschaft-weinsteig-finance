@@ -22,5 +22,6 @@ return [
 		['name' => 'api#unassignUser', 'url' => '/api/unassign', 'verb' => 'POST'],
 		['name' => 'api#vorschreibungPdf', 'url' => '/api/vorschreibung/{id}/{month}', 'verb' => 'GET'],
 		['name' => 'api#getVorschreibungen', 'url' => '/api/vorschreibungen', 'verb' => 'GET'],
+		['name' => 'api#generateVorschreibungen', 'url' => '/api/vorschreibungen/{year}/{month}/generate', 'verb' => 'POST'],
 	],
 ];

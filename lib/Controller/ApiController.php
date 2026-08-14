@@ -7,6 +7,7 @@ namespace OCA\WeinsteigFinance\Controller;
 use OCA\WeinsteigFinance\AppInfo\Application;
 use OCA\WeinsteigFinance\Util\IbanValidator;
 use OCA\WeinsteigFinance\Service\MandateService;
+use OCA\WeinsteigFinance\Service\VorschreibungService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -31,6 +32,7 @@ class ApiController extends Controller {
 		private MandateService $mandateService,
 		private IConfig $config,
 		private IURLGenerator $urlGenerator,
+		private VorschreibungService $vorschreibungService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -433,6 +435,25 @@ class ApiController extends Controller {
 			->fetch();
 
 		return new DataResponse($row ?: ['error' => 'Not found']);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function generateVorschreibungen(int $year, int $month): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$generated = $this->vorschreibungService->generateAllForMonth($year, $month);
+			return new DataResponse([
+				'success' => true,
+				'count' => count($generated),
+				'message' => 'Generiert: ' . count($generated) . ' Vorschreibungen für ' . sprintf('%02d', $month) . '/' . $year
+			]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
 	}
 
 	#[NoAdminRequired]
