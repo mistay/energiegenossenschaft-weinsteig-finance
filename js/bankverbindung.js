@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	const editZahlungspflichtig = document.getElementById('edit-zahlungspflichtig');
 	const editIban = document.getElementById('edit-iban');
 	const saveBtn = document.getElementById('save-btn');
+	const saveForceBtn = document.getElementById('save-force-btn');
 	const cancelBtn = document.getElementById('cancel-btn');
 
 	let currentMemberId = null;
@@ -27,6 +28,35 @@ document.addEventListener('DOMContentLoaded', function() {
 			ibanStatus.style.color = 'red';
 		}
 	});
+
+	function saveData(skipValidation = false) {
+		if (!currentMemberId) return;
+
+		const iban = editIban.value.trim().replace(/\s+/g, '');
+		if (!skipValidation && iban && !validateIBAN(iban)) {
+			alert('IBAN ungültig. Bitte prüfen oder "Trotzdem speichern" verwenden.');
+			return;
+		}
+
+		fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + currentMemberId), {
+			method: 'PUT',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				zahlungspflichtig: editZahlungspflichtig.value.trim(),
+				iban: iban
+			})
+		})
+			.then(r => r.json())
+			.then(data => {
+				if (data.success) {
+					modal.style.display = 'none';
+					ibanStatus.textContent = '';
+					load();
+				} else if (data.error) {
+					alert('Fehler: ' + data.error);
+				}
+			});
+	}
 
 	function load() {
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
@@ -76,32 +106,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	saveBtn.addEventListener('click', function() {
-		if (!currentMemberId) return;
+		saveData(false);
+	});
 
-		const iban = editIban.value.trim().replace(/\s+/g, '');
-		if (iban && !validateIBAN(iban)) {
-			alert('IBAN ungültig. Bitte prüfen.');
-			return;
-		}
-
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + currentMemberId), {
-			method: 'PUT',
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({
-				zahlungspflichtig: editZahlungspflichtig.value.trim(),
-				iban: iban
-			})
-		})
-			.then(r => r.json())
-			.then(data => {
-				if (data.success) {
-					modal.style.display = 'none';
-					ibanStatus.textContent = '';
-					load();
-				} else if (data.error) {
-					alert('Fehler: ' + data.error);
-				}
-			});
+	saveForceBtn.addEventListener('click', function() {
+		saveData(true);
 	});
 
 	cancelBtn.addEventListener('click', function() {
