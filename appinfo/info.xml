@@ -31,4 +31,7 @@ sowie die eingehenden Zahlungen der 22 Häuser.
 			<order>80</order>
 		</navigation>
 	</navigations>
+	<background-jobs>
+		<job>OCA\WeinsteigFinance\BackgroundJob\GenerateVorschreibungenJob</job>
+	</background-jobs>
 </info>

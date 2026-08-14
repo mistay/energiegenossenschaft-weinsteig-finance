@@ -99,7 +99,9 @@ function load() {
 					html += '</tbody></table>';
 				}
 
+				console.log('Setting HTML, length:', html.length);
 				container.innerHTML = html;
+				console.log('HTML set. Container content:', container.innerHTML.length);
 
 				// Import Button Handler
 				const importBtn = document.getElementById('import-btn');

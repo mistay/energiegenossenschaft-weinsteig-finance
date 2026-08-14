@@ -22,7 +22,7 @@ class Application extends App implements IBootstrap {
 
 	public function register(IRegistrationContext $context): void {
 		$context->registerService('UserId', fn() => \OCP\Server::get(\OCP\IUserSession::class)->getUser()?->getUID() ?? '');
-		$context->registerJob(GenerateVorschreibungenJob::class);
+		// BackgroundJob wird via info.xml registriert
 	}
 
 	public function boot(IBootContext $context): void {
