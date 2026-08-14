@@ -45,4 +45,18 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'admin');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function bankverbindung(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || (!$this->groupManager->isInGroup($user->getUID(), 'obpersonen') && !$this->groupManager->isInGroup($user->getUID(), 'mitglieder'))) {
+			return new RedirectResponse(\OCP\Util::linkTo('', 'index.php'));
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'bankverbindung');
+
+		return new TemplateResponse(Application::APP_ID, 'bankverbindung');
+	}
 }

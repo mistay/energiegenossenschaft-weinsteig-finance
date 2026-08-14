@@ -6,6 +6,7 @@ return [
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 		['name' => 'page#admin', 'url' => '/admin', 'verb' => 'GET'],
+		['name' => 'page#bankverbindung', 'url' => '/bankverbindung', 'verb' => 'GET'],
 		['name' => 'api#members', 'url' => '/api/members', 'verb' => 'GET'],
 		['name' => 'api#users', 'url' => '/api/users', 'verb' => 'GET'],
 		['name' => 'api#getMember', 'url' => '/api/member/{id}', 'verb' => 'GET'],

@@ -8,5 +8,8 @@ declare(strict_types=1);
 	<h2>Hello, Weinsteig!</h2>
 	<p><?php p($l->t('Die App läuft. Hier entstehen Vorschreibungen, SEPA-Mandate und Zahlungen.')); ?></p>
 	<hr>
-	<p><a href="/index.php/apps/weinsteigfinance/admin"><?php p($l->t('→ Admin: Mitglieder verwalten')); ?></a></p>
+	<ul>
+		<li><a href="/index.php/apps/weinsteigfinance/admin"><?php p($l->t('Admin: Mitglieder & Benutzer')); ?></a></li>
+		<li><a href="/index.php/apps/weinsteigfinance/bankverbindung"><?php p($l->t('Bankverbindung verwalten')); ?></a></li>
+	</ul>
 </div>
