@@ -8,6 +8,7 @@ use OCA\WeinsteigFinance\AppInfo\Application;
 use OCA\WeinsteigFinance\Util\IbanValidator;
 use OCA\WeinsteigFinance\Service\MandateService;
 use OCA\WeinsteigFinance\Service\VorschreibungService;
+use OCA\WeinsteigFinance\Service\ZahlungService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -33,6 +34,7 @@ class ApiController extends Controller {
 		private IConfig $config,
 		private IURLGenerator $urlGenerator,
 		private VorschreibungService $vorschreibungService,
+		private ZahlungService $zahlungService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -413,6 +415,95 @@ class ApiController extends Controller {
 			readfile($filePath);
 			exit;
 		} catch (\Throwable $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungenImport(): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$csvContent = $this->request->getParam('csv');
+			if (!$csvContent) {
+				return new DataResponse(['error' => 'No CSV provided'], 400);
+			}
+
+			$result = $this->zahlungService->importFromCsv($csvContent);
+			return new DataResponse($result);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungenGetUnmatched(): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$unmatched = $this->zahlungService->getUnmatched('pending');
+			$qb = $this->db->getQueryBuilder();
+			$members = $qb->select('*')
+				->from('weinsteig_members')
+				->orderBy('address')
+				->executeQuery()
+				->fetchAll();
+
+			return new DataResponse(['unmatched' => $unmatched, 'members' => $members]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungenAssign(int $zahlungId, int $memberId): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$this->zahlungService->assignZahlung($zahlungId, $memberId);
+			return new DataResponse(['success' => true]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungenGet(?int $memberId = null): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// Mitglieder sehen nur ihre eigenen Zahlungen
+			if (!$this->isObperson()) {
+				$userId = $this->getUserId();
+				$qb = $this->db->getQueryBuilder();
+				$member = $qb->select('m.id')
+					->from('weinsteig_members', 'm')
+					->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
+					->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
+					->setMaxResults(1)
+					->executeQuery()
+					->fetch();
+				if (!$member) {
+					return new DataResponse(['error' => 'Not found'], 404);
+				}
+				$memberId = $member['id'];
+			}
+
+			$zahlungen = $this->zahlungService->getAll($memberId);
+			return new DataResponse(['zahlungen' => $zahlungen]);
+		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
 	}

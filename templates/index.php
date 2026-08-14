@@ -12,5 +12,6 @@ declare(strict_types=1);
 		<li><a href="/index.php/apps/weinsteigfinance/admin"><?php p($l->t('Admin: Mitglieder & Benutzer')); ?></a></li>
 		<li><a href="/index.php/apps/weinsteigfinance/bankverbindung"><?php p($l->t('Bankverbindung verwalten')); ?></a></li>
 		<li><a href="/index.php/apps/weinsteigfinance/vorschreibungen"><?php p($l->t('Vorschreibungen')); ?></a></li>
+		<li><a href="/index.php/apps/weinsteigfinance/zahlungen"><?php p($l->t('Zahlungen')); ?></a></li>
 	</ul>
 </div>

@@ -80,4 +80,18 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'vorschreibungen');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungen(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || (!$this->groupManager->isInGroup($user->getUID(), 'obpersonen') && !$this->groupManager->isInGroup($user->getUID(), 'mitglieder'))) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'zahlungen');
+
+		return new TemplateResponse(Application::APP_ID, 'zahlungen');
+	}
 }
