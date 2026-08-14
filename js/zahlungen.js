@@ -1,10 +1,14 @@
-document.addEventListener('DOMContentLoaded', function() {
-	const container = document.getElementById('zahlungen-container');
-	let unmatched = [];
-	let members = [];
+let unmatched = [];
+let members = [];
 
-	function load() {
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/unmatched'))
+function load() {
+	const container = document.getElementById('zahlungen-container');
+	if (!container) {
+		console.error('zahlungen-container not found');
+		return;
+	}
+
+	fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/unmatched'))
 			.then(r => r.json())
 			.then(data => {
 				if (data.error) {
@@ -173,11 +177,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 	}
 
-	function escapeHtml(text) {
-		const div = document.createElement('div');
-		div.textContent = text;
-		return div.innerHTML;
-	}
+function escapeHtml(text) {
+	const div = document.createElement('div');
+	div.textContent = text;
+	return div.innerHTML;
+}
 
-	load();
-});
+// Starte wenn DOM fertig ist
+document.addEventListener('DOMContentLoaded', load);
