@@ -223,7 +223,11 @@ class ApiController extends Controller {
 
 		try {
 			$pdf = $this->mandateService->generateMandatePdf($id);
-			return new Response($pdf, 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="mandat.pdf"']);
+			$response = new Response();
+			$response->setStatus(200);
+			$response->setHeaders(['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="mandat.pdf"']);
+			$response->setContent($pdf);
+			return $response;
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
