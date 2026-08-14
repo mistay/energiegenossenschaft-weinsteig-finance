@@ -1,6 +1,15 @@
 <?php
 declare(strict_types=1);
 /** @var string $currentPage */
+
+use OCP\IGroupManager;
+use OCP\IUserSession;
+use OCP\Server;
+
+$groupManager = Server::get(IGroupManager::class);
+$userSession = Server::get(IUserSession::class);
+$user = $userSession->getUser();
+$isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 ?>
 
 <nav style="background: #0082c9; padding: 0; margin: -20px -20px 20px -20px; border-bottom: 3px solid #003d7a;">
@@ -26,6 +35,7 @@ declare(strict_types=1);
 			💰 Meine Zahlungen
 		</a>
 
+		<?php if ($isAdmin): ?>
 		<a href="/index.php/apps/weinsteigfinance/zahlungen"
 			style="padding: 12px 16px; color: white; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'zahlungen' ? '#ffb81c' : 'transparent' ?>; transition: all 0.2s;">
 			📥 Admin: Zahlungen
@@ -35,5 +45,6 @@ declare(strict_types=1);
 			style="padding: 12px 16px; color: white; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'admin' ? '#ffb81c' : 'transparent' ?>; transition: all 0.2s;">
 			⚙️ Admin: Mitglieder
 		</a>
+		<?php endif; ?>
 	</div>
 </nav>
