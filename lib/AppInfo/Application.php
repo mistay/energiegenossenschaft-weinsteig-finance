@@ -11,6 +11,7 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCA\WeinsteigFinance\BackgroundJob\GenerateVorschreibungenJob;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'weinsteigfinance';
@@ -21,6 +22,7 @@ class Application extends App implements IBootstrap {
 
 	public function register(IRegistrationContext $context): void {
 		$context->registerService('UserId', fn() => \OCP\Server::get(\OCP\IUserSession::class)->getUser()?->getUID() ?? '');
+		$context->registerJob(GenerateVorschreibungenJob::class);
 	}
 
 	public function boot(IBootContext $context): void {

@@ -519,6 +519,20 @@ class ApiController extends Controller {
 				return new DataResponse(['error' => 'Member not found'], 404);
 			}
 
+			$address = $member['address'];
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$filename = sprintf('%04d-%02d-vorschreibung.pdf', $year, $m);
+			$filePath = "$dataDir/generated/{$address}/vorschreibungen/$filename";
+
+			// Prüfe ob gespeicherte PDF existiert
+			if (file_exists($filePath)) {
+				header('Content-Type: application/pdf');
+				header('Content-Disposition: attachment; filename="' . $filename . '"');
+				readfile($filePath);
+				exit;
+			}
+
+			// Fallback: Generate on-demand (falls noch nicht generiert)
 			$pdf = $this->generateVorschreibungPdf($member, $year, $m);
 			header('Content-Type: application/pdf');
 			header('Content-Disposition: attachment; filename="vorschreibung_' . $year . sprintf('%02d', $m) . '.pdf"');
