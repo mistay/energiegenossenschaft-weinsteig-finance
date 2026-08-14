@@ -249,7 +249,7 @@ class ZahlungService {
 	private function getUserNames(): array {
 		$qb = $this->db->getQueryBuilder();
 		$users = $qb->select('uid', 'displayname')
-			->from('oc_users')
+			->from('users')
 			->executeQuery()
 			->fetchAll();
 
