@@ -212,7 +212,7 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function mandatePdf(int $id): Response|DataResponse {
+	public function mandatePdf(int $id) {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
@@ -223,11 +223,10 @@ class ApiController extends Controller {
 
 		try {
 			$pdf = $this->mandateService->generateMandatePdf($id);
-			$response = new Response();
-			$response->setStatus(200);
-			$response->setHeaders(['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="mandat.pdf"']);
-			$response->setContent($pdf);
-			return $response;
+			header('Content-Type: application/pdf');
+			header('Content-Disposition: attachment; filename="mandat.pdf"');
+			echo $pdf;
+			exit;
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
