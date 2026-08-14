@@ -12,7 +12,9 @@ class Version0002Date20260814000100 implements IMigrationStep {
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): void {
 		$schema = $schemaClosure();
 
-		if (!isset($schema->getTable('weinsteig_user_members'))) {
+		try {
+			$schema->getTable('weinsteig_user_members');
+		} catch (\Exception) {
 			$table = $schema->createTable('weinsteig_user_members');
 			$table->addColumn('id', 'integer', ['autoincrement' => true, 'notnull' => true]);
 			$table->addColumn('user_id', 'string', ['length' => 255, 'notnull' => true]);
