@@ -143,36 +143,7 @@ function load() {
 				}
 
 				// Assign Button Handlers (für beide Tabellen)
-				setTimeout(() => {
-					document.querySelectorAll('.assign-btn').forEach(btn => {
-						btn.onclick = function(e) {
-							e.preventDefault();
-							const zahlungId = this.dataset.id;
-							const select = document.getElementById('select-' + zahlungId);
-							const memberId = select ? select.value : null;
-
-							if (!memberId) {
-								alert('Bitte wähle ein Haus');
-								return false;
-							}
-
-							fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/' + zahlungId + '/assign/' + memberId), {
-								method: 'POST',
-								headers: {'Content-Type': 'application/json'}
-							})
-								.then(r => r.json())
-								.then(data => {
-									if (data.success) {
-										load();
-									} else {
-										alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
-									}
-								})
-								.catch(err => alert('Fehler: ' + err.message));
-							return false;
-						};
-					});
-				}, 100);
+				attachButtonHandlers();
 			})
 			.catch(err => {
 				container.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(err.message) + '</p>';
@@ -183,6 +154,50 @@ function escapeHtml(text) {
 	const div = document.createElement('div');
 	div.textContent = text;
 	return div.innerHTML;
+}
+
+function attachButtonHandlers() {
+	console.log('Attaching button handlers...');
+	document.querySelectorAll('.assign-btn').forEach(btn => {
+		btn.onclick = function(e) {
+			e.preventDefault();
+			console.log('Button clicked:', this.dataset.id);
+
+			const zahlungId = this.dataset.id;
+			const select = document.getElementById('select-' + zahlungId);
+			const memberId = select ? select.value : null;
+
+			console.log('ZahlungId:', zahlungId, 'MemberId:', memberId);
+
+			if (!memberId) {
+				alert('Bitte wähle ein Haus');
+				return false;
+			}
+
+			const url = OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/' + zahlungId + '/assign/' + memberId);
+			console.log('POST to:', url);
+
+			fetch(url, {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'}
+			})
+				.then(r => r.json())
+				.then(data => {
+					console.log('Response:', data);
+					if (data.success) {
+						load();
+					} else {
+						alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+					}
+				})
+				.catch(err => {
+					console.error('Error:', err);
+					alert('Fehler: ' + err.message);
+				});
+			return false;
+		};
+	});
+	console.log('Attached handlers to', document.querySelectorAll('.assign-btn').length, 'buttons');
 }
 
 // Starte wenn DOM fertig ist
