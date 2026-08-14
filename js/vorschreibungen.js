@@ -50,8 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
 					html += '<tr><td><strong>' + escapeHtml(member.address) + '</strong></td>';
 					months.forEach(m => {
 						const monthStr = m.year + '-' + String(m.month).padStart(2, '0');
-						const url = OC.generateUrl('/apps/weinsteigfinance/api/vorschreibung/' + member.id + '/' + monthStr);
-						html += '<td><a href="' + url + '" target="_blank" class="download-btn">📥 PDF</a></td>';
+						const vorschreibung = member.vorschreibungen?.[monthStr];
+						if (vorschreibung?.exists) {
+							const url = OC.generateUrl('/apps/weinsteigfinance/api/vorschreibung/' + member.id + '/' + monthStr);
+							html += '<td><a href="' + url + '" target="_blank" class="download-btn" title="Generiert: ' + escapeHtml(vorschreibung.date) + '">📥<br><span style="font-size: 10px; color: #666;">(' + escapeHtml(vorschreibung.date) + ')</span></a></td>';
+						} else {
+							html += '<td style="color: #999;">—</td>';
+						}
 					});
 					html += '</tr>';
 				});

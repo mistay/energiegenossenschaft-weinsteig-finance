@@ -487,6 +487,7 @@ class ApiController extends Controller {
 				->orderBy('address')
 				->executeQuery()
 				->fetchAll();
+			$members = $this->enrichMembersWithVorschreibungDates($members, $months);
 			return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => true]);
 		}
 
@@ -505,7 +506,38 @@ class ApiController extends Controller {
 			return new DataResponse(['error' => 'Member not found'], 404);
 		}
 
-		return new DataResponse(['months' => $months, 'members' => [$member], 'isObperson' => false]);
+		$members = [$member];
+		$members = $this->enrichMembersWithVorschreibungDates($members, $months);
+		return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => false]);
+	}
+
+	private function enrichMembersWithVorschreibungDates(array $members, array $months): array {
+		$dataDir = $this->config->getSystemValue('datadirectory');
+
+		foreach ($members as &$member) {
+			$member['vorschreibungen'] = [];
+			$address = $member['address'];
+
+			foreach ($months as $month) {
+				$filename = sprintf('%04d-%02d-vorschreibung.pdf', $month['year'], $month['month']);
+				$filePath = "$dataDir/generated/{$address}/vorschreibungen/$filename";
+
+				if (file_exists($filePath)) {
+					$mtime = filemtime($filePath);
+					$member['vorschreibungen'][$month['year'] . '-' . sprintf('%02d', $month['month'])] = [
+						'exists' => true,
+						'mtime' => $mtime,
+						'date' => (new DateTime())->setTimestamp($mtime)->format('d.m.Y H:i')
+					];
+				} else {
+					$member['vorschreibungen'][$month['year'] . '-' . sprintf('%02d', $month['month'])] = [
+						'exists' => false
+					];
+				}
+			}
+		}
+
+		return $members;
 	}
 
 	#[NoAdminRequired]
