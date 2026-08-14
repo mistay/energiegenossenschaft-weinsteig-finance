@@ -943,7 +943,7 @@ HTML;
 			if ($memberId === 0) {
 				$userId = $this->getUserId();
 				$qb = $this->db->getQueryBuilder();
-				$member = $qb->select('m.id')
+				$member = $qb->select('m.*')
 					->from('weinsteig_members', 'm')
 					->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
 					->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
@@ -958,7 +958,7 @@ HTML;
 				// Mitglieder können nur ihre eigenen Daten sehen
 				$userId = $this->getUserId();
 				$qb = $this->db->getQueryBuilder();
-				$assigned = $qb->select('m.id')
+				$assigned = $qb->select('m.*')
 					->from('weinsteig_members', 'm')
 					->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
 					->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
@@ -969,6 +969,7 @@ HTML;
 				if (!$assigned) {
 					return new DataResponse(['error' => 'Unauthorized'], 403);
 				}
+				$member = $assigned;
 			}
 
 			// Lade alle Vorschreibungen
