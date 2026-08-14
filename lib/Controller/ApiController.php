@@ -234,6 +234,122 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function uploadSignedMandate(int $id) {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot edit other members'], 403);
+		}
+
+		if (empty($_FILES['file'])) {
+			return new DataResponse(['error' => 'No file provided'], 400);
+		}
+
+		try {
+			$file = $_FILES['file'];
+			if ($file['error'] !== UPLOAD_ERR_OK) {
+				return new DataResponse(['error' => 'Upload error: ' . $file['error']], 400);
+			}
+
+			// Daten laden
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('*')
+				->from('weinsteig_members')
+				->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+				->executeQuery()
+				->fetch();
+
+			if (!$member) {
+				return new DataResponse(['error' => 'Member not found'], 404);
+			}
+
+			$address = $member['address'];
+			$pdfContent = file_get_contents($file['tmp_name']);
+
+			// Im Nextcloud-Dateisystem speichern
+			$folder = "energiegenossenschaft-weinsteig/generated/{$address}/sepa";
+			$filePath = "$folder/mandat_unterschrieben.pdf";
+
+			// Ordner erstellen
+			$this->ensureNextcloudFolder($folder);
+
+			// Datei speichern
+			try {
+				$ncFile = \OCP\Server::get(\OCP\Files\IRootFolder::class)->get($filePath);
+				$ncFile->putContent($pdfContent);
+			} catch (\Exception) {
+				\OCP\Server::get(\OCP\Files\IRootFolder::class)->newFile($filePath)->putContent($pdfContent);
+			}
+
+			return new DataResponse(['success' => true]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function getSignedMandate(int $id): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot access other members'], 403);
+		}
+
+		try {
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('*')
+				->from('weinsteig_members')
+				->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+				->executeQuery()
+				->fetch();
+
+			if (!$member) {
+				return new DataResponse(['error' => 'Member not found'], 404);
+			}
+
+			$address = $member['address'];
+			$filePath = "energiegenossenschaft-weinsteig/generated/{$address}/sepa/mandat_unterschrieben.pdf";
+
+			try {
+				\OCP\Server::get(\OCP\Files\IRootFolder::class)->get($filePath);
+				return new DataResponse(['exists' => true]);
+			} catch (\Exception) {
+				return new DataResponse(['exists' => false]);
+			}
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	private function ensureNextcloudFolder(string $path): void {
+		try {
+			\OCP\Server::get(\OCP\Files\IRootFolder::class)->get($path);
+		} catch (\Exception) {
+			$parts = explode('/', $path);
+			$current = '';
+			foreach ($parts as $part) {
+				if (!$part) continue;
+				$current .= ($current ? '/' : '') . $part;
+				try {
+					\OCP\Server::get(\OCP\Files\IRootFolder::class)->get($current);
+				} catch (\Exception) {
+					try {
+						\OCP\Server::get(\OCP\Files\IRootFolder::class)->newFolder($current);
+					} catch (\Exception) {
+						// Folder exists
+					}
+				}
+			}
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function myMember(): DataResponse {
 		$userId = $this->getUserId();
 		if (!$userId || !$this->groupManager->isInGroup($userId, 'mitglieder')) {

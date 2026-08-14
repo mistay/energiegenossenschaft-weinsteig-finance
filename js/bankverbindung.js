@@ -133,6 +133,34 @@ document.addEventListener('DOMContentLoaded', function() {
 				modal.style.display = 'block';
 			});
 		});
+
+		document.querySelectorAll('.upload-signed-btn').forEach(btn => {
+			btn.addEventListener('click', function() {
+				const memberId = this.dataset.id;
+				const input = document.createElement('input');
+				input.type = 'file';
+				input.accept = 'application/pdf';
+				input.addEventListener('change', function() {
+					if (!this.files.length) return;
+					const formData = new FormData();
+					formData.append('file', this.files[0]);
+					fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed'), {
+						method: 'POST',
+						body: formData
+					})
+						.then(r => r.json())
+						.then(data => {
+							if (data.success) {
+								alert('Datei erfolgreich hochgeladen');
+								load();
+							} else {
+								alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+							}
+						});
+				});
+				input.click();
+			});
+		});
 	}
 
 	saveBtn.addEventListener('click', function() {

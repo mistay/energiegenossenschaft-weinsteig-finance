@@ -13,6 +13,8 @@ return [
 		['name' => 'api#updateMember', 'url' => '/api/member/{id}', 'verb' => 'PUT'],
 		['name' => 'api#withdrawMandate', 'url' => '/api/member/{id}/withdraw', 'verb' => 'POST'],
 		['name' => 'api#mandatePdf', 'url' => '/api/member/{id}/mandate-pdf', 'verb' => 'GET'],
+		['name' => 'api#uploadSignedMandate', 'url' => '/api/member/{id}/mandate-signed', 'verb' => 'POST'],
+		['name' => 'api#getSignedMandate', 'url' => '/api/member/{id}/mandate-signed', 'verb' => 'GET'],
 		['name' => 'api#myMember', 'url' => '/api/my-member', 'verb' => 'GET'],
 		['name' => 'api#assignUser', 'url' => '/api/assign', 'verb' => 'POST'],
 		['name' => 'api#unassignUser', 'url' => '/api/unassign', 'verb' => 'POST'],
