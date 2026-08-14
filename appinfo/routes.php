@@ -33,6 +33,6 @@ return [
 		['name' => 'api#zahlungenUnassign', 'url' => '/api/zahlungen/{zahlungId}/unassign', 'verb' => 'POST'],
 		['name' => 'api#zahlungenGet', 'url' => '/api/zahlungen', 'verb' => 'GET'],
 		['name' => 'api#zahlungenUebersicht', 'url' => '/api/zahlungen-uebersicht', 'verb' => 'GET'],
-		['name' => 'api#memberJournal', 'url' => '/api/member/{id}/journal', 'verb' => 'GET'],
+		['name' => 'api#memberJournal', 'url' => '/api/member/{memberId}/journal', 'verb' => 'GET'],
 	],
 ];

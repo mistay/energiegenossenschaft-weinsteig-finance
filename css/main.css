@@ -16,6 +16,7 @@ html, body {
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
+	overflow-y: auto;
 }
 
 .app-weinsteigfinance h1 {
@@ -41,21 +42,41 @@ html, body {
 	color: #34495e;
 }
 
-/* Tables */
-.app-weinsteigfinance table {
-	width: 100%;
-	border-collapse: collapse;
+/* Tables - Wrapper for horizontal scroll */
+.app-weinsteigfinance .table-wrapper {
+	overflow-x: auto;
 	margin-top: 16px;
-	background: white;
 	border: 1px solid #ecf0f1;
 	border-radius: 6px;
-	overflow: hidden;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Auto-wrap all tables */
+.app-weinsteigfinance > table,
+.app-weinsteigfinance > div > table,
+.app-weinsteigfinance > div > div > table {
+	display: block;
+	width: 100%;
+	overflow-x: auto;
+	border: 1px solid #ecf0f1;
+	border-radius: 6px;
+}
+
+.app-weinsteigfinance table {
+	width: 100%;
+	min-width: 600px;
+	border-collapse: collapse;
+	background: white;
+	margin-top: 16px;
 }
 
 .app-weinsteigfinance table thead {
 	background: #f8f9fa;
 	font-weight: 600;
 	color: #2c3e50;
+	position: sticky;
+	top: 0;
+	z-index: 10;
 }
 
 .app-weinsteigfinance table th {
@@ -64,6 +85,7 @@ html, body {
 	border-bottom: 2px solid #ecf0f1;
 	font-size: 13px;
 	font-weight: 600;
+	white-space: nowrap;
 }
 
 .app-weinsteigfinance table td {

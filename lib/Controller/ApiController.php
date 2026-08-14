@@ -933,14 +933,14 @@ HTML;
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function memberJournal(?int $memberId = null): DataResponse {
+	public function memberJournal(int $memberId = 0): DataResponse {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
 		try {
 			// Mitglieder sehen nur ihre eigenen Daten
-			if (!$this->isObperson()) {
+			if ($memberId === 0) {
 				$userId = $this->getUserId();
 				$qb = $this->db->getQueryBuilder();
 				$member = $qb->select('m.id')
@@ -951,13 +951,24 @@ HTML;
 					->executeQuery()
 					->fetch();
 				if (!$member) {
-					return new DataResponse(['error' => 'Not found'], 404);
+					return new DataResponse(['error' => 'Kein Haus zugewiesen'], 404);
 				}
-				$memberId = $member['id'];
-			}
-
-			if (!$memberId) {
-				return new DataResponse(['error' => 'memberId required'], 400);
+				$memberId = (int)$member['id'];
+			} elseif (!$this->isObperson()) {
+				// Mitglieder können nur ihre eigenen Daten sehen
+				$userId = $this->getUserId();
+				$qb = $this->db->getQueryBuilder();
+				$assigned = $qb->select('m.id')
+					->from('weinsteig_members', 'm')
+					->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
+					->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
+					->andWhere($qb->expr()->eq('m.id', $qb->createNamedParameter($memberId)))
+					->setMaxResults(1)
+					->executeQuery()
+					->fetch();
+				if (!$assigned) {
+					return new DataResponse(['error' => 'Unauthorized'], 403);
+				}
 			}
 
 			// Lade alle Vorschreibungen
