@@ -115,7 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
 					<td>${mandatInfo}</td>
 					<td>
 						<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>
-						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 PDF</a>
+						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 Mandatsformular</a>
+						<button class="upload-signed-btn" data-id="${m.id}" style="margin-left: 10px; background: #17a2b8; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">📤 Unterschriebenes hochladen</button>
 					</td>
 				</tr>`;
 			});
