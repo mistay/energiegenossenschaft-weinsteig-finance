@@ -18,6 +18,7 @@ use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\IConfig;
+use OCP\IURLGenerator;
 use DateTime;
 
 class ApiController extends Controller {
@@ -29,6 +30,7 @@ class ApiController extends Controller {
 		private IUserSession $userSession,
 		private MandateService $mandateService,
 		private IConfig $config,
+		private IURLGenerator $urlGenerator,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -331,7 +333,7 @@ class ApiController extends Controller {
 						$files[] = [
 							'version' => (int)$m[1],
 							'filename' => $file,
-							'downloadUrl' => \OCP\Util::linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id, 'v' => (int)$m[1]]),
+							'downloadUrl' => $this->urlGenerator->linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id, 'v' => (int)$m[1]]),
 							'mtime' => filemtime("$folderPath/$file")
 						];
 					}
