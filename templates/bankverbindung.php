@@ -5,8 +5,11 @@ declare(strict_types=1);
 /** @var \OCP\IL10N $l */
 use OCP\Util;
 Util::addScript('weinsteigfinance', 'iban-validator');
+$currentPage = 'bankverbindung';
 ?>
 <div id="weinsteigfinance-bankverbindung" class="app-weinsteigfinance">
+	<?php include 'nav.php'; ?>
+
 	<h2><?php p($l->t('Bankverbindung verwalten')); ?></h2>
 
 	<div id="members-list">

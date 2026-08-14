@@ -1,8 +1,11 @@
 <?php
 /** @var \OCP\IL10N $l */
+$currentPage = 'vorschreibungen';
 ?>
 
 <div class="app-weinsteigfinance">
+	<?php include 'nav.php'; ?>
+
 	<h2>Vorschreibungen</h2>
 	<div id="vorschreibungen-container"></div>
 </div>

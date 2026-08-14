@@ -1,8 +1,11 @@
 <?php
 /** @var \OCP\IL10N $l */
+$currentPage = 'zahlungen';
 ?>
 
 <div class="app-weinsteigfinance">
+	<?php include 'nav.php'; ?>
+
 	<h2>Zahlungen</h2>
 	<div id="zahlungen-container"></div>
 </div>

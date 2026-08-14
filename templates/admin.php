@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 /** @var \OCP\IL10N $l */
+$currentPage = 'admin';
 ?>
 <div id="weinsteigfinance-admin" class="app-weinsteigfinance">
+	<?php include 'nav.php'; ?>
+
 	<h2><?php p($l->t('Mitglieder und Benutzer')); ?></h2>
 	<p><?php p($l->t('Ordne Nextcloud-Benutzerkonten den 22 Häusern zu.')); ?></p>
 
