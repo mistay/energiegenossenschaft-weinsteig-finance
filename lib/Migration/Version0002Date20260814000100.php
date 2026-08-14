@@ -7,9 +7,9 @@ namespace OCA\WeinsteigFinance\Migration;
 use Closure;
 use OCP\DB\ISchemaTools;
 use OCP\Migration\IOutput;
-use OCP\Migration\SimpleMigration;
+use OCP\Migration\IMigration;
 
-class Version0002Date20260814000100 extends SimpleMigration {
+class Version0002Date20260814000100 implements IMigration {
 	public function changeSchema(IOutput $output, Closure $schemaClosure, ISchemaTools $schemaTools): void {
 		$schema = $schemaClosure();
 
