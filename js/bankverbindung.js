@@ -70,7 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
 			.then(r => r.json())
 			.then(members => {
-				if (members.error === 'Unauthorized') {
+				// Wenn Fehler (Unauthorized) oder nicht Array → Mitglied
+				if (!Array.isArray(members)) {
 					// Nicht obperson - eigenes Mitglied laden
 					fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
 						.then(r => r.json())
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					return;
 				}
 
-				isObperson = !members.error && Array.isArray(members);
+				isObperson = true;
 				renderMembers(members);
 			});
 	}
