@@ -9,6 +9,10 @@ $currentPage = 'journal';
 
 	<h2>Kontojurnal</h2>
 
+	<!-- Status Message -->
+	<div id="status-message" style="padding: 16px; border-radius: 6px; margin-bottom: 20px; display: none; font-weight: 500; border-left: 4px solid;">
+	</div>
+
 	<!-- Statistik Box -->
 	<div id="stats-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; margin-bottom: 30px; display: none;">
 		<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">

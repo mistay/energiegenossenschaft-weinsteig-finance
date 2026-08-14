@@ -39,6 +39,7 @@ function load() {
 
 function renderJournal(data) {
 	const statsBox = document.getElementById('stats-box');
+	const statusMessage = document.getElementById('status-message');
 	const vorschreibungenSection = document.getElementById('vorschreibungen-section');
 	const zahlungenSection = document.getElementById('zahlungen-section');
 
@@ -51,6 +52,31 @@ function renderJournal(data) {
 	document.getElementById('stat-open').textContent = formatAmount(stats.openVorschreibungen);
 	document.getElementById('stat-zahlungen').textContent = formatAmount(stats.totalZahlungen);
 	statsBox.style.display = 'block';
+
+	// Zeige Status-Nachricht
+	const saldo = parseFloat(stats.saldo) || 0;
+	statusMessage.style.display = 'block';
+
+	if (saldo < -0.01) {
+		// Schuld
+		const schuld = Math.abs(saldo);
+		statusMessage.style.background = '#fff3cd';
+		statusMessage.style.borderLeftColor = '#ffc107';
+		statusMessage.style.color = '#856404';
+		statusMessage.innerHTML = `⚠️ <strong>Zahlungsaufforderung:</strong> Ihr Konto ist mit <strong>${schuld.toFixed(2).replace('.', ',')} €</strong> im Rückstand. Bitte um Ausgleich durch Zahlung aufs Konto der Energiegenossenschaft Weinsteig.`;
+	} else if (saldo > 0.01) {
+		// Guthaben
+		statusMessage.style.background = '#d4edda';
+		statusMessage.style.borderLeftColor = '#28a745';
+		statusMessage.style.color = '#155724';
+		statusMessage.innerHTML = `✓ <strong>Guthaben:</strong> Sie haben ein Guthaben von <strong>${saldo.toFixed(2).replace('.', ',')} €</strong>`;
+	} else {
+		// Ausgeglichen
+		statusMessage.style.background = '#d1ecf1';
+		statusMessage.style.borderLeftColor = '#17a2b8';
+		statusMessage.style.color = '#0c5460';
+		statusMessage.innerHTML = `✓ <strong>Ausgeglichen:</strong> Ihr Konto ist ausgeglichen.`;
+	}
 
 	// Rendere Vorschreibungen
 	if (vorschreibungen.length > 0) {
