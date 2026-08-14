@@ -74,7 +74,7 @@ function load() {
 							html += '<option value="' + m.id + '">' + escapeHtml(m.address) + '</option>';
 						});
 						html += '</select>';
-						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold;">✓ Zuordnen</button>';
+						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" >✓ Zuordnen</button>';
 						html += '</td>';
 						html += '</tr>';
 					});
@@ -107,7 +107,7 @@ function load() {
 						});
 						html += '</select>';
 						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-right: 5px;">✓ Ändern</button>';
-						html += '<button type="button" class="unassign-btn" data-id="' + z.id + '" style="background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold;">↩️ Zurück</button>';
+						html += '<button type="button" class="unassign-btn" data-id="' + z.id + '" >↩️ Zurück</button>';
 						html += '</td>';
 						html += '</tr>';
 					});

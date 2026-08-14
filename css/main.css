@@ -51,6 +51,14 @@ html, body {
 	-webkit-overflow-scrolling: touch;
 }
 
+/* Action cell layout - flex for buttons */
+.app-weinsteigfinance td:last-child {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
 /* All tables */
 .app-weinsteigfinance table {
 	width: 100%;
