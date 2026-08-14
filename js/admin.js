@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						const cell = document.querySelector('.users-col-' + memberId);
 						if (cell) {
 							const userList = allAssignments[memberId].map(uid => {
-								return `<div>${escapeHtml(uid)} <button class="remove-btn" data-member="${memberId}" data-user="${escapeHtml(uid)}" style="font-size: 0.8em;">✕</button></div>`;
+								return `<div>${escapeHtml(uid)} <button class="remove-btn" data-member="${memberId}" data-user="${escapeHtml(uid)}">✕</button></div>`;
 							}).join('');
 							cell.innerHTML = userList;
 

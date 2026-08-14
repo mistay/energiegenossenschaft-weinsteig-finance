@@ -11,7 +11,7 @@ $currentPage = 'admin';
 	<h2><?php p($l->t('Mitglieder und Benutzer')); ?></h2>
 	<p><?php p($l->t('Ordne Nextcloud-Benutzerkonten den 22 Häusern zu.')); ?></p>
 
-	<table class="grid">
+	<table>
 		<thead>
 			<tr>
 				<th><?php p($l->t('Haus')); ?></th>
