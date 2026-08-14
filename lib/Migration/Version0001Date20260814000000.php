@@ -4,21 +4,28 @@ declare(strict_types=1);
 
 namespace OCA\WeinsteigFinance\Migration;
 
-use Closure;
-use OCP\DB\ISchemaTools;
+use OCP\IDBConnection;
 use OCP\Migration\IOutput;
-use OCP\Migration\IMigration;
+use OCP\Migration\IRepairStep;
 
-class Version0001Date20260814000000 implements IMigration {
-	public function changeSchema(IOutput $output, Closure $schemaClosure, ISchemaTools $schemaTools): void {
-		$schema = $schemaClosure();
+class Version0001Date20260814000000 implements IRepairStep {
+	public function __construct(private IDBConnection $db) {}
 
-		if (!$schemaTools->tableExists('weinsteig_members')) {
-			$table = $schema->createTable('weinsteig_members');
-			$table->addColumn('id', 'integer', ['autoincrement' => true, 'notnull' => true]);
-			$table->addColumn('address', 'string', ['length' => 64, 'notnull' => true]);
-			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['address']);
+	public function getName(): string {
+		return 'Create weinsteig_members table';
+	}
+
+	public function run(IOutput $output): void {
+		if ($this->db->tableExists('weinsteig_members')) {
+			return;
 		}
+
+		$sql = "CREATE TABLE `weinsteig_members` (
+			`id` INT AUTO_INCREMENT PRIMARY KEY,
+			`address` VARCHAR(64) NOT NULL UNIQUE
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+		$this->db->executeUpdate($sql);
+		$output->info('Created table weinsteig_members');
 	}
 }
