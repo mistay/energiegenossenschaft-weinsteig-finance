@@ -51,23 +51,33 @@ html, body {
 	-webkit-overflow-scrolling: touch;
 }
 
-/* Auto-wrap all tables */
-.app-weinsteigfinance > table,
-.app-weinsteigfinance > div > table,
-.app-weinsteigfinance > div > div > table {
-	display: block;
-	width: 100%;
-	overflow-x: auto;
-	border: 1px solid #ecf0f1;
-	border-radius: 6px;
-}
-
+/* All tables */
 .app-weinsteigfinance table {
 	width: 100%;
-	min-width: 600px;
 	border-collapse: collapse;
 	background: white;
 	margin-top: 16px;
+}
+
+/* Wrap all direct tables in overflow container */
+.app-weinsteigfinance > table,
+.app-weinsteigfinance > div > table {
+	display: table;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+/* Create scrollable container for wide tables */
+.app-weinsteigfinance > table,
+.app-weinsteigfinance > div > table,
+#members-list table,
+#vorschreibungen-list table,
+#zahlungen-list table,
+#zahlungen-matched-table,
+#zahlungen-table,
+#vorschreibungen-table,
+#zahlungen-table tbody {
+	table-layout: auto;
 }
 
 .app-weinsteigfinance table thead {

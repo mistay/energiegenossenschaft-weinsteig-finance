@@ -53,6 +53,7 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'admin');
 
 		return new TemplateResponse(Application::APP_ID, 'admin');
@@ -67,6 +68,7 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'bankverbindung');
 
 		return new TemplateResponse(Application::APP_ID, 'bankverbindung');
@@ -81,6 +83,7 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'vorschreibungen');
 
 		return new TemplateResponse(Application::APP_ID, 'vorschreibungen');
@@ -95,6 +98,7 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'zahlungen');
 
 		return new TemplateResponse(Application::APP_ID, 'zahlungen');
@@ -109,6 +113,7 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'zahlungen-uebersicht');
 
 		return new TemplateResponse(Application::APP_ID, 'zahlungen-uebersicht');
@@ -123,6 +128,7 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'journal');
 
 		return new TemplateResponse(Application::APP_ID, 'journal');
