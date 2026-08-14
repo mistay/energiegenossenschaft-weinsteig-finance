@@ -316,10 +316,51 @@ class ApiController extends Controller {
 			$filePath = "$dataDir/generated/{$address}/sepa/mandat_unterschrieben.pdf";
 
 			if (file_exists($filePath)) {
-				return new DataResponse(['exists' => true, 'downloadUrl' => OC_Helper::linkToRemote('data/generated/' . urlencode($address) . '/sepa/mandat_unterschrieben.pdf')]);
+				$downloadUrl = \OCP\Util::linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id]);
+				return new DataResponse(['exists' => true, 'downloadUrl' => $downloadUrl]);
 			} else {
 				return new DataResponse(['exists' => false]);
 			}
+		} catch (\Throwable $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function downloadSignedMandate(int $id) {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot access other members'], 403);
+		}
+
+		try {
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('*')
+				->from('weinsteig_members')
+				->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+				->executeQuery()
+				->fetch();
+
+			if (!$member) {
+				return new DataResponse(['error' => 'Member not found'], 404);
+			}
+
+			$address = $member['address'];
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$filePath = "$dataDir/generated/{$address}/sepa/mandat_unterschrieben.pdf";
+
+			if (!file_exists($filePath)) {
+				return new DataResponse(['error' => 'File not found'], 404);
+			}
+
+			header('Content-Type: application/pdf');
+			header('Content-Disposition: attachment; filename="' . urlencode($address) . '_unterschriebenes_mandat.pdf"');
+			readfile($filePath);
+			exit;
 		} catch (\Throwable $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}

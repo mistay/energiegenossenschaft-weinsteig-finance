@@ -15,6 +15,7 @@ return [
 		['name' => 'api#mandatePdf', 'url' => '/api/member/{id}/mandate-pdf', 'verb' => 'GET'],
 		['name' => 'api#uploadSignedMandate', 'url' => '/api/member/{id}/mandate-signed', 'verb' => 'POST'],
 		['name' => 'api#getSignedMandate', 'url' => '/api/member/{id}/mandate-signed', 'verb' => 'GET'],
+		['name' => 'api#downloadSignedMandate', 'url' => '/api/download/{id}', 'verb' => 'GET'],
 		['name' => 'api#myMember', 'url' => '/api/my-member', 'verb' => 'GET'],
 		['name' => 'api#assignUser', 'url' => '/api/assign', 'verb' => 'POST'],
 		['name' => 'api#unassignUser', 'url' => '/api/unassign', 'verb' => 'POST'],
