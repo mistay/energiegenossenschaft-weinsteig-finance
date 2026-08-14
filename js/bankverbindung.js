@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	saveBtn.addEventListener('click', function() {
 		if (!currentMemberId) return;
 
-		const iban = editIban.value.trim();
+		const iban = editIban.value.trim().replace(/\s+/g, '');
 		if (iban && !validateIBAN(iban)) {
 			alert('IBAN ungültig. Bitte prüfen.');
 			return;
@@ -70,8 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			method: 'PUT',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
-				zahlungspflichtig: editZahlungspflichtig.value,
-				iban: editIban.value
+				zahlungspflichtig: editZahlungspflichtig.value.trim(),
+				iban: iban
 			})
 		})
 			.then(r => r.json())

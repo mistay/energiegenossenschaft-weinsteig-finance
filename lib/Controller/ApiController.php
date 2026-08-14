@@ -102,6 +102,10 @@ class ApiController extends Controller {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
+		// Trim whitespace
+		$zahlungspflichtig = $zahlungspflichtig ? trim($zahlungspflichtig) : null;
+		$iban = $iban ? preg_replace('/\s+/', '', trim($iban)) : null;
+
 		if ($iban && !IbanValidator::validate($iban)) {
 			return new DataResponse(['error' => 'IBAN invalid'], 400);
 		}
