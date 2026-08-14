@@ -79,6 +79,9 @@ class ZahlungService {
 	private function matchZahlung(array $zahlung, array $members): array {
 		$text = $zahlung['verwendungszweck'] . ' ' . $zahlung['partnername'];
 
+		// Lade User-Namen für Matching
+		$userNames = $this->getUserNames();
+
 		// 1. Exakte Adresse im Text
 		foreach ($members as $member) {
 			$adresse = strtolower($member['address']);
@@ -104,7 +107,49 @@ class ZahlungService {
 			}
 		}
 
-		// 2b. Partnername: Alle Wörter müssen vorkommen (aber nicht in Reihenfolge)
+		// 2b. Partnername gegen User-DisplayNames
+		foreach ($userNames as $userId => $displayName) {
+			$partner = strtolower($zahlung['partnername']);
+			$userNameLower = strtolower($displayName);
+
+			// Exakter Match
+			if ($partner === $userNameLower || strpos($partner, $userNameLower) !== false) {
+				// Finde das Haus das diesem User zugeordnet ist
+				$memberId = $this->getMemberForUser($userId);
+				if ($memberId) {
+					return [
+						'member_id' => $memberId,
+						'type' => 'auto_username',
+						'confidence' => 89
+					];
+				}
+			}
+
+			// Wort-Match auf User-Name
+			$partnerWords = preg_split('/[\s,;\/\-]+/', $partner, -1, PREG_SPLIT_NO_EMPTY);
+			$userWords = preg_split('/[\s,;\/\-]+/', $userNameLower, -1, PREG_SPLIT_NO_EMPTY);
+
+			$allMatch = true;
+			foreach ($partnerWords as $word) {
+				if (strlen($word) > 2 && !in_array($word, $userWords)) {
+					$allMatch = false;
+					break;
+				}
+			}
+
+			if ($allMatch && count($partnerWords) >= 2) {
+				$memberId = $this->getMemberForUser($userId);
+				if ($memberId) {
+					return [
+						'member_id' => $memberId,
+						'type' => 'auto_username_words',
+						'confidence' => 87
+					];
+				}
+			}
+		}
+
+		// 2c. Partnername: Alle Wörter gegen zahlungspflichtig (aber nicht in Reihenfolge)
 		foreach ($members as $member) {
 			$zahl = strtolower($member['zahlungspflichtig'] ?? '');
 			$partner = strtolower($zahlung['partnername']);
@@ -126,7 +171,7 @@ class ZahlungService {
 				return [
 					'member_id' => $member['id'],
 					'type' => 'auto_partnername_words',
-					'confidence' => 88
+					'confidence' => 86
 				];
 			}
 		}
@@ -196,6 +241,41 @@ class ZahlungService {
 			->orderBy('address')
 			->executeQuery()
 			->fetchAll();
+	}
+
+	/**
+	 * Lade alle Nextcloud User-DisplayNames
+	 */
+	private function getUserNames(): array {
+		$qb = $this->db->getQueryBuilder();
+		$users = $qb->select('uid', 'displayname')
+			->from('oc_users')
+			->executeQuery()
+			->fetchAll();
+
+		$names = [];
+		foreach ($users as $user) {
+			$displayName = $user['displayname'] ?: $user['uid'];
+			if (!empty($displayName)) {
+				$names[$user['uid']] = $displayName;
+			}
+		}
+		return $names;
+	}
+
+	/**
+	 * Finde das Haus das einem User zugeordnet ist
+	 */
+	private function getMemberForUser(string $userId): ?int {
+		$qb = $this->db->getQueryBuilder();
+		$result = $qb->select('member_id')
+			->from('weinsteig_user_members')
+			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)))
+			->setMaxResults(1)
+			->executeQuery()
+			->fetch();
+
+		return $result ? (int)$result['member_id'] : null;
 	}
 
 	private function saveZahlung(array $zahlung): void {
