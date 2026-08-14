@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Load vendor autoloader for mPDF
+@require_once __DIR__ . '/../../vendor/autoload.php';
+
 namespace OCA\WeinsteigFinance\AppInfo;
 
 use OCP\AppFramework\App;
