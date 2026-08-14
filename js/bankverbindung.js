@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 
 		let html = '<table class="grid" style="width:100%"><thead><tr>' +
-			'<th>Haus</th><th>Zahlungspflichtig</th><th>IBAN</th><th>Mandat</th><th>Aktion</th>' +
+			'<th>Haus</th><th>Zahlungspflichtig</th><th>IBAN</th><th>Mandat</th><th>Unterschriebene Mandate</th><th>Aktion</th>' +
 			'</tr></thead><tbody>';
 
 		if (isObperson || isUserView) {
@@ -113,10 +113,11 @@ document.addEventListener('DOMContentLoaded', function() {
 					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
 					<td>${escapeHtml(m.iban || '-')}</td>
 					<td>${mandatInfo}</td>
+					<td class="downloads-cell-${m.id}"><span style="font-size: 12px; color: #999;">lädt...</span></td>
 					<td>
 						<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>
-						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 Mandatsformular</a>
-						<button class="upload-signed-btn" data-id="${m.id}" style="margin-left: 10px; background: #17a2b8; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">📤 Unterschriebenes hochladen</button>
+						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 Vorlage</a>
+						<button class="upload-signed-btn" data-id="${m.id}" style="margin-left: 10px; background: #17a2b8; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">📤 Upload</button>
 					</td>
 				</tr>`;
 			});
@@ -163,36 +164,38 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 
-		// Prüfe für jedes Mitglied, ob unterschriebene Formulare existieren
+		// Lade unterschriebene Mandate für jedes Mitglied
 		const rows = document.querySelectorAll('tr');
 		rows.forEach(row => {
 			const editBtn = row.querySelector('.edit-btn');
 			if (!editBtn) return;
 			const memberId = editBtn.dataset.id;
+			const downloadCell = document.querySelector('.downloads-cell-' + memberId);
+			if (!downloadCell) return;
+
 			fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed'), {method: 'GET'})
 				.then(r => r.json())
 				.then(data => {
 					if (data.exists && data.files && data.files.length > 0) {
-						const actionCol = row.querySelector('td:last-child');
-						const container = document.createElement('div');
-						container.style.marginTop = '5px';
-
+						downloadCell.innerHTML = '';
 						data.files.forEach(f => {
 							const link = document.createElement('a');
 							link.href = f.downloadUrl;
-							link.style.display = 'inline-block';
-							link.style.marginRight = '5px';
-							link.style.marginTop = '3px';
+							link.style.display = 'block';
+							link.style.marginBottom = '4px';
 							link.style.color = '#28a745';
 							link.style.textDecoration = 'none';
 							link.style.fontSize = '12px';
 							const date = new Date(f.mtime * 1000).toLocaleDateString('de-AT');
-							link.innerHTML = `✅ v${f.version} (${date})`;
-							container.appendChild(link);
+							link.innerHTML = `📥 v${f.version} (${date})`;
+							downloadCell.appendChild(link);
 						});
-
-						actionCol.appendChild(container);
+					} else {
+						downloadCell.innerHTML = '<span style="font-size: 12px; color: #999;">—</span>';
 					}
+				})
+				.catch(err => {
+					downloadCell.innerHTML = '<span style="font-size: 12px; color: #999;">—</span>';
 				});
 		});
 	}
