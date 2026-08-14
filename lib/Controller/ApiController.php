@@ -531,12 +531,16 @@ class ApiController extends Controller {
 		$monthName = $months[$month] . ' ' . $year;
 		$today = (new DateTime())->format('d.m.Y');
 
-		// Belastungskonto: Mitglied-IBAN falls vorhanden, sonst Genossenschaft
-		$bankAccount = '';
+		// Belastungskonto: Immer Genossenschaft anzeigen, plus optional Mitglied-IBAN
+		$bankAccount = '<strong>Der fällige Betrag wird von folgendem Konto eingezogen:</strong><br><br>';
+		$bankAccount .= '<strong>Energiegenossenschaft Weinsteig</strong><br>';
+		$bankAccount .= 'IBAN: AT822011185788107800<br>';
+		$bankAccount .= 'BIC: GIBATWWXXX<br>';
+
 		if ($iban) {
-			$bankAccount = '<strong>Belastungskonto:</strong><br>' . $address . '<br>IBAN: ' . $iban;
-		} else {
-			$bankAccount = '<strong>Belastungskonto:</strong><br>Energiegenossenschaft Weinsteig<br>IBAN: AT822011185788107800<br>BIC: GIBATWWXXX';
+			$bankAccount .= '<br><strong>Ihr hinterlegtes Konto:</strong><br>';
+			$bankAccount .= $address . '<br>';
+			$bankAccount .= 'IBAN: ' . $iban;
 		}
 
 		$html = <<<HTML
@@ -551,6 +555,7 @@ table { width: 100%; border-collapse: collapse; margin-top: 10px; }
 td { padding: 5px; border: 1px solid #ddd; }
 .label { font-weight: bold; }
 .amount { font-size: 14pt; font-weight: bold; color: #d9534f; }
+.note { font-size: 9pt; color: #666; margin-top: 20px; line-height: 1.3; }
 </style>
 </head>
 <body>
@@ -586,6 +591,10 @@ Energiegenossenschaft Weinsteig
 
 <div class="section" style="margin-top: 20px;">
 {$bankAccount}
+</div>
+
+<div class="note">
+<strong>Widerrufsrecht:</strong> Das SEPA-Lastschrift-Mandat kann jederzeit online über das Kundencenter der Energiegenossenschaft Weinsteig widerrufen werden.
 </div>
 
 <div style="margin-top: 30px; font-size: 9pt; color: #666;">
