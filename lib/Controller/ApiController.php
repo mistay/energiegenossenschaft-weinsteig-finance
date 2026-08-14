@@ -149,8 +149,15 @@ class ApiController extends Controller {
 		$qb = $this->db->getQueryBuilder();
 		$qb->update('weinsteig_members')
 			->set('zahlungspflichtig', $qb->createNamedParameter($zahlungspflichtig))
-			->set('iban', $qb->createNamedParameter($iban))
-			->set('mandate_withdrawn_date', $qb->createNamedParameter(null))
+			->set('iban', $qb->createNamedParameter($iban));
+
+		// Setze mandate_granted_date wenn IBAN gespeichert wird
+		if ($iban) {
+			$now = (new DateTime())->format('Y-m-d H:i:s');
+			$qb->set('mandate_granted_date', $qb->createNamedParameter($now));
+		}
+
+		$qb->set('mandate_withdrawn_date', $qb->createNamedParameter(null))
 			->set('mandate_withdrawn_reason', $qb->createNamedParameter(null))
 			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
 			->executeStatement();
