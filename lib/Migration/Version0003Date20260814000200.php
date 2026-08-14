@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\WeinsteigFinance\Migration;
 
 use Closure;
-use OCP\DB\ISchemaTools;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\IMigrationStep;
@@ -13,7 +12,7 @@ use OCP\Migration\IMigrationStep;
 class Version0003Date20260814000200 implements IMigrationStep {
 	public function __construct(private IDBConnection $db) {}
 
-	public function changeSchema(IOutput $output, Closure $schemaClosure, ISchemaTools $schemaTools): void {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): void {
 		$addresses = [
 			'Weinsteig 2a', 'Weinsteig 2b', 'Weinsteig 4', 'Weinsteig 6a', 'Weinsteig 6b',
 			'Weinsteig 8a', 'Weinsteig 8b', 'Weinsteig 8c', 'Weinsteig 10', 'Weinsteig 12',

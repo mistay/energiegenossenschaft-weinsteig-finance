@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace OCA\WeinsteigFinance\Migration;
 
 use Closure;
-use OCP\DB\ISchemaTools;
 use OCP\Migration\IOutput;
 use OCP\Migration\IMigrationStep;
 
 class Version0002Date20260814000100 implements IMigrationStep {
-	public function changeSchema(IOutput $output, Closure $schemaClosure, ISchemaTools $schemaTools): void {
+	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): void {
 		$schema = $schemaClosure();
 
-		if (!$schemaTools->tableExists('weinsteig_user_members')) {
+		if (!isset($schema->getTable('weinsteig_user_members'))) {
 			$table = $schema->createTable('weinsteig_user_members');
 			$table->addColumn('id', 'integer', ['autoincrement' => true, 'notnull' => true]);
 			$table->addColumn('user_id', 'string', ['length' => 255, 'notnull' => true]);
