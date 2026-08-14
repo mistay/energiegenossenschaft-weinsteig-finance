@@ -432,6 +432,17 @@ class ApiController extends Controller {
 				return new DataResponse(['error' => 'No CSV provided'], 400);
 			}
 
+			// Speichere CSV mit Zeitstempel
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$importDir = "$dataDir/imports";
+			@mkdir($importDir, 0750, true);
+			$timestamp = (new DateTime())->format('Y-m-d_H-i-s');
+			$csvFile = "$importDir/zahlungen_$timestamp.csv";
+			file_put_contents($csvFile, $csvContent);
+
+			// Speichere Zeitstempel
+			$this->config->setAppValue('weinsteigfinance', 'last_zahlungen_import', (new DateTime())->format('Y-m-d H:i:s'));
+
 			$result = $this->zahlungService->importFromCsv($csvContent);
 			return new DataResponse($result);
 		} catch (\Exception $e) {
@@ -459,10 +470,13 @@ class ApiController extends Controller {
 			$pending = array_values(array_filter($allZahlungen, fn($z) => $z['status'] === 'pending'));
 			$matched = array_values(array_filter($allZahlungen, fn($z) => $z['status'] === 'matched'));
 
+			$lastImport = $this->config->getAppValue('weinsteigfinance', 'last_zahlungen_import');
+
 			return new DataResponse([
 				'unmatched' => $pending,
 				'matched' => $matched,
 				'members' => $members,
+				'lastImport' => $lastImport ?: null,
 				'stats' => [
 					'pending' => count($pending),
 					'matched' => count($matched),
@@ -483,6 +497,21 @@ class ApiController extends Controller {
 
 		try {
 			$this->zahlungService->assignZahlung($zahlungId, $memberId);
+			return new DataResponse(['success' => true]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function zahlungenUnassign(int $zahlungId): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$this->zahlungService->unassignZahlung($zahlungId);
 			return new DataResponse(['success' => true]);
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);

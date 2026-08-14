@@ -236,6 +236,22 @@ class ZahlungService {
 	}
 
 	/**
+	 * Zahlung auf unzugeordnet zurückstellen
+	 */
+	public function unassignZahlung(int $zahlungId): bool {
+		$qb = $this->db->getQueryBuilder();
+		$qb->update('weinsteig_zahlungen')
+			->set('member_id', $qb->createNamedParameter(null))
+			->set('match_type', $qb->createNamedParameter('pending'))
+			->set('match_confidence', $qb->createNamedParameter(0))
+			->set('status', $qb->createNamedParameter('pending'))
+			->set('updated_at', $qb->createNamedParameter((new DateTime())->format('Y-m-d H:i:s')))
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($zahlungId)))
+			->executeStatement();
+		return true;
+	}
+
+	/**
 	 * Alle Zahlungen (pending und matched) für Übersicht
 	 */
 	public function getAllPendingAndMatched(): array {

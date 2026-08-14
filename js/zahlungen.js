@@ -31,10 +31,13 @@ function load() {
 				html += '<div id="import-status" style="margin-top: 10px;"></div>';
 				html += '</div>';
 
-				// Statistik
+				// Statistik + Letzter Import
 				if (stats.total > 0) {
 					html += '<div style="background: #f0f8ff; padding: 10px; border-radius: 3px; margin-bottom: 20px; font-size: 12px;">';
 					html += '📊 Total: <strong>' + stats.total + '</strong> | ✓ Zugeordnet: <strong style="color: #28a745;">' + stats.matched + '</strong> | ⚠️ Ausstehend: <strong style="color: #ff9800;">' + stats.pending + '</strong>';
+					if (data.lastImport) {
+						html += '<br>📅 Letzter Import: ' + escapeHtml(data.lastImport);
+					}
 					html += '</div>';
 				}
 
@@ -91,7 +94,8 @@ function load() {
 							html += '<option value="' + m.id + '"' + selected + '>' + escapeHtml(m.address) + '</option>';
 						});
 						html += '</select>';
-						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold;">✓ Ändern</button>';
+						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-right: 5px;">✓ Ändern</button>';
+						html += '<button type="button" class="unassign-btn" data-id="' + z.id + '" style="background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold;">↩️ Zurück</button>';
 						html += '</td>';
 						html += '</tr>';
 					});
@@ -158,16 +162,16 @@ function escapeHtml(text) {
 
 function attachButtonHandlers() {
 	console.log('Attaching button handlers...');
+
+	// Assign Buttons (Zuordnen/Ändern)
 	document.querySelectorAll('.assign-btn').forEach(btn => {
 		btn.onclick = function(e) {
 			e.preventDefault();
-			console.log('Button clicked:', this.dataset.id);
+			console.log('Assign clicked:', this.dataset.id);
 
 			const zahlungId = this.dataset.id;
 			const select = document.getElementById('select-' + zahlungId);
 			const memberId = select ? select.value : null;
-
-			console.log('ZahlungId:', zahlungId, 'MemberId:', memberId);
 
 			if (!memberId) {
 				alert('Bitte wähle ein Haus');
@@ -175,29 +179,40 @@ function attachButtonHandlers() {
 			}
 
 			const url = OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/' + zahlungId + '/assign/' + memberId);
-			console.log('POST to:', url);
-
-			fetch(url, {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'}
-			})
+			fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}})
 				.then(r => r.json())
 				.then(data => {
-					console.log('Response:', data);
-					if (data.success) {
-						load();
-					} else {
-						alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
-					}
+					if (data.success) load();
+					else alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
 				})
-				.catch(err => {
-					console.error('Error:', err);
-					alert('Fehler: ' + err.message);
-				});
+				.catch(err => alert('Fehler: ' + err.message));
 			return false;
 		};
 	});
-	console.log('Attached handlers to', document.querySelectorAll('.assign-btn').length, 'buttons');
+
+	// Unassign Buttons (Zurückstellen)
+	document.querySelectorAll('.unassign-btn').forEach(btn => {
+		btn.onclick = function(e) {
+			e.preventDefault();
+			const zahlungId = this.dataset.id;
+
+			if (!confirm('Zahlung wirklich auf "unzugeordnet" zurückstellen?')) {
+				return false;
+			}
+
+			const url = OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/' + zahlungId + '/unassign');
+			fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}})
+				.then(r => r.json())
+				.then(data => {
+					if (data.success) load();
+					else alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+				})
+				.catch(err => alert('Fehler: ' + err.message));
+			return false;
+		};
+	});
+
+	console.log('Attached handlers to', document.querySelectorAll('.assign-btn').length, 'assign +', document.querySelectorAll('.unassign-btn').length, 'unassign buttons');
 }
 
 // Starte wenn DOM fertig ist

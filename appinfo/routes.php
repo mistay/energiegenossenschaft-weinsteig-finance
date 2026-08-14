@@ -27,6 +27,7 @@ return [
 		['name' => 'api#zahlungenImport', 'url' => '/api/zahlungen/import', 'verb' => 'POST'],
 		['name' => 'api#zahlungenGetUnmatched', 'url' => '/api/zahlungen/unmatched', 'verb' => 'GET'],
 		['name' => 'api#zahlungenAssign', 'url' => '/api/zahlungen/{zahlungId}/assign/{memberId}', 'verb' => 'POST'],
+		['name' => 'api#zahlungenUnassign', 'url' => '/api/zahlungen/{zahlungId}/unassign', 'verb' => 'POST'],
 		['name' => 'api#zahlungenGet', 'url' => '/api/zahlungen', 'verb' => 'GET'],
 	],
 ];
