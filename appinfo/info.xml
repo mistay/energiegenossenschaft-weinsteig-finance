@@ -30,12 +30,5 @@ sowie die eingehenden Zahlungen der 22 Häuser.
 			<icon>app.svg</icon>
 			<order>80</order>
 		</navigation>
-		<navigation>
-			<id>weinsteigfinance-bankverbindung</id>
-			<name>Bankverbindung</name>
-			<route>weinsteigfinance.page.bankverbindung</route>
-			<icon>app.svg</icon>
-			<order>81</order>
-		</navigation>
 	</navigations>
 </info>
