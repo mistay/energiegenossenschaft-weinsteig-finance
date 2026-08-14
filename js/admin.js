@@ -50,10 +50,18 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(r => r.json())
 			.then(data => {
 				if (data.assignments) {
+					const assignments = {};
 					data.assignments.forEach(a => {
-						const cell = document.querySelector('.users-col-' + a.member_id);
+						if (!assignments[a.member_id]) {
+							assignments[a.member_id] = [];
+						}
+						assignments[a.member_id].push(a.user_id);
+					});
+
+					Object.keys(assignments).forEach(memberId => {
+						const cell = document.querySelector('.users-col-' + memberId);
 						if (cell) {
-							cell.innerHTML = a.user_id;
+							cell.innerHTML = assignments[memberId].join('<br>');
 						}
 					});
 				}
