@@ -524,8 +524,20 @@ class ApiController extends Controller {
 
 	private function generateVorschreibungPdf(array $member, int $year, int $month): string {
 		$address = $member['address'];
-		$monthName = (new DateTime("$year-$month-01"))->format('F Y');
+		$iban = $member['iban'] ?? '';
+
+		// Deutsche Monatsnamen
+		$months = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+		$monthName = $months[$month] . ' ' . $year;
 		$today = (new DateTime())->format('d.m.Y');
+
+		// Belastungskonto: Mitglied-IBAN falls vorhanden, sonst Genossenschaft
+		$bankAccount = '';
+		if ($iban) {
+			$bankAccount = '<strong>Belastungskonto:</strong><br>' . $address . '<br>IBAN: ' . $iban;
+		} else {
+			$bankAccount = '<strong>Belastungskonto:</strong><br>Energiegenossenschaft Weinsteig<br>IBAN: AT822011185788107800<br>BIC: GIBATWWXXX';
+		}
 
 		$html = <<<HTML
 <html>
@@ -549,11 +561,16 @@ td { padding: 5px; border: 1px solid #ddd; }
 <strong>Energiegenossenschaft Weinsteig</strong><br>
 Weinsteig 19a<br>
 5082 Glanegg<br>
-Austria
+Österreich
 </div>
 
 <div class="section">
 <strong>Rechnungsempfänger</strong><br>
+Energiegenossenschaft Weinsteig
+</div>
+
+<div class="section">
+<strong>Liegenschaft</strong><br>
 {$address}
 </div>
 
@@ -563,18 +580,12 @@ Austria
 </div>
 
 <table>
-<tr><td class="label">Abschlagszahlung für Energieversorgung</td><td style="text-align: right; width: 150px;">€ 60,00</td></tr>
+<tr><td class="label">Akontozahlung</td><td style="text-align: right; width: 150px;">€ 60,00</td></tr>
 <tr style="background: #f5f5f5;"><td class="label" style="border-top: 2px solid black; padding-top: 10px;"><strong>Gesamtbetrag fällig</strong></td><td style="border-top: 2px solid black; padding-top: 10px; text-align: right;"><span class="amount">€ 60,00</span></td></tr>
 </table>
 
 <div class="section" style="margin-top: 20px;">
-<strong>Zahlungsanweisung</strong><br>
-Bitte überweisen Sie den fälligen Betrag innerhalb von 14 Tagen nach Rechnungsdatum auf folgendes Konto:
-<br><br>
-<strong>Kontoinhaber:</strong> Energiegenossenschaft Weinsteig<br>
-<strong>IBAN:</strong> AT80ZZZ00000086863<br>
-<strong>BIC:</strong> GENSTAT<br>
-<strong>Referenz:</strong> {$address} - {$monthName}
+{$bankAccount}
 </div>
 
 <div style="margin-top: 30px; font-size: 9pt; color: #666;">
