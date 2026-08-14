@@ -108,14 +108,13 @@ document.addEventListener('DOMContentLoaded', function() {
 				const mandatInfo = m.mandate_withdrawn_date
 					? `✗ ${escapeHtml(m.mandate_withdrawn_reason || 'Zurückgezogen')}`
 					: '✓ Aktiv';
-				const editBtn = isObperson ? `<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>` : '';
 				html += `<tr>
 					<td>${escapeHtml(m.address)}</td>
 					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
 					<td>${escapeHtml(m.iban || '-')}</td>
 					<td>${mandatInfo}</td>
 					<td>
-						${editBtn}
+						<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>
 						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="margin-left: 10px; color: #0082c9; text-decoration: none;">📄 PDF</a>
 					</td>
 				</tr>`;
