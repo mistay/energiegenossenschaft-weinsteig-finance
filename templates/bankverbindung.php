@@ -26,6 +26,7 @@ Util::addScript('weinsteigfinance', 'iban-validator');
 				<span id="iban-status" style="margin-left: 10px; font-weight: bold;"></span>
 			</label><br><br>
 			<button type="button" id="save-btn"><?php p($l->t('Speichern')); ?></button>
+			<button type="button" id="save-force-btn" style="background-color: #f39200;"><?php p($l->t('Trotzdem speichern')); ?></button>
 			<button type="button" id="cancel-btn"><?php p($l->t('Abbrechen')); ?></button>
 		</form>
 	</div>
