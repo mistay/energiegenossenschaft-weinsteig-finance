@@ -26,9 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	function loadAssignments(members, users) {
-		const url = OC.generateUrl('/apps/weinsteigfinance/api/members');
-		const query = new URL(url);
-		query.searchParams.set('loadAssignments', '1');
+		const url = OC.generateUrl('/apps/weinsteigfinance/api/members') + '?loadAssignments=1';
 
 		let html = '';
 		members.forEach(member => {
@@ -48,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		table.innerHTML = html;
 
 		// Zuordnungen laden
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members?loadAssignments=1'))
+		fetch(url)
 			.then(r => r.json())
 			.then(data => {
 				if (data.assignments) {
