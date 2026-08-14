@@ -520,6 +520,26 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function zahlungenAutoMatch(): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$result = $this->zahlungService->autoMatchAll();
+			return new DataResponse([
+				'success' => true,
+				'matched' => $result['matched'],
+				'total' => $result['total'],
+				'message' => $result['matched'] . ' von ' . $result['total'] . ' Zahlungen neu zugeordnet'
+			]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function zahlungenGet(?int $memberId = null): DataResponse {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);

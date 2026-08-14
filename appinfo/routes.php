@@ -25,6 +25,7 @@ return [
 		['name' => 'api#getVorschreibungen', 'url' => '/api/vorschreibungen', 'verb' => 'GET'],
 		['name' => 'api#generateVorschreibungen', 'url' => '/api/vorschreibungen/{year}/{month}/generate', 'verb' => 'POST'],
 		['name' => 'api#zahlungenImport', 'url' => '/api/zahlungen/import', 'verb' => 'POST'],
+		['name' => 'api#zahlungenAutoMatch', 'url' => '/api/zahlungen/auto-match', 'verb' => 'POST'],
 		['name' => 'api#zahlungenGetUnmatched', 'url' => '/api/zahlungen/unmatched', 'verb' => 'GET'],
 		['name' => 'api#zahlungenAssign', 'url' => '/api/zahlungen/{zahlungId}/assign/{memberId}', 'verb' => 'POST'],
 		['name' => 'api#zahlungenUnassign', 'url' => '/api/zahlungen/{zahlungId}/unassign', 'verb' => 'POST'],

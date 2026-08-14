@@ -282,6 +282,42 @@ class ZahlungService {
 	}
 
 	/**
+	 * Auto-Match: Versuche alle pending Zahlungen erneut zu matchen
+	 */
+	public function autoMatchAll(): array {
+		// Alle pending Zahlungen laden
+		$qb = $this->db->getQueryBuilder();
+		$pending = $qb->select('*')
+			->from('weinsteig_zahlungen')
+			->where($qb->expr()->eq('status', $qb->createNamedParameter('pending')))
+			->executeQuery()
+			->fetchAll();
+
+		// Alle Members für Matching
+		$members = $this->getAllMembers();
+
+		$matched = 0;
+		foreach ($pending as $zahlung) {
+			$match = $this->matchZahlung($zahlung, $members);
+			if ($match['member_id']) {
+				// Update wenn Match gefunden
+				$qb = $this->db->getQueryBuilder();
+				$qb->update('weinsteig_zahlungen')
+					->set('member_id', $qb->createNamedParameter($match['member_id']))
+					->set('match_type', $qb->createNamedParameter($match['type']))
+					->set('match_confidence', $qb->createNamedParameter($match['confidence']))
+					->set('status', $qb->createNamedParameter('matched'))
+					->set('updated_at', $qb->createNamedParameter((new DateTime())->format('Y-m-d H:i:s')))
+					->where($qb->expr()->eq('id', $qb->createNamedParameter($zahlung['id'])))
+					->executeStatement();
+				$matched++;
+			}
+		}
+
+		return ['matched' => $matched, 'total' => count($pending)];
+	}
+
+	/**
 	 * Alle Zahlungen laden
 	 */
 	public function getAll(?int $memberId = null): array {

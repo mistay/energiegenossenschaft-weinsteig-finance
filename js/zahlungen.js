@@ -27,7 +27,12 @@ function load() {
 				html += '<div id="zahlungen-import">';
 				html += '<h3>CSV-Import</h3>';
 				html += '<textarea id="csv-input" placeholder="Füge hier den CSV-Inhalt ein (mit Semikolon-Trennzeichen)..."></textarea>';
-				html += '<button class="import-btn" id="import-btn">📤 Zahlungen importieren</button>';
+				html += '<div style="margin-top: 10px;">';
+				html += '<button class="import-btn" id="import-btn" style="margin-right: 10px;">📤 Zahlungen importieren</button>';
+				if (stats.pending > 0) {
+					html += '<button class="import-btn" id="auto-match-btn" style="background: #ff9800;">🔍 Auto-Match (' + stats.pending + ' ausstehend)</button>';
+				}
+				html += '</div>';
 				html += '<div id="import-status" style="margin-top: 10px;"></div>';
 				html += '</div>';
 
@@ -109,6 +114,7 @@ function load() {
 
 				// Import Button Handler
 				const importBtn = document.getElementById('import-btn');
+				const autoMatchBtn = document.getElementById('auto-match-btn');
 				const csvInput = document.getElementById('csv-input');
 				const importStatus = document.getElementById('import-status');
 
@@ -142,6 +148,37 @@ function load() {
 							.catch(err => {
 								importStatus.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(err.message) + '</p>';
 								importBtn.disabled = false;
+							});
+					});
+				}
+
+				// Auto-Match Button Handler
+				if (autoMatchBtn) {
+					autoMatchBtn.addEventListener('click', function() {
+						if (!confirm('Versuche alle ' + stats.pending + ' unzugeordneten Zahlungen erneut zu matchen?')) {
+							return;
+						}
+
+						autoMatchBtn.disabled = true;
+						importStatus.innerHTML = '<p style="color: #0082c9;">⏳ Auto-Match läuft...</p>';
+
+						fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/auto-match'), {
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'}
+						})
+							.then(r => r.json())
+							.then(data => {
+								if (data.success) {
+									importStatus.innerHTML = '<p style="color: #28a745;">✓ ' + data.message + '</p>';
+									setTimeout(() => load(), 1000);
+								} else {
+									importStatus.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error || 'Unbekannter Fehler') + '</p>';
+									autoMatchBtn.disabled = false;
+								}
+							})
+							.catch(err => {
+								importStatus.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(err.message) + '</p>';
+								autoMatchBtn.disabled = false;
 							});
 					});
 				}
