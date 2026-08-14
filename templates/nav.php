@@ -35,6 +35,11 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 			💰 Meine Zahlungen
 		</a>
 
+		<a href="/index.php/apps/weinsteigfinance/journal"
+			style="padding: 12px 16px; color: white; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'journal' ? '#ffb81c' : 'transparent' ?>; transition: all 0.2s;">
+			📊 Kontojurnal
+		</a>
+
 		<?php if ($isAdmin): ?>
 		<a href="/index.php/apps/weinsteigfinance/zahlungen"
 			style="padding: 12px 16px; color: white; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'zahlungen' ? '#ffb81c' : 'transparent' ?>; transition: all 0.2s;">

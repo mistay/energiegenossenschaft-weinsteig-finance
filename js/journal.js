@@ -1,0 +1,122 @@
+function load() {
+	const loadingEl = document.getElementById('loading');
+	const errorEl = document.getElementById('error-message');
+	const statsBox = document.getElementById('stats-box');
+	const vorschreibungenSection = document.getElementById('vorschreibungen-section');
+	const zahlungenSection = document.getElementById('zahlungen-section');
+
+	loadingEl.style.display = 'block';
+	errorEl.style.display = 'none';
+
+	// Lade aktuelles Mitglied
+	fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
+		.then(r => r.json())
+		.then(memberData => {
+			if (!memberData || memberData.error) {
+				throw new Error(memberData?.message || 'Kein Mitglied zugewiesen');
+			}
+
+			const memberId = memberData.id;
+
+			// Lade Journal
+			return fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/journal'))
+				.then(r => r.json())
+				.then(journalData => {
+					if (journalData.error) {
+						throw new Error(journalData.message || journalData.error);
+					}
+
+					loadingEl.style.display = 'none';
+					renderJournal(journalData);
+				});
+		})
+		.catch(err => {
+			loadingEl.style.display = 'none';
+			errorEl.style.display = 'block';
+			errorEl.innerHTML = '❌ ' + escapeHtml(err.message);
+		});
+}
+
+function renderJournal(data) {
+	const statsBox = document.getElementById('stats-box');
+	const vorschreibungenSection = document.getElementById('vorschreibungen-section');
+	const zahlungenSection = document.getElementById('zahlungen-section');
+
+	const stats = data.stats || {};
+	const vorschreibungen = data.vorschreibungen || [];
+	const zahlungen = data.zahlungen || [];
+
+	// Zeige Statistik
+	document.getElementById('stat-saldo').textContent = formatAmount(stats.saldo);
+	document.getElementById('stat-open').textContent = formatAmount(stats.openVorschreibungen);
+	document.getElementById('stat-zahlungen').textContent = formatAmount(stats.totalZahlungen);
+	statsBox.style.display = 'block';
+
+	// Rendere Vorschreibungen
+	if (vorschreibungen.length > 0) {
+		const tbody = document.querySelector('#vorschreibungen-table tbody');
+		tbody.innerHTML = '';
+
+		vorschreibungen.forEach(v => {
+			const statusClass = v.status === 'paid' ? 'status-paid' : 'status-open';
+			const statusText = v.status === 'paid' ? '✓ Bezahlt' : '⏳ Offen';
+			const period = v.month.toString().padStart(2, '0') + '/' + v.year;
+
+			const row = document.createElement('tr');
+			row.innerHTML = `
+				<td style="border: 1px solid #ddd; padding: 10px;">${escapeHtml(period)}</td>
+				<td style="border: 1px solid #ddd; padding: 10px; text-align: right;">${formatAmount(v.amount)}</td>
+				<td style="border: 1px solid #ddd; padding: 10px; text-align: center;"><span class="${statusClass}">${statusText}</span></td>
+				<td style="border: 1px solid #ddd; padding: 10px; font-size: 12px; color: #666;">${escapeHtml(formatDate(v.created_at))}</td>
+			`;
+			tbody.appendChild(row);
+		});
+		vorschreibungenSection.style.display = 'block';
+	}
+
+	// Rendere Zahlungen
+	if (zahlungen.length > 0) {
+		const tbody = document.querySelector('#zahlungen-table tbody');
+		tbody.innerHTML = '';
+
+		zahlungen.forEach(z => {
+			const statusClass = z.status === 'matched' ? 'status-matched' : 'status-pending';
+			const statusText = z.status === 'matched' ? '✓ Zugeordnet' : '⏳ Ausstehend';
+
+			const row = document.createElement('tr');
+			row.innerHTML = `
+				<td style="border: 1px solid #ddd; padding: 10px;">${escapeHtml(z.valutadatum)}</td>
+				<td style="border: 1px solid #ddd; padding: 10px;">${escapeHtml(z.partnername)}</td>
+				<td style="border: 1px solid #ddd; padding: 10px; font-size: 12px; color: #666;">${escapeHtml(z.verwendungszweck)}</td>
+				<td style="border: 1px solid #ddd; padding: 10px; text-align: right;">${formatAmount(z.betrag)}</td>
+				<td style="border: 1px solid #ddd; padding: 10px; text-align: center;"><span class="${statusClass}">${statusText}</span></td>
+			`;
+			tbody.appendChild(row);
+		});
+		zahlungenSection.style.display = 'block';
+	}
+}
+
+function formatAmount(amount) {
+	if (!amount) return '0,00 €';
+	return parseFloat(amount).toFixed(2).replace('.', ',') + ' €';
+}
+
+function formatDate(dateStr) {
+	if (!dateStr) return '—';
+	try {
+		const date = new Date(dateStr);
+		return date.toLocaleDateString('de-AT');
+	} catch {
+		return dateStr;
+	}
+}
+
+function escapeHtml(text) {
+	const div = document.createElement('div');
+	div.textContent = text;
+	return div.innerHTML;
+}
+
+// Starte wenn DOM fertig ist
+document.addEventListener('DOMContentLoaded', load);
