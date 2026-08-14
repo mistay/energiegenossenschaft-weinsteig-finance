@@ -174,9 +174,12 @@ function load() {
 											importStatus.innerHTML += '<br>' + escapeHtml(d.date) + ' | ' + escapeHtml(d.partner) + ' | ' + d.amount.toFixed(2);
 										});
 										importStatus.innerHTML += '</p>';
+										importStatus.innerHTML += '<button id="reload-btn" style="margin-top: 10px; padding: 6px 12px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer;">↻ Aktualisieren</button>';
+										document.getElementById('reload-btn').addEventListener('click', () => load());
+									} else {
+										csvInput.value = '';
+										setTimeout(() => load(), 1500);
 									}
-									csvInput.value = '';
-									setTimeout(() => load(), 1000);
 								} else {
 									importStatus.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error || 'Unbekannter Fehler') + '</p>';
 									importBtn.disabled = false;
