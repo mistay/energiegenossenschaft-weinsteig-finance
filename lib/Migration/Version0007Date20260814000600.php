@@ -34,8 +34,6 @@ class Version0007Date20260814000600 implements IMigrationStep {
 				'default' => null,
 			]);
 		}
-
-		return $schema;
 	}
 
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {
