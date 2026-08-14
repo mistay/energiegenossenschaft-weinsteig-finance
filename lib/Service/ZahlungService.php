@@ -25,6 +25,9 @@ class ZahlungService {
 		array_shift($lines);
 
 		$zahlungen = [];
+		$duplicates = [];
+		$seenHashes = [];
+
 		foreach ($lines as $line) {
 			$parts = str_getcsv($line, ';');
 			if (count($parts) < 8) continue;
@@ -39,6 +42,32 @@ class ZahlungService {
 			$bic = trim($parts[7]) ?: null;
 
 			if (!$buchungsdatum || !$betrag) continue;
+
+			// Duplikat-Hash: buchungsdatum + betrag + partnername
+			$hash = hash('md5', "$buchungsdatum|$betrag|$partnername");
+
+			// Prüfe ob bereits in CSV vorhanden
+			if (isset($seenHashes[$hash])) {
+				$duplicates[] = [
+					'date' => $buchungsdatum,
+					'partner' => $partnername,
+					'amount' => $betrag,
+					'type' => 'csv_duplicate'
+				];
+				continue;
+			}
+			$seenHashes[$hash] = true;
+
+			// Prüfe ob bereits in DB vorhanden
+			if ($this->zahlungExists($buchungsdatum, $betrag, $partnername)) {
+				$duplicates[] = [
+					'date' => $buchungsdatum,
+					'partner' => $partnername,
+					'amount' => $betrag,
+					'type' => 'db_duplicate'
+				];
+				continue;
+			}
 
 			$zahlungen[] = [
 				'buchungsdatum' => $buchungsdatum,
@@ -70,7 +99,29 @@ class ZahlungService {
 			$result[] = $zahlung;
 		}
 
-		return ['success' => true, 'count' => count($result), 'zahlungen' => $result];
+		$response = ['success' => true, 'count' => count($result), 'zahlungen' => $result];
+		if (!empty($duplicates)) {
+			$response['duplicates'] = $duplicates;
+			$response['duplicate_count'] = count($duplicates);
+		}
+		return $response;
+	}
+
+	/**
+	 * Prüfe ob Zahlung bereits in DB existiert
+	 */
+	private function zahlungExists(string $buchungsdatum, float $betrag, string $partnername): bool {
+		$qb = $this->db->getQueryBuilder();
+		$result = $qb->select('id')
+			->from('weinsteig_zahlungen')
+			->where($qb->expr()->eq('buchungsdatum', $qb->createNamedParameter($buchungsdatum)))
+			->andWhere($qb->expr()->eq('betrag', $qb->createNamedParameter($betrag)))
+			->andWhere($qb->expr()->eq('partnername', $qb->createNamedParameter($partnername)))
+			->setMaxResults(1)
+			->executeQuery()
+			->fetch();
+
+		return $result !== false;
 	}
 
 	/**

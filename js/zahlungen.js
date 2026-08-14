@@ -137,7 +137,18 @@ function load() {
 							.then(r => r.json())
 							.then(data => {
 								if (data.success) {
-									importStatus.innerHTML = '<p style="color: #28a745;">✓ ' + data.count + ' Zahlungen importiert</p>';
+									let msg = '✓ ' + data.count + ' Zahlungen importiert';
+									if (data.duplicate_count > 0) {
+										msg += ' | ⚠️ ' + data.duplicate_count + ' Duplikate ignoriert';
+									}
+									importStatus.innerHTML = '<p style="color: #28a745;">' + msg + '</p>';
+									if (data.duplicates && data.duplicates.length > 0) {
+										importStatus.innerHTML += '<p style="color: #ff9800; font-size: 11px; margin-top: 5px;">Ignorierte: ';
+										data.duplicates.forEach(d => {
+											importStatus.innerHTML += '<br>' + escapeHtml(d.date) + ' | ' + escapeHtml(d.partner) + ' | ' + d.amount.toFixed(2);
+										});
+										importStatus.innerHTML += '</p>';
+									}
 									csvInput.value = '';
 									setTimeout(() => load(), 1000);
 								} else {
