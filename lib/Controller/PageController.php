@@ -33,6 +33,7 @@ class PageController extends Controller {
 	}
 
 	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function admin(): TemplateResponse|RedirectResponse {
 		$user = $this->userSession->getUser();
 		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
