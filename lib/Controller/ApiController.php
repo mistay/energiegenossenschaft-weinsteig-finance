@@ -479,6 +479,17 @@ class ApiController extends Controller {
 			$current->modify('first day of next month');
 		}
 
+		// Hol Cron-Status für obpersonen
+		$cronStatus = null;
+		if ($this->isObperson()) {
+			$lastCronRun = $this->config->getAppValue('weinsteigfinance', 'last_cron_run');
+			$lastGenerated = $this->config->getAppValue('weinsteigfinance', 'last_vorschreibungen_generated');
+			$cronStatus = [
+				'lastRun' => $lastCronRun ?: null,
+				'lastGenerated' => $lastGenerated ?: null,
+			];
+		}
+
 		// Obpersonen sehen alle Häuser
 		if ($this->isObperson()) {
 			$qb = $this->db->getQueryBuilder();
@@ -488,7 +499,7 @@ class ApiController extends Controller {
 				->executeQuery()
 				->fetchAll();
 			$members = $this->enrichMembersWithVorschreibungDates($members, $months);
-			return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => true]);
+			return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => true, 'cronStatus' => $cronStatus]);
 		}
 
 		// Mitglieder sehen nur ihr Haus
@@ -508,7 +519,7 @@ class ApiController extends Controller {
 
 		$members = [$member];
 		$members = $this->enrichMembersWithVorschreibungDates($members, $months);
-		return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => false]);
+		return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => false, 'cronStatus' => $cronStatus]);
 	}
 
 	private function enrichMembersWithVorschreibungDates(array $members, array $months): array {

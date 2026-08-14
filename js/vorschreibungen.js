@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				const months = data.months || [];
 				const members = data.members || [];
 				const isObperson = data.isObperson || false;
+				const cronStatus = data.cronStatus || {};
 
 				if (members.length === 0) {
 					container.innerHTML = '<p>Keine Häuser gefunden.</p>';
@@ -36,6 +37,18 @@ document.addEventListener('DOMContentLoaded', function() {
 					html += '<button id="generate-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">✨ Alle generieren</button>';
 					html += '</label>';
 					html += '<div id="generate-status" style="margin-top: 10px;"></div>';
+					html += '</div>';
+
+					// Cron-Status anzeigen
+					html += '<div style="background: #f5f5f5; padding: 10px; border-radius: 3px; margin-bottom: 20px; font-size: 12px;">';
+					if (cronStatus.lastRun) {
+						html += '✓ <strong>Letzter Cron-Lauf:</strong> ' + escapeHtml(cronStatus.lastRun) + '<br>';
+					} else {
+						html += '⏳ <strong>Cron-Lauf:</strong> Noch nicht gelaufen<br>';
+					}
+					if (cronStatus.lastGenerated) {
+						html += '✓ <strong>Zuletzt Vorschreibungen generiert:</strong> ' + escapeHtml(cronStatus.lastGenerated);
+					}
 					html += '</div><hr>';
 				}
 
