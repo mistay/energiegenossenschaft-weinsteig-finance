@@ -8,5 +8,5 @@ declare(strict_types=1);
 	<h2>Hello, Weinsteig!</h2>
 	<p><?php p($l->t('Die App läuft. Hier entstehen Vorschreibungen, SEPA-Mandate und Zahlungen.')); ?></p>
 	<hr>
-	<p><a href="<?php p(\OC::$server->getURLGenerator()->linkToRoute('weinsteigfinance.page.admin')); ?>"><?php p($l->t('→ Admin: Mitglieder verwalten')); ?></a></p>
+	<p><a href="<?php print_unescaped(\OCP\Util::linkTo('weinsteigfinance', 'index.php') . '#/admin'); ?>"><?php p($l->t('→ Admin: Mitglieder verwalten')); ?></a></p>
 </div>
