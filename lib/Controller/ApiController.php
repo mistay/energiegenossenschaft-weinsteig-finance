@@ -17,6 +17,7 @@ use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\IConfig;
 use DateTime;
 
 class ApiController extends Controller {
@@ -27,6 +28,7 @@ class ApiController extends Controller {
 		private IUserManager $userManager,
 		private IUserSession $userSession,
 		private MandateService $mandateService,
+		private IConfig $config,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -268,21 +270,16 @@ class ApiController extends Controller {
 			$address = $member['address'];
 			$pdfContent = file_get_contents($file['tmp_name']);
 
-			// Im Nextcloud-Dateisystem speichern
-			$folder = "energiegenossenschaft-weinsteig/generated/{$address}/sepa";
-			$filePath = "$folder/mandat_unterschrieben.pdf";
+			// Im Nextcloud data/-Verzeichnis speichern
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$folderPath = "$dataDir/generated/{$address}/sepa";
+			$filePath = "$folderPath/mandat_unterschrieben.pdf";
 
 			// Ordner erstellen
-			$this->ensureNextcloudFolder($folder);
+			@mkdir($folderPath, 0750, true);
 
 			// Datei speichern
-			$rootFolder = \OCP\Server::get(\OCP\Files\IRootFolder::class);
-			try {
-				$ncFile = $rootFolder->get($filePath);
-				$ncFile->putContent($pdfContent);
-			} catch (\Exception) {
-				$rootFolder->newFile($filePath)->putContent($pdfContent);
-			}
+			file_put_contents($filePath, $pdfContent);
 
 			return new DataResponse(['success' => true]);
 		} catch (\Throwable $e) {
@@ -325,28 +322,6 @@ class ApiController extends Controller {
 			}
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
-		}
-	}
-
-	private function ensureNextcloudFolder(string $path): void {
-		try {
-			\OCP\Server::get(\OCP\Files\IRootFolder::class)->get($path);
-		} catch (\Exception) {
-			$parts = explode('/', $path);
-			$current = '';
-			foreach ($parts as $part) {
-				if (!$part) continue;
-				$current .= ($current ? '/' : '') . $part;
-				try {
-					\OCP\Server::get(\OCP\Files\IRootFolder::class)->get($current);
-				} catch (\Exception) {
-					try {
-						\OCP\Server::get(\OCP\Files\IRootFolder::class)->newFolder($current);
-					} catch (\Exception) {
-						// Folder exists
-					}
-				}
-			}
 		}
 	}
 
