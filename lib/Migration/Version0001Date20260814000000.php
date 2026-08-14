@@ -9,6 +9,16 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IMigrationStep;
 
 class Version0001Date20260814000000 implements IMigrationStep {
+	public function getName(): string {
+		return 'Create weinsteig_members table';
+	}
+
+	public function getDescription(): string {
+		return 'Creates table for storing house members';
+	}
+
+	public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {}
+
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): void {
 		$schema = $schemaClosure();
 
@@ -22,4 +32,6 @@ class Version0001Date20260814000000 implements IMigrationStep {
 			$table->addUniqueIndex(['address']);
 		}
 	}
+
+	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {}
 }

@@ -12,6 +12,16 @@ use OCP\Migration\IMigrationStep;
 class Version0003Date20260814000200 implements IMigrationStep {
 	public function __construct(private IDBConnection $db) {}
 
+	public function getName(): string {
+		return 'Seed weinsteig_members with 22 houses';
+	}
+
+	public function getDescription(): string {
+		return 'Inserts the 22 houses defined in statutes';
+	}
+
+	public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {}
+
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): void {
 		$addresses = [
 			'Weinsteig 2a', 'Weinsteig 2b', 'Weinsteig 4', 'Weinsteig 6a', 'Weinsteig 6b',
@@ -32,4 +42,6 @@ class Version0003Date20260814000200 implements IMigrationStep {
 			}
 		}
 	}
+
+	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {}
 }

@@ -9,6 +9,16 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IMigrationStep;
 
 class Version0002Date20260814000100 implements IMigrationStep {
+	public function getName(): string {
+		return 'Create weinsteig_user_members table';
+	}
+
+	public function getDescription(): string {
+		return 'Creates junction table for users and members';
+	}
+
+	public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {}
+
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): void {
 		$schema = $schemaClosure();
 
@@ -24,4 +34,6 @@ class Version0002Date20260814000100 implements IMigrationStep {
 			$table->addForeignKeyConstraint('weinsteig_members', ['member_id'], ['id'], ['onDelete' => 'CASCADE']);
 		}
 	}
+
+	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {}
 }
