@@ -56,7 +56,7 @@ class VorschreibungService {
 							'status' => $insertQb->createNamedParameter('open'),
 							'created_at' => $insertQb->createNamedParameter($now->format('Y-m-d H:i:s')),
 						])
-						->execute();
+						->executeStatement();
 				}
 
 				// PDF generieren und speichern
