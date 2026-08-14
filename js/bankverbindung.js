@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		const iban = editIban.value.trim().replace(/\s+/g, '');
 		if (!skipValidation && iban && !validateIBAN(iban)) {
-			alert('IBAN ungültig. Bitte prüfen oder "Trotzdem speichern" verwenden.');
+			// Nicht speichern, nur visuell warning geben (red status ist schon da)
 			return;
 		}
 
