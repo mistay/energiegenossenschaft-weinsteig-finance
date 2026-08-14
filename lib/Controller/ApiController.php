@@ -43,7 +43,7 @@ class ApiController extends Controller {
 		}
 
 		$qb = $this->db->getQueryBuilder();
-		$rows = $qb->select('id', 'address')
+		$rows = $qb->select('*')
 			->from('weinsteig_members')
 			->orderBy('address')
 			->executeQuery()
