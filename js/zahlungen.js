@@ -26,7 +26,14 @@ function load() {
 				// CSV Import Section
 				html += '<div id="zahlungen-import">';
 				html += '<h3>CSV-Import</h3>';
-				html += '<textarea id="csv-input" placeholder="Füge hier den CSV-Inhalt ein (mit Semikolon-Trennzeichen)..."></textarea>';
+				html += '<div style="margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 3px;">';
+				html += '<label style="cursor: pointer; display: inline-block; padding: 10px 15px; background: #0082c9; color: white; border-radius: 3px; font-weight: bold;">';
+				html += '📁 CSV-Datei auswählen';
+				html += '<input type="file" id="csv-file" accept=".csv" style="display: none;">';
+				html += '</label>';
+				html += '<span style="margin-left: 10px; font-size: 12px; color: #666;">oder Text unten einfügen</span>';
+				html += '</div>';
+				html += '<textarea id="csv-input" placeholder="Oder: CSV-Inhalt hierher einfügen (mit Semikolon-Trennzeichen)..."></textarea>';
 				html += '<div style="margin-top: 10px;">';
 				html += '<button class="import-btn" id="import-btn" style="margin-right: 10px;">📤 Zahlungen importieren</button>';
 				if (stats.pending > 0) {
@@ -111,6 +118,25 @@ function load() {
 				console.log('Setting HTML, length:', html.length);
 				container.innerHTML = html;
 				console.log('HTML set. Container content:', container.innerHTML.length);
+
+				// CSV File Upload Handler
+				const csvFileInput = document.getElementById('csv-file');
+				if (csvFileInput) {
+					csvFileInput.addEventListener('change', function(e) {
+						const file = e.target.files[0];
+						if (!file) return;
+
+						const reader = new FileReader();
+						reader.onload = function(event) {
+							document.getElementById('csv-input').value = event.target.result;
+							importStatus.innerHTML = '<p style="color: #0082c9;">✓ CSV-Datei geladen: ' + escapeHtml(file.name) + '</p>';
+						};
+						reader.onerror = function() {
+							importStatus.innerHTML = '<p style="color: red;">Fehler beim Lesen der Datei</p>';
+						};
+						reader.readAsText(file);
+					});
+				}
 
 				// Import Button Handler
 				const importBtn = document.getElementById('import-btn');
