@@ -8,7 +8,7 @@ use OCA\WeinsteigFinance\AppInfo\Application;
 use OCA\WeinsteigFinance\Util\IbanValidator;
 use OCA\WeinsteigFinance\Service\MandateService;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\FileDisplayResponse;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataResponse;
@@ -212,7 +212,7 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function mandatePdf(int $id): FileDisplayResponse|DataResponse {
+	public function mandatePdf(int $id): Response|DataResponse {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
@@ -222,11 +222,8 @@ class ApiController extends Controller {
 		}
 
 		try {
-			$pdfPath = $this->mandateService->generateMandatePdf($id);
-			// PDF aus Nextcloud-Dateisystem zurückgeben
-			$rootFolder = \OCP\Server::get(\OCP\Files\IRootFolder::class);
-			$file = $rootFolder->get($pdfPath);
-			return new FileDisplayResponse($file, 200, ['Content-Type' => 'application/pdf']);
+			$pdf = $this->mandateService->generateMandatePdf($id);
+			return new Response($pdf, 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="mandat.pdf"']);
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}

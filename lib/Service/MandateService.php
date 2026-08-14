@@ -41,14 +41,8 @@ class MandateService {
 		$mpdf = new Mpdf(['default_font_size' => 11, 'default_font' => 'Arial']);
 		$mpdf->WriteHTML($html);
 
-		// Im Nextcloud-Dateisystem speichern
-		$pdfPath = "energiegenossenschaft-weinsteig/generated/{$address}/sepa/mandat_vorlage.pdf";
-		$this->ensureFolder("energiegenossenschaft-weinsteig/generated/{$address}/sepa");
-
-		$file = $this->rootFolder->newFile($pdfPath);
-		$file->putContent($mpdf->Output('', 'S'));
-
-		return $pdfPath;
+		// PDF als String zurückgeben
+		return $mpdf->Output('', 'S');
 	}
 
 	private function getHtmlTemplate(string $address, string $zahlungspflichtig, string $iban, string $bic, string $date): string {
