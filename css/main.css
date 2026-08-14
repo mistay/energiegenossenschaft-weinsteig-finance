@@ -1,0 +1,10 @@
+.app-weinsteigfinance {
+	padding: 24px;
+	max-width: 900px;
+}
+
+.app-weinsteigfinance h2 {
+	font-size: 20px;
+	font-weight: bold;
+	margin-bottom: 8px;
+}

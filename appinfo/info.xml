@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>weinsteigfinance</id>
+	<name>Weinsteig Finance</name>
+	<summary>Vorschreibungen, SEPA-Mandate und Zahlungen der Energiegenossenschaft Weinsteig</summary>
+	<description><![CDATA[
+Verwaltung der Finanzen der Energiegenossenschaft Weinsteig.
+
+Die App verwaltet die Vorschreibungen für den gemeinsamen Technikraum
+"Brunnenstube" (Strom, Internet), die SEPA-Mandate der Zahlungspflichtigen
+sowie die eingehenden Zahlungen der 22 Häuser.
+	]]></description>
+	<version>0.1.0</version>
+	<licence>gpl</licence>
+	<author mail="office@langhofer.at">Armin Langhofer</author>
+	<namespace>WeinsteigFinance</namespace>
+	<category>office</category>
+	<bugs>https://github.com/mistay/energiegenossenschaft-weinsteig-finance/issues</bugs>
+	<repository type="git">https://github.com/mistay/energiegenossenschaft-weinsteig-finance.git</repository>
+	<dependencies>
+		<php min-version="8.1"/>
+		<nextcloud min-version="30" max-version="32"/>
+	</dependencies>
+	<navigations>
+		<navigation>
+			<id>weinsteigfinance</id>
+			<name>Weinsteig Finance</name>
+			<route>weinsteigfinance.page.index</route>
+			<icon>app.svg</icon>
+			<order>80</order>
+		</navigation>
+	</navigations>
+</info>
