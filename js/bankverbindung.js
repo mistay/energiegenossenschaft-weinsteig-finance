@@ -162,6 +162,29 @@ document.addEventListener('DOMContentLoaded', function() {
 				input.click();
 			});
 		});
+
+		// Prüfe für jedes Mitglied, ob ein unterschriebenes Formular existiert
+		const rows = document.querySelectorAll('tr');
+		rows.forEach(row => {
+			const editBtn = row.querySelector('.edit-btn');
+			if (!editBtn) return;
+			const memberId = editBtn.dataset.id;
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed'), {method: 'GET'})
+				.then(r => r.json())
+				.then(data => {
+					if (data.exists && data.downloadUrl) {
+						const actionCol = row.querySelector('td:last-child');
+						const link = document.createElement('a');
+						link.href = data.downloadUrl;
+						link.target = '_blank';
+						link.style.marginLeft = '10px';
+						link.style.color = '#28a745';
+						link.style.textDecoration = 'none';
+						link.innerHTML = '✅ Unterschriebenes';
+						actionCol.appendChild(link);
+					}
+				});
+		});
 	}
 
 	saveBtn.addEventListener('click', function() {

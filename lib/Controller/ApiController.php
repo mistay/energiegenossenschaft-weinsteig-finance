@@ -290,7 +290,7 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function getSignedMandate(int $id): DataResponse {
+	public function getSignedMandate(int $id) {
 		if (!$this->canEdit()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
@@ -312,15 +312,15 @@ class ApiController extends Controller {
 			}
 
 			$address = $member['address'];
-			$filePath = "energiegenossenschaft-weinsteig/generated/{$address}/sepa/mandat_unterschrieben.pdf";
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$filePath = "$dataDir/generated/{$address}/sepa/mandat_unterschrieben.pdf";
 
-			try {
-				\OCP\Server::get(\OCP\Files\IRootFolder::class)->get($filePath);
-				return new DataResponse(['exists' => true]);
-			} catch (\Exception) {
+			if (file_exists($filePath)) {
+				return new DataResponse(['exists' => true, 'downloadUrl' => OC_Helper::linkToRemote('data/generated/' . urlencode($address) . '/sepa/mandat_unterschrieben.pdf')]);
+			} else {
 				return new DataResponse(['exists' => false]);
 			}
-		} catch (\Exception $e) {
+		} catch (\Throwable $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
 	}
