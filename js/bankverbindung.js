@@ -1,15 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const list = document.getElementById('members-list');
 	const modal = document.getElementById('edit-modal');
+	const withdrawModal = document.getElementById('withdraw-modal');
 	const editAddress = document.getElementById('edit-address');
 	const editZahlungspflichtig = document.getElementById('edit-zahlungspflichtig');
 	const editIban = document.getElementById('edit-iban');
 	const saveBtn = document.getElementById('save-btn');
 	const saveForceBtn = document.getElementById('save-force-btn');
+	const withdrawBtn = document.getElementById('withdraw-btn');
 	const cancelBtn = document.getElementById('cancel-btn');
+	const withdrawAddress = document.getElementById('withdraw-address');
+	const withdrawReason = document.getElementById('withdraw-reason');
+	const withdrawConfirmBtn = document.getElementById('withdraw-confirm-btn');
+	const withdrawCancelBtn = document.getElementById('withdraw-cancel-btn');
 
 	let currentMemberId = null;
 	let isObperson = false;
+	let isUserView = false;
 	const ibanStatus = document.getElementById('iban-status');
 
 	// Live IBAN Validierung
@@ -59,50 +66,68 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	function load() {
+		// Erst obperson-Liste versuchen
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
 			.then(r => r.json())
 			.then(members => {
-				if (members.error) {
-					list.innerHTML = '<p>Fehler: ' + members.error + '</p>';
+				if (members.error === 'Unauthorized') {
+					// Nicht obperson - eigenes Mitglied laden
+					fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
+						.then(r => r.json())
+						.then(data => {
+							if (data.error) {
+								list.innerHTML = '<p>Fehler: ' + data.error + '</p>';
+								return;
+							}
+							isUserView = true;
+							renderMembers([data]);
+						});
 					return;
 				}
 
-				// Check ob obperson
 				isObperson = !members.error && Array.isArray(members);
-
-				let html = '<table class="grid" style="width:100%"><thead><tr>' +
-					'<th>Haus</th><th>Zahlungspflichtig</th><th>IBAN</th><th>Aktion</th>' +
-					'</tr></thead><tbody>';
-
-				if (isObperson) {
-					// Obperson sieht alle Häuser
-					members.forEach(m => {
-						html += `<tr>
-							<td>${escapeHtml(m.address)}</td>
-							<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
-							<td>${escapeHtml(m.iban || '-')}</td>
-							<td><button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button></td>
-						</tr>`;
-					});
-				} else {
-					// Mitglied sieht nur eigenes Haus
-					list.innerHTML = '<p>Nur Obpersonen können Bankverbindungen zentral verwalten.</p>';
-					return;
-				}
-
-				html += '</tbody></table>';
-				list.innerHTML = html;
-
-				document.querySelectorAll('.edit-btn').forEach(btn => {
-					btn.addEventListener('click', function() {
-						currentMemberId = this.dataset.id;
-						editAddress.textContent = this.dataset.addr;
-						editZahlungspflichtig.value = this.dataset.zahl;
-						editIban.value = this.dataset.iban;
-						modal.style.display = 'block';
-					});
-				});
+				renderMembers(members);
 			});
+	}
+
+	function renderMembers(members) {
+		if (members.error) {
+			list.innerHTML = '<p>Fehler: ' + members.error + '</p>';
+			return;
+		}
+
+		let html = '<table class="grid" style="width:100%"><thead><tr>' +
+			'<th>Haus</th><th>Zahlungspflichtig</th><th>IBAN</th><th>Mandat</th><th>Aktion</th>' +
+			'</tr></thead><tbody>';
+
+		if (isObperson || isUserView) {
+			members = Array.isArray(members) ? members : [members];
+			members.forEach(m => {
+				const mandatInfo = m.mandate_withdrawn_date
+					? `✗ ${escapeHtml(m.mandate_withdrawn_reason || 'Zurückgezogen')}`
+					: '✓ Aktiv';
+				html += `<tr>
+					<td>${escapeHtml(m.address)}</td>
+					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
+					<td>${escapeHtml(m.iban || '-')}</td>
+					<td>${mandatInfo}</td>
+					<td><button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button></td>
+				</tr>`;
+			});
+		}
+
+		html += '</tbody></table>';
+		list.innerHTML = html;
+
+		document.querySelectorAll('.edit-btn').forEach(btn => {
+			btn.addEventListener('click', function() {
+				currentMemberId = this.dataset.id;
+				editAddress.textContent = this.dataset.addr;
+				editZahlungspflichtig.value = this.dataset.zahl;
+				editIban.value = this.dataset.iban;
+				modal.style.display = 'block';
+			});
+		});
 	}
 
 	saveBtn.addEventListener('click', function() {
@@ -113,8 +138,38 @@ document.addEventListener('DOMContentLoaded', function() {
 		saveData(true);
 	});
 
+	withdrawBtn.addEventListener('click', function() {
+		modal.style.display = 'none';
+		withdrawAddress.textContent = editAddress.textContent;
+		withdrawReason.value = '';
+		withdrawModal.style.display = 'block';
+	});
+
+	withdrawConfirmBtn.addEventListener('click', function() {
+		if (!currentMemberId) return;
+
+		fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + currentMemberId + '/withdraw'), {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({reason: withdrawReason.value.trim()})
+		})
+			.then(r => r.json())
+			.then(data => {
+				if (data.success) {
+					withdrawModal.style.display = 'none';
+					load();
+				} else if (data.error) {
+					alert('Fehler: ' + data.error);
+				}
+			});
+	});
+
 	cancelBtn.addEventListener('click', function() {
 		modal.style.display = 'none';
+	});
+
+	withdrawCancelBtn.addEventListener('click', function() {
+		withdrawModal.style.display = 'none';
 	});
 
 	function escapeHtml(text) {

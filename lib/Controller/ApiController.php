@@ -15,6 +15,7 @@ use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use DateTime;
 
 class ApiController extends Controller {
 	public function __construct(
@@ -152,5 +153,43 @@ class ApiController extends Controller {
 			->executeStatement();
 
 		return new DataResponse(['success' => true]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function withdrawMandate(int $id, ?string $reason = null): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		$now = (new DateTime())->format('Y-m-d H:i:s');
+		$qb = $this->db->getQueryBuilder();
+		$qb->update('weinsteig_members')
+			->set('mandate_withdrawn_date', $qb->createNamedParameter($now))
+			->set('mandate_withdrawn_reason', $qb->createNamedParameter($reason))
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+			->executeStatement();
+
+		return new DataResponse(['success' => true]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function myMember(): DataResponse {
+		$userId = $this->getUserId();
+		if (!$userId || !$this->groupManager->isInGroup($userId, 'mitglieder')) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		$qb = $this->db->getQueryBuilder();
+		$row = $qb->select('m.*')
+			->from('weinsteig_members', 'm')
+			->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
+			->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
+			->setMaxResults(1)
+			->executeQuery()
+			->fetch();
+
+		return new DataResponse($row ?: ['error' => 'Not found']);
 	}
 }
