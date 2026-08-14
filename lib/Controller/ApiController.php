@@ -961,20 +961,20 @@ HTML;
 			}
 
 			// Lade alle Vorschreibungen
-			$vorschreibungen = $this->db->getQueryBuilder()
-				->select('*')
+			$qb = $this->db->getQueryBuilder();
+			$vorschreibungen = $qb->select('*')
 				->from('weinsteig_vorschreibungen')
-				->where($this->db->getQueryBuilder()->expr()->eq('member_id', $this->db->getQueryBuilder()->createNamedParameter($memberId)))
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 				->orderBy('year', 'DESC')
 				->addOrderBy('month', 'DESC')
 				->executeQuery()
 				->fetchAll();
 
 			// Lade alle Zahlungen
-			$zahlungen = $this->db->getQueryBuilder()
-				->select('*')
+			$qb = $this->db->getQueryBuilder();
+			$zahlungen = $qb->select('*')
 				->from('weinsteig_zahlungen')
-				->where($this->db->getQueryBuilder()->expr()->eq('member_id', $this->db->getQueryBuilder()->createNamedParameter($memberId)))
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 				->orderBy('valutadatum', 'DESC')
 				->executeQuery()
 				->fetchAll();
