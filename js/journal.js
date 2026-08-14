@@ -40,10 +40,13 @@ function load() {
 function renderJournal(data) {
 	const statsBox = document.getElementById('stats-box');
 	const statusMessage = document.getElementById('status-message');
+	const accountInfoBox = document.getElementById('account-info-box');
+	const accountInfoSubject = document.getElementById('account-info-subject');
 	const vorschreibungenSection = document.getElementById('vorschreibungen-section');
 	const zahlungenSection = document.getElementById('zahlungen-section');
 
 	const stats = data.stats || {};
+	const member = data.member || {};
 	const vorschreibungen = data.vorschreibungen || [];
 	const zahlungen = data.zahlungen || [];
 
@@ -53,9 +56,15 @@ function renderJournal(data) {
 	document.getElementById('stat-zahlungen').textContent = formatAmount(stats.totalZahlungen);
 	statsBox.style.display = 'block';
 
-	// Zeige Status-Nachricht
+	// Zeige Status-Nachricht und Kontoinformationen
 	const saldo = parseFloat(stats.saldo) || 0;
 	statusMessage.style.display = 'block';
+	accountInfoBox.style.display = 'block';
+
+	// Setze Betreff (Adresse)
+	if (member.address) {
+		accountInfoSubject.textContent = escapeHtml(member.address);
+	}
 
 	if (saldo < -0.01) {
 		// Schuld
