@@ -455,9 +455,9 @@ class ApiController extends Controller {
 				->executeQuery()
 				->fetchAll();
 
-			// Gruppiere nach Status
-			$pending = array_filter($allZahlungen, fn($z) => $z['status'] === 'pending');
-			$matched = array_filter($allZahlungen, fn($z) => $z['status'] === 'matched');
+			// Gruppiere nach Status (und neu indizieren)
+			$pending = array_values(array_filter($allZahlungen, fn($z) => $z['status'] === 'pending'));
+			$matched = array_values(array_filter($allZahlungen, fn($z) => $z['status'] === 'matched'));
 
 			return new DataResponse([
 				'unmatched' => $pending,
