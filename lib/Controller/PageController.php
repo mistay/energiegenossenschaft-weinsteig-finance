@@ -26,7 +26,14 @@ class PageController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function index(): TemplateResponse {
+	public function index(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+
+		// Mitglieder direkt zur IBAN-Verwaltung
+		if ($user && $this->groupManager->isInGroup($user->getUID(), 'mitglieder') && !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
+			return new RedirectResponse(\OCP\Util::linkTo('', '/index.php/apps/weinsteigfinance/bankverbindung'));
+		}
+
 		Util::addStyle(Application::APP_ID, 'main');
 
 		return new TemplateResponse(Application::APP_ID, 'index');
