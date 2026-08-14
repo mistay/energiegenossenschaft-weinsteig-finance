@@ -27,7 +27,7 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 
 		<a href="/index.php/apps/weinsteigfinance/vorschreibungen"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'vorschreibungen' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
-			📋 Rech.
+			📋 Vorschreibungen
 		</a>
 
 		<a href="/index.php/apps/weinsteigfinance/zahlungen-uebersicht"
