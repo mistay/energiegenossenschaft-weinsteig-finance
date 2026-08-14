@@ -34,10 +34,10 @@ function load() {
 				html += '<span style="margin-left: 10px; font-size: 12px; color: #666;">oder Text unten einfügen</span>';
 				html += '</div>';
 				html += '<textarea id="csv-input" placeholder="Oder: CSV-Inhalt hierher einfügen (mit Semikolon-Trennzeichen)..."></textarea>';
-				html += '<div style="margin-top: 10px;">';
-				html += '<button class="import-btn" id="import-btn" style="margin-right: 10px;">📤 Zahlungen importieren</button>';
+				html += '<div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">';
+				html += '<button class="import-btn" id="import-btn">📤 Importieren</button>';
 				if (stats.pending > 0) {
-					html += '<button class="import-btn" id="auto-match-btn" style="background: #ff9800;">🔍 Auto-Match (' + stats.pending + ' ausstehend)</button>';
+					html += '<button class="import-btn" id="auto-match-btn" style="background: #ff9800;">🔍 Auto-Match</button>';
 				}
 				html += '</div>';
 				html += '<div id="import-status" style="margin-top: 10px;"></div>';
