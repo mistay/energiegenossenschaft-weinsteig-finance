@@ -12,11 +12,11 @@ use OCP\Migration\IMigrationStep;
 class Version0003Date20260814000200 implements IMigrationStep {
 	public function __construct(private IDBConnection $db) {}
 
-	public function getName(): string {
+	public function name(): string {
 		return 'Seed weinsteig_members with 22 houses';
 	}
 
-	public function getDescription(): string {
+	public function description(): string {
 		return 'Inserts the 22 houses defined in statutes';
 	}
 

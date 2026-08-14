@@ -9,11 +9,11 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IMigrationStep;
 
 class Version0001Date20260814000000 implements IMigrationStep {
-	public function getName(): string {
+	public function name(): string {
 		return 'Create weinsteig_members table';
 	}
 
-	public function getDescription(): string {
+	public function description(): string {
 		return 'Creates table for storing house members';
 	}
 
