@@ -9,6 +9,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	let currentMemberId = null;
 	let isObperson = false;
+	const ibanStatus = document.getElementById('iban-status');
+
+	// Live IBAN Validierung
+	editIban.addEventListener('input', function() {
+		const iban = this.value.trim().replace(/\s+/g, '');
+		if (!iban) {
+			ibanStatus.textContent = '';
+			ibanStatus.style.color = '';
+			return;
+		}
+		if (validateIBAN(iban)) {
+			ibanStatus.textContent = '✓ gültig';
+			ibanStatus.style.color = 'green';
+		} else {
+			ibanStatus.textContent = '✗ ungültig';
+			ibanStatus.style.color = 'red';
+		}
+	});
 
 	function load() {
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
@@ -78,7 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(data => {
 				if (data.success) {
 					modal.style.display = 'none';
+					ibanStatus.textContent = '';
 					load();
+				} else if (data.error) {
+					alert('Fehler: ' + data.error);
 				}
 			});
 	});

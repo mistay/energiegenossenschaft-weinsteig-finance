@@ -23,6 +23,7 @@ Util::addScript('weinsteigfinance', 'iban-validator');
 			<label>
 				<?php p($l->t('IBAN:')); ?><br>
 				<input type="text" id="edit-iban" style="width: 300px; padding: 5px;" placeholder="AT00 1234 5678 9012 3456">
+				<span id="iban-status" style="margin-left: 10px; font-weight: bold;"></span>
 			</label><br><br>
 			<button type="button" id="save-btn"><?php p($l->t('Speichern')); ?></button>
 			<button type="button" id="cancel-btn"><?php p($l->t('Abbrechen')); ?></button>
