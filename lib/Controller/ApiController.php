@@ -276,16 +276,18 @@ class ApiController extends Controller {
 			$this->ensureNextcloudFolder($folder);
 
 			// Datei speichern
+			$rootFolder = \OCP\Server::get(\OCP\Files\IRootFolder::class);
 			try {
-				$ncFile = \OCP\Server::get(\OCP\Files\IRootFolder::class)->get($filePath);
+				$ncFile = $rootFolder->get($filePath);
 				$ncFile->putContent($pdfContent);
 			} catch (\Exception) {
-				\OCP\Server::get(\OCP\Files\IRootFolder::class)->newFile($filePath)->putContent($pdfContent);
+				$rootFolder->newFile($filePath)->putContent($pdfContent);
 			}
 
 			return new DataResponse(['success' => true]);
-		} catch (\Exception $e) {
-			return new DataResponse(['error' => $e->getMessage()], 400);
+		} catch (\Throwable $e) {
+			\OCP\Server::get(\OCP\Log\ILogFactory::class)->getLogFile()?->log(0, 'Upload error: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
+			return new DataResponse(['error' => $e->getMessage() ?: 'Upload failed'], 400);
 		}
 	}
 
