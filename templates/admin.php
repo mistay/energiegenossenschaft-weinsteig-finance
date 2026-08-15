@@ -16,13 +16,30 @@ $currentPage = 'admin';
 			<tr>
 				<th><?php p($l->t('Haus')); ?></th>
 				<th><?php p($l->t('Zugeordnete Benutzer')); ?></th>
+				<th><?php p($l->t('Offene Beträge')); ?></th>
 				<th><?php p($l->t('Aktionen')); ?></th>
 			</tr>
 		</thead>
 		<tbody id="members-table">
-			<tr><td colspan="3"><?php p($l->t('Lädt...')); ?></td></tr>
+			<tr><td colspan="4"><?php p($l->t('Lädt...')); ?></td></tr>
 		</tbody>
 	</table>
+
+	<style>
+		.amount-positive {
+			color: #28a745;
+			font-weight: bold;
+		}
+
+		.amount-negative {
+			color: #dc3545;
+			font-weight: bold;
+		}
+
+		.amount-zero {
+			color: #999;
+		}
+	</style>
 
 	<div id="assign-modal" style="display:none; margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f5f5f5;">
 		<h3><?php p($l->t('Benutzer zuordnen')); ?></h3>

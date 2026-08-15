@@ -86,6 +86,27 @@ class ApiController extends Controller {
 			->executeQuery()
 			->fetchAll();
 
+		// Berechne offene Beträge für jedes Mitglied
+		foreach ($rows as &$row) {
+			$qb = $this->db->getQueryBuilder();
+			$totalZahlungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+				->from('weinsteig_zahlungen')
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
+				->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
+				->executeQuery()
+				->fetchOne()['total'] ?? 0;
+
+			$qb = $this->db->getQueryBuilder();
+			$totalVorschreibungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+				->from('weinsteig_vorschreibungen')
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
+				->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
+				->executeQuery()
+				->fetchOne()['total'] ?? 0;
+
+			$row['open_amount'] = round($totalVorschreibungen - $totalZahlungen, 2);
+		}
+
 		if ($this->request->getParam('loadAssignments') === '1') {
 			$qb = $this->db->getQueryBuilder();
 			$assignments = $qb->select('member_id', 'user_id')

@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(r => r.json())
 			.then(members => {
 				if (members.error) {
-					table.innerHTML = '<tr><td colspan="3">Fehler: ' + members.error + '</td></tr>';
+					table.innerHTML = '<tr><td colspan="4">Fehler: ' + members.error + '</td></tr>';
 					return;
 				}
 
@@ -33,10 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		let html = '';
 		members.forEach(member => {
+			const amountClass = member.open_amount > 0 ? 'amount-negative' : (member.open_amount < 0 ? 'amount-positive' : 'amount-zero');
+			const amountText = member.open_amount ? member.open_amount.toFixed(2) + ' €' : '0,00 €';
 			html += `
 				<tr>
 					<td>${escapeHtml(member.address)}</td>
 					<td class="users-col-${member.id}">-</td>
+					<td class="${amountClass}"><strong>${amountText}</strong></td>
 					<td>
 						<button class="assign-btn" data-id="${member.id}" data-addr="${escapeHtml(member.address)}">
 							+ Benutzer
