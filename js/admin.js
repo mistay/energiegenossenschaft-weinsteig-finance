@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		members.forEach(member => {
 			const amountClass = member.open_amount > 0 ? 'amount-negative' : (member.open_amount < 0 ? 'amount-positive' : 'amount-zero');
 			const amountText = member.open_amount ? member.open_amount.toFixed(2) + ' €' : '0,00 €';
-			const journalUrl = OC.generateUrl('/index.php/apps/weinsteigfinance/journal?member=' + member.id);
+			const journalUrl = OC.generateUrl('/apps/weinsteigfinance/journal?member=' + member.id);
 			html += `
 				<tr>
 					<td>${escapeHtml(member.address)}</td>
