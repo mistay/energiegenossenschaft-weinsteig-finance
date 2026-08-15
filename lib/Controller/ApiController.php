@@ -1014,6 +1014,7 @@ HTML;
 			$saldo = $totalZahlungen - $openVorschreibungen;
 
 			return new DataResponse([
+				'member' => $member,
 				'vorschreibungen' => $vorschreibungen,
 				'zahlungen' => $zahlungen,
 				'stats' => [
