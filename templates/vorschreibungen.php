@@ -33,17 +33,22 @@ $currentPage = 'vorschreibungen';
 }
 
 .download-btn {
-	background: #0082c9;
-	color: white;
-	border: none;
+	background: white;
+	color: #333;
+	border: 1px solid #0082c9;
 	padding: 5px 10px;
 	border-radius: 3px;
 	cursor: pointer;
 	font-size: 12px;
 	margin: 2px;
+	text-decoration: none;
+	display: inline-block;
+	transition: all 0.2s;
 }
 
 .download-btn:hover {
-	background: #0070a8;
+	background: #0082c9;
+	color: white;
+	text-decoration: none;
 }
 </style>
