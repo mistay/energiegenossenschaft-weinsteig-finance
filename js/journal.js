@@ -80,7 +80,13 @@ function renderJournal(data) {
 	statusMessage.style.display = 'block';
 	accountInfoBox.style.display = 'block';
 
-	// Setze Betreff (Adresse)
+	// Setze Liegenschaft (Adresse) in der Kontoinformationen-Box
+	const accountInfoAddress = document.getElementById('account-info-address');
+	if (member.address) {
+		accountInfoAddress.textContent = escapeHtml(member.address);
+	}
+
+	// Setze Betreff (Adresse) für Zahlungsaufforderung
 	if (member.address) {
 		accountInfoSubject.textContent = escapeHtml(member.address);
 	}

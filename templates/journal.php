@@ -18,7 +18,11 @@ $currentPage = 'journal';
 		<h3 style="margin-top: 0; color: #2c3e50;">Zahlungsinformationen</h3>
 		<table style="width: 100%; border-collapse: collapse;">
 			<tr>
-				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-weight: 600; width: 150px;">Kontoinhaber:</td>
+				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-weight: 600; width: 150px;">Liegenschaft:</td>
+				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-weight: bold; color: #0082c9;" id="account-info-address">-</td>
+			</tr>
+			<tr>
+				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-weight: 600;">Kontoinhaber:</td>
 				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1;">Energiegenossenschaft Weinsteig</td>
 			</tr>
 			<tr>
