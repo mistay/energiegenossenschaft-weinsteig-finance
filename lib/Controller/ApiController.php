@@ -996,6 +996,8 @@ HTML;
 		}
 
 		try {
+			$member = null;
+
 			// Mitglieder sehen nur ihre eigenen Daten
 			if ($memberId === 0) {
 				$userId = $this->getUserId();
@@ -1015,7 +1017,7 @@ HTML;
 				// Mitglieder können nur ihre eigenen Daten sehen
 				$userId = $this->getUserId();
 				$qb = $this->db->getQueryBuilder();
-				$assigned = $qb->select('m.*')
+				$member = $qb->select('m.*')
 					->from('weinsteig_members', 'm')
 					->innerJoin('m', 'weinsteig_user_members', 'um', $qb->expr()->eq('m.id', 'um.member_id'))
 					->where($qb->expr()->eq('um.user_id', $qb->createNamedParameter($userId)))
@@ -1023,10 +1025,21 @@ HTML;
 					->setMaxResults(1)
 					->executeQuery()
 					->fetch();
-				if (!$assigned) {
+				if (!$member) {
 					return new DataResponse(['error' => 'Unauthorized'], 403);
 				}
-				$member = $assigned;
+			} else {
+				// Admins können jedes Haus sehen
+				$qb = $this->db->getQueryBuilder();
+				$member = $qb->select('m.*')
+					->from('weinsteig_members', 'm')
+					->where($qb->expr()->eq('m.id', $qb->createNamedParameter($memberId)))
+					->setMaxResults(1)
+					->executeQuery()
+					->fetch();
+				if (!$member) {
+					return new DataResponse(['error' => 'Haus nicht gefunden'], 404);
+				}
 			}
 
 			// Lade alle Vorschreibungen
