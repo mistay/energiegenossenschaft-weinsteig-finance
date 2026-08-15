@@ -170,7 +170,8 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Responsive Tabellen** mit Table-Wrapping für Mobile
 
 ### 🎯 Administrator-Features & Verwaltung
-- **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded)
+- **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded) mit offenen Beträgen
+- **Offene Beträge Übersicht**: Farblich formatiert (🔴 Rückstand, 🟢 Guthaben, ⚪ ausgeglichen)
 - **Benutzer-Zuordnung**: Many-to-Many mit Dropdown + Zuordnungs-UI
 - **Bulk-Operationen**: Mehrere Häuser mit einem Admin-Benutzer
 - **Import-Management**: CSV-Validierung mit Fehlerbehandlung + Duplikat-Detection
@@ -179,6 +180,11 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Mandate-Verwaltung**: Für alle 22 Mitglieder + Upload/Widerruf
 - **Vorschreibungs-Generierung**: Manuell pro Monat + automatisch täglich
 - **CSV-Import**: Automatische Duplikat-Erkennung + Fuzzy-Matching
+- **Journal-Zugriff für Admins**: Schneller Zugriff zu allen Kundenjournalen via 📊-Button
+- **Dynamische Journal-Überschrift**: "Kontojurnal von [Haus]" für bessere Orientierung
+- **SEPA Core Datenträger**: Listet alle gültigen Mandate mit offenen Beträgen + CSV-Export
+- **Smart Payment Matching**: Intelligente Zuordnung von Zahlungen auch ohne manuelle Zuweisung
+- **Echtzeit Saldo-Berechnung**: Offene Beträge = eingegangene Zahlungen - offene Rechnungen
 
 ### ⚙️ Technische Architektur & Stack
 - **Nextcloud 34 AppFramework** Bootstrap Pattern mit PSR-4 Autoloading
@@ -236,10 +242,16 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 0.9.0
-- **Release-Zyklus**: Kontinuierlich neue Features
-- **Backward-Kompatibilität**: Alle 10 Migrationen vollständig unterstützt
+- **Aktuelle Version**: 1.1.5
+- **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
+- **Backward-Kompatibilität**: Alle 10+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.1.x)**:
+  - ✨ Admin Journal-Zugriff mit Quick-Links
+  - 📊 Farbliche Saldo-Formatierung in Verwaltung
+  - 🏦 SEPA Core Datenträger mit CSV-Export
+  - 🎯 Smart Payment Matching für intelligente Zahlungszuordnung
+  - 🏘️ Dynamische Journal-Überschriften mit Hausnamen
 
 ---
 
