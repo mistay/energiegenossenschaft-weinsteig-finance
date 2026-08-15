@@ -1049,4 +1049,161 @@ HTML;
 			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
 		}
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function sepaDataCarrier(): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$dataDir = $this->config->getSystemValue('datadirectory');
+
+			// Alle Mitglieder laden
+			$qb = $this->db->getQueryBuilder();
+			$members = $qb->select('*')
+				->from('weinsteig_members')
+				->orderBy('address')
+				->executeQuery()
+				->fetchAll();
+
+			$mandates = [];
+
+			foreach ($members as $member) {
+				// Prüfe ob signed mandate existiert
+				$address = $member['address'];
+				$folderPath = "$dataDir/generated/{$address}/sepa";
+				$signedMandateExists = false;
+				if (is_dir($folderPath)) {
+					$files = scandir($folderPath);
+					foreach ($files as $file) {
+						if (preg_match('/^mandat_unterschrieben_v\d+\.pdf$/', $file)) {
+							$signedMandateExists = true;
+							break;
+						}
+					}
+				}
+
+				// Nur gültige Mandate: Nicht zurückgezogen UND PDF hochgeladen UND Erteilungsdatum gesetzt
+				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
+					// Berechne offene Beträge (Saldo = eingegangene Zahlungen - offene Vorschreibungen)
+					$qb = $this->db->getQueryBuilder();
+					$totalZahlungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+						->from('weinsteig_zahlungen')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
+						->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
+						->executeQuery()
+						->fetchOne()['total'] ?? 0;
+
+					$qb = $this->db->getQueryBuilder();
+					$totalVorschreibungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+						->from('weinsteig_vorschreibungen')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
+						->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
+						->executeQuery()
+						->fetchOne()['total'] ?? 0;
+
+					$openAmount = $totalVorschreibungen - $totalZahlungen;
+
+					$mandates[] = [
+						'id' => $member['id'],
+						'address' => $member['address'],
+						'zahlungspflichtig' => $member['zahlungspflichtig'] ?? '-',
+						'iban' => $member['iban'] ?? '-',
+						'mandate_granted_date' => $member['mandate_granted_date'],
+						'open_amount' => round($openAmount, 2),
+					];
+				}
+			}
+
+			return new DataResponse([
+				'success' => true,
+				'count' => count($mandates),
+				'mandates' => $mandates,
+			]);
+
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function sepaDataCarrierCsv(): Response {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$dataDir = $this->config->getSystemValue('datadirectory');
+
+			// Alle Mitglieder laden
+			$qb = $this->db->getQueryBuilder();
+			$members = $qb->select('*')
+				->from('weinsteig_members')
+				->orderBy('address')
+				->executeQuery()
+				->fetchAll();
+
+			$csvLines = [];
+			$csvLines[] = 'Haus;Kontoinhaber;IBAN;Mandat gültig seit;Offene Beträge (€)';
+
+			foreach ($members as $member) {
+				// Prüfe ob signed mandate existiert
+				$address = $member['address'];
+				$folderPath = "$dataDir/generated/{$address}/sepa";
+				$signedMandateExists = false;
+				if (is_dir($folderPath)) {
+					$files = scandir($folderPath);
+					foreach ($files as $file) {
+						if (preg_match('/^mandat_unterschrieben_v\d+\.pdf$/', $file)) {
+							$signedMandateExists = true;
+							break;
+						}
+					}
+				}
+
+				// Nur gültige Mandate
+				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
+					// Berechne offene Beträge
+					$qb = $this->db->getQueryBuilder();
+					$totalZahlungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+						->from('weinsteig_zahlungen')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
+						->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
+						->executeQuery()
+						->fetchOne()['total'] ?? 0;
+
+					$qb = $this->db->getQueryBuilder();
+					$totalVorschreibungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+						->from('weinsteig_vorschreibungen')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
+						->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
+						->executeQuery()
+						->fetchOne()['total'] ?? 0;
+
+					$openAmount = $totalVorschreibungen - $totalZahlungen;
+
+					$zahlungspflichtig = $member['zahlungspflichtig'] ?? '-';
+					$iban = $member['iban'] ?? '-';
+					$mandateDate = $member['mandate_granted_date'] ?? '-';
+					$openStr = number_format($openAmount, 2, ',', '');
+
+					$csvLines[] = "\"$address\";\"$zahlungspflichtig\";\"$iban\";\"$mandateDate\";\"$openStr\"";
+				}
+			}
+
+			$csv = implode("\r\n", $csvLines);
+
+			// Header setzen für CSV-Download
+			header('Content-Type: text/csv; charset=utf-8');
+			header('Content-Disposition: attachment; filename="sepa-datentraeger-' . date('Y-m-d') . '.csv"');
+			echo $csv;
+			exit;
+
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
+		}
+	}
 }

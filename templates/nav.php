@@ -55,6 +55,11 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'admin' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
 			👥 Admin: Häuser & Benutzer
 		</a>
+
+		<a href="/index.php/apps/weinsteigfinance/sepa-datentraeger"
+			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'sepa-datentraeger' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
+			🏦 Admin: SEPA Core
+		</a>
 		<?php endif; ?>
 	</div>
 </nav>

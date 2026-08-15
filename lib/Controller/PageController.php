@@ -147,4 +147,19 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'profil');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function sepaDataCarrier(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
+		Util::addScript(Application::APP_ID, 'sepa-datentraeger');
+
+		return new TemplateResponse(Application::APP_ID, 'sepa-datentraeger');
+	}
 }

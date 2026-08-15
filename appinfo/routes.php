@@ -12,6 +12,7 @@ return [
 		['name' => 'page#zahlungenUebersicht', 'url' => '/zahlungen-uebersicht', 'verb' => 'GET'],
 		['name' => 'page#journal', 'url' => '/journal', 'verb' => 'GET'],
 		['name' => 'page#profil', 'url' => '/profil', 'verb' => 'GET'],
+		['name' => 'page#sepaDataCarrier', 'url' => '/sepa-datentraeger', 'verb' => 'GET'],
 		['name' => 'api#members', 'url' => '/api/members', 'verb' => 'GET'],
 		['name' => 'api#users', 'url' => '/api/users', 'verb' => 'GET'],
 		['name' => 'api#getMember', 'url' => '/api/member/{id}', 'verb' => 'GET'],
@@ -35,5 +36,7 @@ return [
 		['name' => 'api#zahlungenGet', 'url' => '/api/zahlungen', 'verb' => 'GET'],
 		['name' => 'api#zahlungenUebersicht', 'url' => '/api/zahlungen-uebersicht', 'verb' => 'GET'],
 		['name' => 'api#memberJournal', 'url' => '/api/member/{memberId}/journal', 'verb' => 'GET'],
+		['name' => 'api#sepaDataCarrier', 'url' => '/api/sepa-datentraeger', 'verb' => 'GET'],
+		['name' => 'api#sepaDataCarrierCsv', 'url' => '/api/sepa-datentraeger/export', 'verb' => 'GET'],
 	],
 ];
