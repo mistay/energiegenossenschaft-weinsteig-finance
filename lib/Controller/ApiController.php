@@ -86,27 +86,35 @@ class ApiController extends Controller {
 			->executeQuery()
 			->fetchAll();
 
-		// Berechne offene Beträge für jedes Mitglied
+		// Berechne offene Beträge für jedes Mitglied (wie in memberJournal)
 		foreach ($rows as &$row) {
+			// Summe ALLER Zahlungen (nicht gefiltert nach status)
 			$qb = $this->db->getQueryBuilder();
 			$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
 				->from('weinsteig_zahlungen')
 				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
-				->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
 				->executeQuery()
 				->fetchOne();
 			$totalZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
+			// Summe ALLER Vorschreibungen
 			$qb = $this->db->getQueryBuilder();
-			$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+			$allVorschreibungen = $qb->select('amount', 'status')
 				->from('weinsteig_vorschreibungen')
 				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
-				->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
 				->executeQuery()
-				->fetchOne();
-			$totalVorschreibungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
+				->fetchAll();
 
-			$row['open_amount'] = round($totalVorschreibungen - $totalZahlungen, 2);
+			$openVorschreibungen = 0;
+			foreach ($allVorschreibungen as $v) {
+				// Zähle nur offene (nicht bezahlte) Vorschreibungen
+				if ($v['status'] !== 'paid') {
+					$openVorschreibungen += (float)$v['amount'];
+				}
+			}
+
+			// Saldo = eingegangene Zahlungen - offene Vorschreibungen
+			$row['open_amount'] = round($totalZahlungen - $openVorschreibungen, 2);
 		}
 
 		if ($this->request->getParam('loadAssignments') === '1') {
@@ -1110,26 +1118,31 @@ HTML;
 
 				// Nur gültige Mandate: Nicht zurückgezogen UND PDF hochgeladen UND Erteilungsdatum gesetzt
 				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
-					// Berechne offene Beträge (Saldo = eingegangene Zahlungen - offene Vorschreibungen)
+					// Berechne offene Beträge (wie in memberJournal)
 					$qb = $this->db->getQueryBuilder();
 					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
 						->from('weinsteig_zahlungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
-						->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
 						->executeQuery()
 						->fetchOne();
 					$totalZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
+					// Summe aller Vorschreibungen (nur offene/nicht bezahlte)
 					$qb = $this->db->getQueryBuilder();
-					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+					$allVorschreibungen = $qb->select('amount', 'status')
 						->from('weinsteig_vorschreibungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
-						->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
 						->executeQuery()
-						->fetchOne();
-					$totalVorschreibungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
+						->fetchAll();
 
-					$openAmount = $totalVorschreibungen - $totalZahlungen;
+					$openVorschreibungen = 0;
+					foreach ($allVorschreibungen as $v) {
+						if ($v['status'] !== 'paid') {
+							$openVorschreibungen += (float)$v['amount'];
+						}
+					}
+
+					$openAmount = $totalZahlungen - $openVorschreibungen;
 
 					$mandates[] = [
 						'id' => $member['id'],
@@ -1196,21 +1209,26 @@ HTML;
 					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
 						->from('weinsteig_zahlungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
-						->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
 						->executeQuery()
 						->fetchOne();
 					$totalZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
+					// Summe aller Vorschreibungen (nur offene/nicht bezahlte)
 					$qb = $this->db->getQueryBuilder();
-					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+					$allVorschreibungen = $qb->select('amount', 'status')
 						->from('weinsteig_vorschreibungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
-						->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
 						->executeQuery()
-						->fetchOne();
-					$totalVorschreibungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
+						->fetchAll();
 
-					$openAmount = $totalVorschreibungen - $totalZahlungen;
+					$openVorschreibungen = 0;
+					foreach ($allVorschreibungen as $v) {
+						if ($v['status'] !== 'paid') {
+							$openVorschreibungen += (float)$v['amount'];
+						}
+					}
+
+					$openAmount = $totalZahlungen - $openVorschreibungen;
 
 					$zahlungspflichtig = $member['zahlungspflichtig'] ?? '-';
 					$iban = $member['iban'] ?? '-';
