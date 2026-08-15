@@ -63,11 +63,17 @@ function renderJournal(data) {
 	const accountInfoSubject = document.getElementById('account-info-subject');
 	const vorschreibungenSection = document.getElementById('vorschreibungen-section');
 	const zahlungenSection = document.getElementById('zahlungen-section');
+	const pageTitle = document.getElementById('page-title');
 
 	const stats = data.stats || {};
 	const member = data.member || {};
 	const vorschreibungen = data.vorschreibungen || [];
 	const zahlungen = data.zahlungen || [];
+
+	// Setze dynamische Überschrift mit Hausnamen
+	if (member.address) {
+		pageTitle.textContent = 'Kontojurnal von ' + escapeHtml(member.address);
+	}
 
 	// Zeige Statistik
 	document.getElementById('stat-saldo').textContent = formatAmount(stats.saldo);

@@ -7,7 +7,7 @@ $currentPage = 'journal';
 <div id="weinsteigfinance-journal" class="app-weinsteigfinance">
 	<?php include 'nav.php'; ?>
 
-	<h2>Kontojurnal</h2>
+	<h2 id="page-title">Kontojurnal</h2>
 
 	<!-- Status Message -->
 	<div id="status-message" style="padding: 16px; border-radius: 6px; margin-bottom: 20px; display: none; font-weight: 500; border-left: 4px solid;">
