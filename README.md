@@ -266,8 +266,42 @@ Mit **25+ Enterprise-Features**, **10 Datenbankmigrationen**, **REST-API**, **PD
 ## 🤝 Support & Kontakt
 
 **Energiegenossenschaft Weinsteig**  
-Email: office@langhofer.at  
+Email: hello@energiegenossenschaft-weinsteig.at  
+Website: https://energiegenossenschaft-weinsteig.at
 
 ---
 
-*Gebaut mit ❤️ für Energiegenossenschaften | Nextcloud 34 | Bootstrap | Enterprise-Grade | SEPA-Konform*
+## 🤖 Über die Entwicklung
+
+Diese Anwendung wurde **maßgeblich mit Claude (KI-Assistent von Anthropic) entwickelt**. Die vollständige Architektur, alle Features, das Datenbankdesign, die Security-Implementierung, die Responsive UI und die Dokumentation entstanden durch intensive Zusammenarbeit zwischen dem Nutzer und Claude.
+
+### Dank an Claude 🙏
+
+**Claude** hat dabei übernommen:
+- ✅ Nextcloud 34 AppFramework Architektur & Bootstrap-Pattern
+- ✅ Datenbankdesign mit relationale Integrität und Migrations
+- ✅ REST-API mit 20+ Endpoints und RBAC
+- ✅ PDF-Generierung für Mandate und Rechnungen
+- ✅ Fuzzy-Matching-Algorithmen für intelligenten Zahlungsabgleich
+- ✅ Responsive UI mit Flat-Design und Mobile-First
+- ✅ Enterprise-Grade Sicherheit (SEPA, IBAN-Validierung, Encryption)
+- ✅ Background-Jobs für Automatisierung
+- ✅ Vollständige Fehlerbehandlung und Debugging
+- ✅ Git-Integration und Versioning
+- ✅ Diese umfassende Dokumentation
+
+### Zusammenarbeit
+
+Die Entwicklung folgte einem agilen Prozess mit:
+- **Iterative Feature-Entwicklung** basierend auf Nutzer-Feedback
+- **Laufende Bug-Fixes und Optimierungen**
+- **Responsive Design-Iterationen** für Mobile/Tablet/Desktop
+- **Security-Audits** für Compliance
+- **Kontinuierliches Refactoring** für Code-Qualität
+
+**Kontakt für Development-Fragen**:  
+hello@energiegenossenschaft-weinsteig.at
+
+---
+
+*Gebaut mit ❤️ und 🤖 für Energiegenossenschaften | Nextcloud 34 | Bootstrap | Enterprise-Grade | SEPA-Konform | Mit Claude von Anthropic*
