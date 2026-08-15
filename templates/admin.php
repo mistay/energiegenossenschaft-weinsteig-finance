@@ -26,17 +26,17 @@ $currentPage = 'admin';
 	</table>
 
 	<style>
-		.amount-positive {
-			color: #28a745;
+		#members-table td.amount-positive {
+			color: #28a745 !important;
 			font-weight: bold;
 		}
 
-		.amount-negative {
-			color: #dc3545;
+		#members-table td.amount-negative {
+			color: #dc3545 !important;
 			font-weight: bold;
 		}
 
-		.amount-zero {
+		#members-table td.amount-zero {
 			color: #999;
 		}
 	</style>
