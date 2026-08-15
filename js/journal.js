@@ -8,27 +8,46 @@ function load() {
 	loadingEl.style.display = 'block';
 	errorEl.style.display = 'none';
 
-	// Lade aktuelles Mitglied
-	fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
+	// Prüfe URL-Parameter für fremdes Journal (nur Admins)
+	const urlParams = new URLSearchParams(window.location.search);
+	const memberId = urlParams.get('member');
+
+	if (memberId) {
+		// Admin möchte fremdes Journal sehen
+		loadJournalForMember(memberId);
+	} else {
+		// Lade eigenes Mitglied
+		fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
+			.then(r => r.json())
+			.then(memberData => {
+				if (!memberData || memberData.error) {
+					throw new Error(memberData?.message || 'Kein Mitglied zugewiesen');
+				}
+
+				loadJournalForMember(memberData.id);
+			})
+			.catch(err => {
+				loadingEl.style.display = 'none';
+				errorEl.style.display = 'block';
+				errorEl.innerHTML = '❌ ' + escapeHtml(err.message);
+			});
+	}
+}
+
+function loadJournalForMember(memberId) {
+	const loadingEl = document.getElementById('loading');
+	const errorEl = document.getElementById('error-message');
+
+	// Lade Journal für spezifisches Mitglied
+	fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/journal'))
 		.then(r => r.json())
-		.then(memberData => {
-			if (!memberData || memberData.error) {
-				throw new Error(memberData?.message || 'Kein Mitglied zugewiesen');
+		.then(journalData => {
+			if (journalData.error) {
+				throw new Error(journalData.message || journalData.error);
 			}
 
-			const memberId = memberData.id;
-
-			// Lade Journal
-			return fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/journal'))
-				.then(r => r.json())
-				.then(journalData => {
-					if (journalData.error) {
-						throw new Error(journalData.message || journalData.error);
-					}
-
-					loadingEl.style.display = 'none';
-					renderJournal(journalData);
-				});
+			loadingEl.style.display = 'none';
+			renderJournal(journalData);
 		})
 		.catch(err => {
 			loadingEl.style.display = 'none';
