@@ -89,20 +89,22 @@ class ApiController extends Controller {
 		// Berechne offene Beträge für jedes Mitglied
 		foreach ($rows as &$row) {
 			$qb = $this->db->getQueryBuilder();
-			$totalZahlungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+			$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
 				->from('weinsteig_zahlungen')
 				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
 				->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
 				->executeQuery()
-				->fetchOne()['total'] ?? 0;
+				->fetchOne();
+			$totalZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
 			$qb = $this->db->getQueryBuilder();
-			$totalVorschreibungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+			$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
 				->from('weinsteig_vorschreibungen')
 				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
 				->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
 				->executeQuery()
-				->fetchOne()['total'] ?? 0;
+				->fetchOne();
+			$totalVorschreibungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
 			$row['open_amount'] = round($totalVorschreibungen - $totalZahlungen, 2);
 		}
@@ -1110,20 +1112,22 @@ HTML;
 				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
 					// Berechne offene Beträge (Saldo = eingegangene Zahlungen - offene Vorschreibungen)
 					$qb = $this->db->getQueryBuilder();
-					$totalZahlungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
 						->from('weinsteig_zahlungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
 						->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
 						->executeQuery()
-						->fetchOne()['total'] ?? 0;
+						->fetchOne();
+					$totalZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
 					$qb = $this->db->getQueryBuilder();
-					$totalVorschreibungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
 						->from('weinsteig_vorschreibungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
 						->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
 						->executeQuery()
-						->fetchOne()['total'] ?? 0;
+						->fetchOne();
+					$totalVorschreibungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
 					$openAmount = $totalVorschreibungen - $totalZahlungen;
 
@@ -1189,20 +1193,22 @@ HTML;
 				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
 					// Berechne offene Beträge
 					$qb = $this->db->getQueryBuilder();
-					$totalZahlungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
 						->from('weinsteig_zahlungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
 						->where($qb->expr()->eq('status', $qb->createNamedParameter('matched')))
 						->executeQuery()
-						->fetchOne()['total'] ?? 0;
+						->fetchOne();
+					$totalZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
 					$qb = $this->db->getQueryBuilder();
-					$totalVorschreibungen = (float) $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
+					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(amount), 0)'), 'total')
 						->from('weinsteig_vorschreibungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($member['id'])))
 						->where($qb->expr()->eq('status', $qb->createNamedParameter('open')))
 						->executeQuery()
-						->fetchOne()['total'] ?? 0;
+						->fetchOne();
+					$totalVorschreibungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
 
 					$openAmount = $totalVorschreibungen - $totalZahlungen;
 
