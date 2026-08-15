@@ -653,7 +653,27 @@ class ApiController extends Controller {
 			->executeQuery()
 			->fetch();
 
-		return new DataResponse($row ?: ['error' => 'Not found']);
+		if (!$row) {
+			return new DataResponse(['error' => 'Not found']);
+		}
+
+		// Prüfe, ob ein unterschriebenes Mandat-PDF existiert
+		$address = $row['address'] ?? '';
+		$dataDir = $this->config->getSystemValue('datadirectory');
+		$folderPath = "$dataDir/generated/{$address}/sepa";
+		$signedMandateExists = false;
+		if (is_dir($folderPath)) {
+			$files = scandir($folderPath);
+			foreach ($files as $file) {
+				if (preg_match('/^mandat_unterschrieben_v\d+\.pdf$/', $file)) {
+					$signedMandateExists = true;
+					break;
+				}
+			}
+		}
+
+		$row['signed_mandate_exists'] = $signedMandateExists;
+		return new DataResponse($row);
 	}
 
 	#[NoAdminRequired]

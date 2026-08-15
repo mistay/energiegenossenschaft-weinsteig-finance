@@ -36,13 +36,33 @@ function load() {
 				html += '<div style="margin-bottom: 8px; color: #999;"><strong>IBAN:</strong> Nicht hinterlegt</div>';
 			}
 
+			// Mandat-Validierung: Gültig nur wenn nicht zurückgezogen UND PDF hochgeladen
+			let mandatHtml = '<div>';
 			if (member.mandate_withdrawn_date) {
-				html += '<div style="color: #dc3545;"><strong>Mandat:</strong> ⚠️ Zurückgezogen (' + escapeHtml(member.mandate_withdrawn_reason || 'Grund nicht angegeben') + ')</div>';
+				mandatHtml += '<div style="color: #dc3545; margin-bottom: 8px;"><strong>Mandat Status:</strong> ⚠️ Zurückgezogen</div>';
+				mandatHtml += '<div style="color: #dc3545; font-size: 12px; background: #ffebee; padding: 8px; border-radius: 4px;">';
+				mandatHtml += '<strong>Grund:</strong> ' + escapeHtml(member.mandate_withdrawn_reason || 'Grund nicht angegeben');
+				mandatHtml += '</div>';
+			} else if (!member.signed_mandate_exists) {
+				mandatHtml += '<div style="color: #ff9800; margin-bottom: 8px;"><strong>Mandat Status:</strong> ⏳ Nicht gültig</div>';
+				mandatHtml += '<div style="color: #ff9800; font-size: 12px; background: #fff3e0; padding: 8px; border-radius: 4px;">';
+				mandatHtml += '<strong>Info:</strong> Es wurde noch kein unterschriebenes SEPA-Mandat hochgeladen. ';
+				mandatHtml += 'Bitte laden Sie das unterzeichnete Mandatsformular im Bereich "SEPA Lastschrift" hoch.';
+				mandatHtml += '</div>';
 			} else if (member.mandate_granted_date) {
-				html += '<div style="color: #28a745;"><strong>Mandat:</strong> ✓ Gültig seit ' + escapeHtml(member.mandate_granted_date) + '</div>';
+				mandatHtml += '<div style="color: #28a745; margin-bottom: 8px;"><strong>Mandat Status:</strong> ✓ Gültig</div>';
+				mandatHtml += '<div style="color: #28a745; font-size: 12px; background: #f1f8e9; padding: 8px; border-radius: 4px;">';
+				mandatHtml += '<strong>Gültig seit:</strong> ' + escapeHtml(member.mandate_granted_date);
+				mandatHtml += '</div>';
 			} else {
-				html += '<div style="color: #ff9800;"><strong>Mandat:</strong> ⏳ Nicht erteilt</div>';
+				mandatHtml += '<div style="color: #ff9800; margin-bottom: 8px;"><strong>Mandat Status:</strong> ⏳ Nicht gültig</div>';
+				mandatHtml += '<div style="color: #ff9800; font-size: 12px; background: #fff3e0; padding: 8px; border-radius: 4px;">';
+				mandatHtml += '<strong>Info:</strong> Es wurde noch kein unterschriebenes SEPA-Mandat hochgeladen und kein Erteilungsdatum erfasst. ';
+				mandatHtml += 'Bitte laden Sie das unterzeichnete Mandatsformular im Bereich "SEPA Lastschrift" hoch.';
+				mandatHtml += '</div>';
 			}
+			mandatHtml += '</div>';
+			html += mandatHtml;
 
 			html += '</div>';
 			html += '</div>';
