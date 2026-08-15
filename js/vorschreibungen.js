@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						const vorschreibung = member.vorschreibungen?.[monthStr];
 						if (vorschreibung?.exists) {
 							const url = OC.generateUrl('/apps/weinsteigfinance/api/vorschreibung/' + member.id + '/' + monthStr);
-							html += '<td><a href="' + url + '" target="_blank" class="download-btn" title="Generiert: ' + escapeHtml(vorschreibung.date) + '">📥<br><span style="font-size: 10px; color: #666;">(' + escapeHtml(vorschreibung.date) + ')</span></a></td>';
+							html += '<td><a href="' + url + '" target="_blank" class="download-btn" title="Generiert: ' + escapeHtml(vorschreibung.date) + '">📥<br><span style="font-size: 10px; color: rgba(255,255,255,0.9);">(' + escapeHtml(vorschreibung.date) + ')</span></a></td>';
 						} else {
 							html += '<td style="color: #999;">—</td>';
 						}
