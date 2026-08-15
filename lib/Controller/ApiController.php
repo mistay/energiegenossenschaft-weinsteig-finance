@@ -86,59 +86,40 @@ class ApiController extends Controller {
 			->executeQuery()
 			->fetchAll();
 
-		// Berechne offene Beträge für jedes Mitglied mit intelligentem Matching
+		// Berechne offene Beträge für jedes Mitglied (exakt wie memberJournal)
 		foreach ($rows as &$row) {
 			$memberId = $row['id'];
-			$address = $row['address'];
 
-			// 1. Zahlungen, die explizit diesem Mitglied zugeordnet sind
+			// ALLE Zahlungen für dieses Mitglied (keine Status-Filter!)
 			$qb = $this->db->getQueryBuilder();
-			$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+			$zahlungen = $qb->select('*')
 				->from('weinsteig_zahlungen')
 				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 				->executeQuery()
-				->fetchOne();
-			$assignedZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
-
-			// 2. Unzugeordnete Zahlungen, die durch Adresse geMatchet werden können
-			$qb = $this->db->getQueryBuilder();
-			$unassignedZahlungen = $qb->select('betrag', 'verwendungszweck', 'partnername')
-				->from('weinsteig_zahlungen')
-				->where($qb->expr()->isNull('member_id'))
-				->executeQuery()
 				->fetchAll();
 
-			$matchedUnassignedZahlungen = 0;
-			foreach ($unassignedZahlungen as $z) {
-				// Fuzzy-Match: Prüfe ob Adresse im Verwendungszweck oder Partnername vorkommt
-				$verwendung = strtolower($z['verwendungszweck'] ?? '');
-				$partner = strtolower($z['partnername'] ?? '');
-				$addrLower = strtolower($address);
-
-				if (strpos($verwendung, $addrLower) !== false || strpos($partner, $addrLower) !== false) {
-					$matchedUnassignedZahlungen += (float)$z['betrag'];
-				}
+			$totalZahlungen = 0;
+			foreach ($zahlungen as $z) {
+				$totalZahlungen += (float)$z['betrag'];
 			}
 
-			$totalZahlungen = $assignedZahlungen + $matchedUnassignedZahlungen;
-
-			// 3. Offene Vorschreibungen für dieses Mitglied
+			// ALLE Vorschreibungen für dieses Mitglied
 			$qb = $this->db->getQueryBuilder();
-			$allVorschreibungen = $qb->select('amount', 'status')
+			$vorschreibungen = $qb->select('*')
 				->from('weinsteig_vorschreibungen')
 				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 				->executeQuery()
 				->fetchAll();
 
 			$openVorschreibungen = 0;
-			foreach ($allVorschreibungen as $v) {
+			foreach ($vorschreibungen as $v) {
 				// Zähle nur offene (nicht bezahlte) Vorschreibungen
 				if ($v['status'] !== 'paid') {
 					$openVorschreibungen += (float)$v['amount'];
 				}
 			}
 
-			// Saldo = eingegangene Zahlungen - offene Vorschreibungen
+			// Saldo = eingegangene Zahlungen - offene Vorschreibungen (wie memberJournal)
 			$row['open_amount'] = round($totalZahlungen - $openVorschreibungen, 2);
 		}
 
@@ -1116,14 +1097,6 @@ HTML;
 		try {
 			$dataDir = $this->config->getSystemValue('datadirectory');
 
-			// Lade EINMAL alle unzugeordneten Zahlungen für Matching
-			$qb = $this->db->getQueryBuilder();
-			$unassignedZahlungen = $qb->select('betrag', 'verwendungszweck', 'partnername')
-				->from('weinsteig_zahlungen')
-				->where($qb->expr()->isNull('member_id'))
-				->executeQuery()
-				->fetchAll();
-
 			// Alle Mitglieder laden
 			$qb = $this->db->getQueryBuilder();
 			$members = $qb->select('*')
@@ -1151,43 +1124,32 @@ HTML;
 
 				// Nur gültige Mandate: Nicht zurückgezogen UND PDF hochgeladen UND Erteilungsdatum gesetzt
 				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
-					// Berechne offene Beträge mit intelligentem Matching
+					// Berechne offene Beträge (exakt wie memberJournal)
 					$memberId = $member['id'];
-					$address = $member['address'];
 
-					// Explizit zugeordnete Zahlungen
+					// ALLE Zahlungen für dieses Mitglied
 					$qb = $this->db->getQueryBuilder();
-					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+					$zahlungen = $qb->select('*')
 						->from('weinsteig_zahlungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 						->executeQuery()
-						->fetchOne();
-					$assignedZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
+						->fetchAll();
 
-					// Unzugeordnete Zahlungen durch Adress-Matching
-					$matchedUnassignedZahlungen = 0;
-					foreach ($unassignedZahlungen as $z) {
-						$verwendung = strtolower($z['verwendungszweck'] ?? '');
-						$partner = strtolower($z['partnername'] ?? '');
-						$addrLower = strtolower($address);
-
-						if (strpos($verwendung, $addrLower) !== false || strpos($partner, $addrLower) !== false) {
-							$matchedUnassignedZahlungen += (float)$z['betrag'];
-						}
+					$totalZahlungen = 0;
+					foreach ($zahlungen as $z) {
+						$totalZahlungen += (float)$z['betrag'];
 					}
 
-					$totalZahlungen = $assignedZahlungen + $matchedUnassignedZahlungen;
-
-					// Summe aller Vorschreibungen (nur offene/nicht bezahlte)
+					// ALLE Vorschreibungen für dieses Mitglied
 					$qb = $this->db->getQueryBuilder();
-					$allVorschreibungen = $qb->select('amount', 'status')
+					$vorschreibungen = $qb->select('*')
 						->from('weinsteig_vorschreibungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 						->executeQuery()
 						->fetchAll();
 
 					$openVorschreibungen = 0;
-					foreach ($allVorschreibungen as $v) {
+					foreach ($vorschreibungen as $v) {
 						if ($v['status'] !== 'paid') {
 							$openVorschreibungen += (float)$v['amount'];
 						}
@@ -1227,14 +1189,6 @@ HTML;
 		try {
 			$dataDir = $this->config->getSystemValue('datadirectory');
 
-			// Lade EINMAL alle unzugeordneten Zahlungen für Matching
-			$qb = $this->db->getQueryBuilder();
-			$unassignedZahlungen = $qb->select('betrag', 'verwendungszweck', 'partnername')
-				->from('weinsteig_zahlungen')
-				->where($qb->expr()->isNull('member_id'))
-				->executeQuery()
-				->fetchAll();
-
 			// Alle Mitglieder laden
 			$qb = $this->db->getQueryBuilder();
 			$members = $qb->select('*')
@@ -1263,42 +1217,32 @@ HTML;
 
 				// Nur gültige Mandate
 				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
-					// Berechne offene Beträge mit intelligentem Matching
+					// Berechne offene Beträge (exakt wie memberJournal)
 					$memberId = $member['id'];
 
-					// Explizit zugeordnete Zahlungen
+					// ALLE Zahlungen für dieses Mitglied
 					$qb = $this->db->getQueryBuilder();
-					$result = $qb->selectAlias($qb->createFunction('COALESCE(SUM(betrag), 0)'), 'total')
+					$zahlungen = $qb->select('*')
 						->from('weinsteig_zahlungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 						->executeQuery()
-						->fetchOne();
-					$assignedZahlungen = (float) (is_array($result) ? ($result['total'] ?? 0) : 0);
+						->fetchAll();
 
-					// Unzugeordnete Zahlungen durch Adress-Matching
-					$matchedUnassignedZahlungen = 0;
-					foreach ($unassignedZahlungen as $z) {
-						$verwendung = strtolower($z['verwendungszweck'] ?? '');
-						$partner = strtolower($z['partnername'] ?? '');
-						$addrLower = strtolower($address);
-
-						if (strpos($verwendung, $addrLower) !== false || strpos($partner, $addrLower) !== false) {
-							$matchedUnassignedZahlungen += (float)$z['betrag'];
-						}
+					$totalZahlungen = 0;
+					foreach ($zahlungen as $z) {
+						$totalZahlungen += (float)$z['betrag'];
 					}
 
-					$totalZahlungen = $assignedZahlungen + $matchedUnassignedZahlungen;
-
-					// Summe aller Vorschreibungen (nur offene/nicht bezahlte)
+					// ALLE Vorschreibungen für dieses Mitglied
 					$qb = $this->db->getQueryBuilder();
-					$allVorschreibungen = $qb->select('amount', 'status')
+					$vorschreibungen = $qb->select('*')
 						->from('weinsteig_vorschreibungen')
 						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 						->executeQuery()
 						->fetchAll();
 
 					$openVorschreibungen = 0;
-					foreach ($allVorschreibungen as $v) {
+					foreach ($vorschreibungen as $v) {
 						if ($v['status'] !== 'paid') {
 							$openVorschreibungen += (float)$v['amount'];
 						}
