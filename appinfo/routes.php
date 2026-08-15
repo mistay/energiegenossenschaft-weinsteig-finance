@@ -11,6 +11,7 @@ return [
 		['name' => 'page#zahlungen', 'url' => '/zahlungen', 'verb' => 'GET'],
 		['name' => 'page#zahlungenUebersicht', 'url' => '/zahlungen-uebersicht', 'verb' => 'GET'],
 		['name' => 'page#journal', 'url' => '/journal', 'verb' => 'GET'],
+		['name' => 'page#profil', 'url' => '/profil', 'verb' => 'GET'],
 		['name' => 'api#members', 'url' => '/api/members', 'verb' => 'GET'],
 		['name' => 'api#users', 'url' => '/api/users', 'verb' => 'GET'],
 		['name' => 'api#getMember', 'url' => '/api/member/{id}', 'verb' => 'GET'],
