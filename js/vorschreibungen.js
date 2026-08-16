@@ -52,29 +52,38 @@ document.addEventListener('DOMContentLoaded', function() {
 					html += '</div><hr>';
 				}
 
-				// Tabelle aufbauen: Spalten = Monate, Zeilen = Häuser
-				html += '<table id="vorschreibungen-table"><thead><tr><th>Haus</th>';
-				months.forEach(m => {
-					html += '<th>' + escapeHtml(m.label) + '</th>';
-				});
-				html += '</tr></thead><tbody>';
+				// Tabelle aufbauen: Zeilen = Monate (neuste oben), Spalten = Häuser
+				html += '<div style="overflow-x: auto; margin-top: 20px;">';
+				html += '<table id="vorschreibungen-table" style="min-width: 100%; border-collapse: collapse;">';
 
+				// Header: Häuser
+				html += '<thead><tr style="background: #f5f5f5;">';
+				html += '<th style="padding: 10px; text-align: left; border: 1px solid #ddd; position: sticky; left: 0; background: #f5f5f5; font-weight: bold;">Monat</th>';
 				members.forEach(member => {
-					html += '<tr><td><strong>' + escapeHtml(member.address) + '</strong></td>';
-					months.forEach(m => {
-						const monthStr = m.year + '-' + String(m.month).padStart(2, '0');
+					html += '<th style="padding: 10px; text-align: left; border: 1px solid #ddd; white-space: nowrap; font-weight: bold;">' + escapeHtml(member.address) + '</th>';
+				});
+				html += '</tr></thead>';
+
+				// Body: Monate (neuste oben, also reverse)
+				html += '<tbody>';
+				const monthsReverse = [...months].reverse();
+				monthsReverse.forEach(m => {
+					const monthStr = m.year + '-' + String(m.month).padStart(2, '0');
+					html += '<tr style="border-bottom: 1px solid #ddd;">';
+					html += '<td style="padding: 10px; border: 1px solid #ddd; position: sticky; left: 0; background: white; font-weight: 500;">' + escapeHtml(m.label) + '</td>';
+
+					members.forEach(member => {
 						const vorschreibung = member.vorschreibungen?.[monthStr];
 						if (vorschreibung?.exists) {
 							const url = OC.generateUrl('/apps/weinsteigfinance/api/vorschreibung/' + member.id + '/' + monthStr);
-							html += '<td><a href="' + url + '" target="_blank" class="download-btn" title="Generiert: ' + escapeHtml(vorschreibung.date) + '">📥<br><span style="font-size: 10px; color: #666;">(' + escapeHtml(vorschreibung.date) + ')</span></a></td>';
+							html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><a href="' + url + '" target="_blank" class="download-btn" title="Generiert: ' + escapeHtml(vorschreibung.date) + '" style="display: inline-block; padding: 6px 8px; background: white; color: #0082c9; border: 1px solid #0082c9; border-radius: 3px; text-decoration: none; font-size: 12px; transition: all 0.2s;">📥 ' + escapeHtml(vorschreibung.date) + '</a></td>';
 						} else {
-							html += '<td style="color: #999;">—</td>';
+							html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #ccc;">—</td>';
 						}
 					});
 					html += '</tr>';
 				});
-
-				html += '</tbody></table>';
+				html += '</tbody></table></div>';
 				container.innerHTML = html;
 
 				// Generate-Button Handler

@@ -14,7 +14,6 @@ $currentPage = 'vorschreibungen';
 #vorschreibungen-table {
 	width: 100%;
 	border-collapse: collapse;
-	margin-top: 20px;
 }
 
 #vorschreibungen-table th, #vorschreibungen-table td {
@@ -26,29 +25,43 @@ $currentPage = 'vorschreibungen';
 #vorschreibungen-table th {
 	background: #f5f5f5;
 	font-weight: bold;
+	position: relative;
+	white-space: nowrap;
 }
 
-#vorschreibungen-table tr:hover {
+#vorschreibungen-table tbody tr:hover {
 	background: #f9f9f9;
 }
 
 .download-btn {
 	background: white;
-	color: #333;
+	color: #0082c9;
 	border: 1px solid #0082c9;
-	padding: 5px 10px;
+	padding: 6px 8px;
 	border-radius: 3px;
 	cursor: pointer;
 	font-size: 12px;
-	margin: 2px;
 	text-decoration: none;
 	display: inline-block;
 	transition: all 0.2s;
+	white-space: nowrap;
 }
 
 .download-btn:hover {
 	background: #0082c9;
 	color: white;
-	text-decoration: none;
+}
+
+/* Responsive: Monat-Spalte bleibt sichtbar beim Scrollen */
+@media (max-width: 768px) {
+	#vorschreibungen-table th, #vorschreibungen-table td {
+		padding: 8px;
+		font-size: 13px;
+	}
+
+	.download-btn {
+		padding: 4px 6px;
+		font-size: 11px;
+	}
 }
 </style>
