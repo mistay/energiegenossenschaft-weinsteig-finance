@@ -150,13 +150,14 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - `weinsteig_vorschreibungen` (Rechnungen mit Status-Tracking)
   - `weinsteig_zahlungen` (Bank-Transaktionen mit Matching-Info)
   - `weinsteig_zahlung_vorschreibung` (Matching-Junction-Table)
+  - `weinsteig_config` (Key/Value-Konfiguration, z.B. SEPA Creditor ID)
 - **Foreign Key Constraints** mit CASCADE DELETE für Integrität
 - **Unique Constraints** für Duplikat-Prävention:
   - (member_id, year, month) in Vorschreibungen
   - (zahlung_id, vorschreibung_id) in Matching
 - **Optimierte Indizes** für Query-Performance:
   - member_id, status, period (year/month), valutadatum
-- **10 Migrations** mit IMigrationStep für versioniertes Upgrading
+- **11 Migrations** mit IMigrationStep für versioniertes Upgrading
 - **Transaction-Safety** für kritische Operationen
 
 ### 📱 Responsive Design & Mobile-First
@@ -235,14 +236,15 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
    - `obpersonen` (Administratoren)
    - `mitglieder` (Bewohner)
 4. Benutzer in Gruppen zuordnen
-5. Häuser unter "Admin: Häuser & Benutzer" verwalten
-6. Start!
+5. Creditor ID unter "Admin: Häuser & Benutzer" → "Einstellungen" eintragen
+6. Häuser unter "Admin: Häuser & Benutzer" verwalten
+7. Start!
 
 ---
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.1.5
+- **Aktuelle Version**: 1.1.6
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 10+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
@@ -252,6 +254,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - 🏦 SEPA Core Datenträger mit CSV-Export
   - 🎯 Smart Payment Matching für intelligente Zahlungszuordnung
   - 🏘️ Dynamische Journal-Überschriften mit Hausnamen
+  - ⚙️ Creditor ID als Konfiguration in der Datenbank statt im Quellcode
 
 ---
 

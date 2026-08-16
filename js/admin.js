@@ -6,9 +6,51 @@ document.addEventListener('DOMContentLoaded', function() {
 	const assignBtn = document.getElementById('assign-btn');
 	const closeBtn = document.getElementById('modal-close');
 
+	const creditorInput = document.getElementById('creditor-id');
+	const configSaveBtn = document.getElementById('config-save');
+	const configStatus = document.getElementById('config-status');
+
 	let currentMemberId = null;
 	let allAssignments = {};
 	let allUsers = [];
+
+	function loadConfig() {
+		fetch(OC.generateUrl('/apps/weinsteigfinance/api/config'))
+			.then(r => r.json())
+			.then(data => {
+				if (data.error) {
+					configStatus.textContent = 'Fehler: ' + data.error;
+					configStatus.style.color = '#dc3545';
+					return;
+				}
+				creditorInput.value = data.creditorId || '';
+				if (!data.creditorId) {
+					configStatus.textContent = '⚠️ Noch nicht konfiguriert – SEPA-Mandate können nicht erstellt werden.';
+					configStatus.style.color = '#dc3545';
+				}
+			});
+	}
+
+	configSaveBtn.addEventListener('click', function() {
+		configStatus.textContent = '';
+
+		fetch(OC.generateUrl('/apps/weinsteigfinance/api/config'), {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({creditorId: creditorInput.value})
+		})
+			.then(r => r.json())
+			.then(data => {
+				if (data.error) {
+					configStatus.textContent = 'Fehler: ' + data.error;
+					configStatus.style.color = '#dc3545';
+					return;
+				}
+				creditorInput.value = data.creditorId || '';
+				configStatus.textContent = '✓ Gespeichert';
+				configStatus.style.color = '#28a745';
+			});
+	});
 
 	function loadMembers() {
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
@@ -149,5 +191,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		return div.innerHTML;
 	}
 
+	loadConfig();
 	loadMembers();
 });

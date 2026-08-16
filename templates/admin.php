@@ -8,6 +8,18 @@ $currentPage = 'admin';
 <div id="weinsteigfinance-admin" class="app-weinsteigfinance">
 	<?php include 'nav.php'; ?>
 
+	<h2><?php p($l->t('Einstellungen')); ?></h2>
+	<p><?php p($l->t('Gläubiger-Identifikationsnummer (Creditor ID) für SEPA-Mandate.')); ?></p>
+
+	<div id="config-box" style="margin-bottom: 25px;">
+		<label>
+			<?php p($l->t('Creditor ID:')); ?>
+			<input type="text" id="creditor-id" placeholder="AT00ZZZ00000000000" style="width: 220px;">
+		</label>
+		<button id="config-save"><?php p($l->t('Speichern')); ?></button>
+		<span id="config-status" style="margin-left: 10px;"></span>
+	</div>
+
 	<h2><?php p($l->t('Mitglieder und Benutzer')); ?></h2>
 	<p><?php p($l->t('Ordne Nextcloud-Benutzerkonten den 22 Häusern zu.')); ?></p>
 

@@ -13,6 +13,7 @@ class MandateService {
 	public function __construct(
 		private IDBConnection $db,
 		private IRootFolder $rootFolder,
+		private ConfigService $configService,
 	) {}
 
 	public function generateMandatePdf(int $memberId): string {
@@ -34,8 +35,14 @@ class MandateService {
 		$bic = $this->getBicFromIban($iban);
 		$today = (new DateTime())->format('d.m.Y');
 
+		// Creditor ID kommt aus der Konfiguration (Tabelle weinsteig_config)
+		$creditorId = $this->configService->getCreditorId();
+		if ($creditorId === '') {
+			throw new \Exception('Creditor ID ist nicht konfiguriert. Bitte in der Verwaltung unter "Einstellungen" eintragen.');
+		}
+
 		// HTML für PDF
-		$html = $this->getHtmlTemplate($address, $zahlungspflichtig, $iban, $bic, $today);
+		$html = $this->getHtmlTemplate($address, $zahlungspflichtig, $iban, $bic, $today, $creditorId);
 
 		// PDF generieren
 		$mpdf = new Mpdf(['default_font_size' => 11, 'default_font' => 'Arial']);
@@ -45,7 +52,7 @@ class MandateService {
 		return $mpdf->Output('', 'S');
 	}
 
-	private function getHtmlTemplate(string $address, string $zahlungspflichtig, string $iban, string $bic, string $date): string {
+	private function getHtmlTemplate(string $address, string $zahlungspflichtig, string $iban, string $bic, string $date, string $creditorId): string {
 		return <<<HTML
 <html>
 <head>
@@ -75,7 +82,7 @@ td { padding: 3px; }
 Energiegenossenschaft Weinsteig<br>
 Weinsteig 19a<br>
 5082 Glanegg<br><br>
-Creditor ID: AT80ZZZ00000086863
+Creditor ID: {$creditorId}
 </div>
 
 <div class="section">

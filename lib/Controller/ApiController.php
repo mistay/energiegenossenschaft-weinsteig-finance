@@ -6,6 +6,7 @@ namespace OCA\WeinsteigFinance\Controller;
 
 use OCA\WeinsteigFinance\AppInfo\Application;
 use OCA\WeinsteigFinance\Util\IbanValidator;
+use OCA\WeinsteigFinance\Service\ConfigService;
 use OCA\WeinsteigFinance\Service\MandateService;
 use OCA\WeinsteigFinance\Service\VorschreibungService;
 use OCA\WeinsteigFinance\Service\ZahlungService;
@@ -35,6 +36,7 @@ class ApiController extends Controller {
 		private IURLGenerator $urlGenerator,
 		private VorschreibungService $vorschreibungService,
 		private ZahlungService $zahlungService,
+		private ConfigService $configService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -238,6 +240,42 @@ class ApiController extends Controller {
 			->executeStatement();
 
 		return new DataResponse(['success' => true]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function getConfig(): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		return new DataResponse([
+			'creditorId' => $this->configService->getCreditorId(),
+		]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function updateConfig(?string $creditorId = null): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if ($creditorId !== null) {
+			$creditorId = strtoupper(str_replace(' ', '', trim($creditorId)));
+
+			// Creditor ID: Länderkürzel, 2 Prüfziffern, 3 Zeichen Geschäftsbereich, nationale Kennung
+			if ($creditorId !== '' && !preg_match('/^[A-Z]{2}[0-9]{2}[A-Z0-9]{3}[A-Z0-9]{1,28}$/', $creditorId)) {
+				return new DataResponse(['error' => 'Ungültige Creditor ID'], 400);
+			}
+
+			$this->configService->set(ConfigService::KEY_CREDITOR_ID, $creditorId);
+		}
+
+		return new DataResponse([
+			'success' => true,
+			'creditorId' => $this->configService->getCreditorId(),
+		]);
 	}
 
 	#[NoAdminRequired]
