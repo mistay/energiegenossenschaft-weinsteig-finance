@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 /** @var \OCP\IL10N $l */
+/** @var array $_ */
 $currentPage = 'journal';
 ?>
 
@@ -27,11 +28,11 @@ $currentPage = 'journal';
 			</tr>
 			<tr>
 				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-weight: 600;">IBAN:</td>
-				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-family: monospace;">AT822011185788107800</td>
+				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-family: monospace;"><?php p($_['creditorIban'] ?: '-'); ?></td>
 			</tr>
 			<tr>
 				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-weight: 600;">BIC:</td>
-				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-family: monospace;">GIBAATWWXXX</td>
+				<td style="padding: 8px; border-bottom: 1px solid #ecf0f1; font-family: monospace;"><?php p($_['creditorBic'] ?: '-'); ?></td>
 			</tr>
 			<tr>
 				<td style="padding: 8px; font-weight: 600;">Betreff:</td>

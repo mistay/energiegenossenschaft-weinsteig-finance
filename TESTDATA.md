@@ -84,6 +84,6 @@ DELETE FROM oc_weinsteig_vorschreibungen;
 ## Notes
 
 - Alle Daten sind auf die ersten 3 Häuser (member_id 1-3) bezogen
-- Die Creditor ID in `oc_weinsteig_config` ist eine Dummy-Nummer; die echte wird unter `/admin` eingetragen
+- Creditor ID, IBAN und BIC in `oc_weinsteig_config` sind Dummy-Werte; die echten werden unter `/admin` eingetragen
 - Die User-Member-Zuweisungen müssen separat über `/admin` gemacht werden
 - Die IBAN sind Dummy-Daten für Tests

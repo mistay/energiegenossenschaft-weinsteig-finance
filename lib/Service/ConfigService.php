@@ -15,6 +15,8 @@ use DateTime;
  */
 class ConfigService {
 	public const KEY_CREDITOR_ID = 'creditor_id';
+	public const KEY_CREDITOR_IBAN = 'creditor_iban';
+	public const KEY_CREDITOR_BIC = 'creditor_bic';
 
 	public function __construct(private IDBConnection $db) {}
 
@@ -66,5 +68,37 @@ class ConfigService {
 	 */
 	public function getCreditorId(): string {
 		return $this->get(self::KEY_CREDITOR_ID);
+	}
+
+	/**
+	 * IBAN des Genossenschaftskontos.
+	 */
+	public function getCreditorIban(): string {
+		return $this->get(self::KEY_CREDITOR_IBAN);
+	}
+
+	/**
+	 * BIC des Genossenschaftskontos.
+	 */
+	public function getCreditorBic(): string {
+		return $this->get(self::KEY_CREDITOR_BIC);
+	}
+
+	/**
+	 * Bankverbindung der Genossenschaft als HTML-Zeilen für PDFs.
+	 */
+	public function getBankAccountHtml(): string {
+		$html = '';
+		$iban = $this->getCreditorIban();
+		$bic = $this->getCreditorBic();
+
+		if ($iban !== '') {
+			$html .= 'IBAN: ' . $iban . '<br>';
+		}
+		if ($bic !== '') {
+			$html .= 'BIC: ' . $bic . '<br>';
+		}
+
+		return $html;
 	}
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\WeinsteigFinance\Controller;
 
 use OCA\WeinsteigFinance\AppInfo\Application;
+use OCA\WeinsteigFinance\Service\ConfigService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -20,6 +21,7 @@ class PageController extends Controller {
 		IRequest $request,
 		private IGroupManager $groupManager,
 		private IUserSession $userSession,
+		private ConfigService $configService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -131,7 +133,10 @@ class PageController extends Controller {
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'journal');
 
-		return new TemplateResponse(Application::APP_ID, 'journal');
+		return new TemplateResponse(Application::APP_ID, 'journal', [
+			'creditorIban' => $this->configService->getCreditorIban(),
+			'creditorBic' => $this->configService->getCreditorBic(),
+		]);
 	}
 
 	#[NoAdminRequired]

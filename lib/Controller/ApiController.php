@@ -251,12 +251,14 @@ class ApiController extends Controller {
 
 		return new DataResponse([
 			'creditorId' => $this->configService->getCreditorId(),
+			'creditorIban' => $this->configService->getCreditorIban(),
+			'creditorBic' => $this->configService->getCreditorBic(),
 		]);
 	}
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
-	public function updateConfig(?string $creditorId = null): DataResponse {
+	public function updateConfig(?string $creditorId = null, ?string $creditorIban = null, ?string $creditorBic = null): DataResponse {
 		if (!$this->isObperson()) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
@@ -272,9 +274,32 @@ class ApiController extends Controller {
 			$this->configService->set(ConfigService::KEY_CREDITOR_ID, $creditorId);
 		}
 
+		if ($creditorIban !== null) {
+			$creditorIban = strtoupper(str_replace(' ', '', trim($creditorIban)));
+
+			if ($creditorIban !== '' && !IbanValidator::validate($creditorIban)) {
+				return new DataResponse(['error' => 'Ungültige IBAN'], 400);
+			}
+
+			$this->configService->set(ConfigService::KEY_CREDITOR_IBAN, $creditorIban);
+		}
+
+		if ($creditorBic !== null) {
+			$creditorBic = strtoupper(str_replace(' ', '', trim($creditorBic)));
+
+			// BIC: 4 Zeichen Bank, 2 Zeichen Land, 2 Zeichen Ort, optional 3 Zeichen Filiale
+			if ($creditorBic !== '' && !preg_match('/^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/', $creditorBic)) {
+				return new DataResponse(['error' => 'Ungültiger BIC'], 400);
+			}
+
+			$this->configService->set(ConfigService::KEY_CREDITOR_BIC, $creditorBic);
+		}
+
 		return new DataResponse([
 			'success' => true,
 			'creditorId' => $this->configService->getCreditorId(),
+			'creditorIban' => $this->configService->getCreditorIban(),
+			'creditorBic' => $this->configService->getCreditorBic(),
 		]);
 	}
 
@@ -944,8 +969,7 @@ class ApiController extends Controller {
 
 		// Belastungskonto: Immer Genossenschaft anzeigen, plus optional Mitglied-IBAN
 		$bankAccount = '<strong>Energiegenossenschaft Weinsteig</strong><br>';
-		$bankAccount .= 'IBAN: AT822011185788107800<br>';
-		$bankAccount .= 'BIC: GIBATWWXXX<br>';
+		$bankAccount .= $this->configService->getBankAccountHtml();
 
 		if ($iban) {
 			$bankAccount .= '<br><strong>Ihr hinterlegtes Konto:</strong><br>';

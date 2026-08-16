@@ -43,7 +43,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Konfigurierbare Akontozahlungen** (Standard: 60€/Monat, anpassbar)
 - **Intelligentes Belastungskonto-Management**:
   - Primär: Mitglied-spezifische IBAN (falls vorhanden)
-  - Fallback: Genossenschaftskonto (AT822011185788107800)
+  - Fallback: Genossenschaftskonto (IBAN aus der Konfiguration, siehe Verwaltung → Einstellungen)
 - **Mandatsinformation** auf jeder Rechnung für Transparenz
 - **Widerrufsrecht-Information** auf jeder Rechnung
 - **Status-Tracking** pro Vorschreibung (offen, teilweise bezahlt, vollständig bezahlt)
@@ -81,8 +81,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - ✓ **Ausgeglichen**: "Ihr Konto ist ausgeglichen."
 - **Zahlungsinformationen-Box** mit Bank-Details:
   - Kontoinhaber: Energiegenossenschaft Weinsteig
-  - IBAN: AT822011185788107800
-  - BIC: GIBAATWWXXX
+  - IBAN/BIC: aus der Konfiguration (Verwaltung → Einstellungen), nicht im Quellcode hinterlegt
   - Betreff: [Hausadresse zur eindeutigen Zuordnung]
 - **Vorschreibungs-Übersicht** mit Jahr/Monat und Status
 - **Zahlungs-Übersicht** mit Valutadatum, Partner, Verwendungszweck
@@ -150,7 +149,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - `weinsteig_vorschreibungen` (Rechnungen mit Status-Tracking)
   - `weinsteig_zahlungen` (Bank-Transaktionen mit Matching-Info)
   - `weinsteig_zahlung_vorschreibung` (Matching-Junction-Table)
-  - `weinsteig_config` (Key/Value-Konfiguration, z.B. SEPA Creditor ID)
+  - `weinsteig_config` (Key/Value-Konfiguration: Creditor ID, IBAN, BIC)
 - **Foreign Key Constraints** mit CASCADE DELETE für Integrität
 - **Unique Constraints** für Duplikat-Prävention:
   - (member_id, year, month) in Vorschreibungen
@@ -236,7 +235,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
    - `obpersonen` (Administratoren)
    - `mitglieder` (Bewohner)
 4. Benutzer in Gruppen zuordnen
-5. Creditor ID unter "Admin: Häuser & Benutzer" → "Einstellungen" eintragen
+5. Creditor ID, IBAN und BIC unter "Admin: Häuser & Benutzer" → "Einstellungen" eintragen
 6. Häuser unter "Admin: Häuser & Benutzer" verwalten
 7. Start!
 
@@ -244,7 +243,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.1.6
+- **Aktuelle Version**: 1.1.7
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 10+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
@@ -254,7 +253,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - 🏦 SEPA Core Datenträger mit CSV-Export
   - 🎯 Smart Payment Matching für intelligente Zahlungszuordnung
   - 🏘️ Dynamische Journal-Überschriften mit Hausnamen
-  - ⚙️ Creditor ID als Konfiguration in der Datenbank statt im Quellcode
+  - ⚙️ Creditor ID und Bankverbindung als Konfiguration in der Datenbank statt im Quellcode
 
 ---
 

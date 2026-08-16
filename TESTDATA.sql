@@ -50,9 +50,11 @@ INSERT INTO oc_weinsteig_zahlungen (member_id, buchungsdatum, valutadatum, partn
 (3, '2026-03-22', '2026-03-24', 'Hans Schmidt', 'Akontozahlung 03/2026', 60.00, 'EUR', 'AT345678901234567890123456', 'GIBAATWWXXX', 'exact_address', 95, 'matched', '2026-03-24 11:20:00', '2026-03-24 11:25:00'),
 (3, '2026-04-18', '2026-04-20', 'Hans Schmidt', 'Akontozahlung 04/2026', 60.00, 'EUR', 'AT345678901234567890123456', 'GIBAATWWXXX', 'exact_address', 95, 'matched', '2026-04-20 12:00:00', '2026-04-20 12:05:00');
 
--- KONFIGURATION (Dummy-Creditor-ID, damit Mandats-PDFs in der Testumgebung erstellt werden können)
+-- KONFIGURATION (Dummy-Werte, damit PDFs in der Testumgebung erstellt werden können)
 INSERT INTO oc_weinsteig_config (config_key, config_value, updated_at) VALUES
-('creditor_id', 'AT00ZZZ00000000000', '2026-08-16 10:00:00');
+('creditor_id', 'AT00ZZZ00000000000', '2026-08-16 10:00:00'),
+('creditor_iban', 'AT611904300234573201', '2026-08-16 10:00:00'),
+('creditor_bic', 'GIBAATWWXXX', '2026-08-16 10:00:00');
 
 -- Ausgabe
 SELECT '✓ Test-Daten eingefügt!' as 'Status';

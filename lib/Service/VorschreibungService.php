@@ -13,6 +13,7 @@ class VorschreibungService {
 	public function __construct(
 		private IDBConnection $db,
 		private IConfig $config,
+		private ConfigService $configService,
 	) {}
 
 	/**
@@ -112,8 +113,7 @@ class VorschreibungService {
 
 		// Belastungskonto: Immer Genossenschaft anzeigen, plus optional Mitglied-IBAN
 		$bankAccount = '<strong>Energiegenossenschaft Weinsteig</strong><br>';
-		$bankAccount .= 'IBAN: AT822011185788107800<br>';
-		$bankAccount .= 'BIC: GIBATWWXXX<br>';
+		$bankAccount .= $this->configService->getBankAccountHtml();
 
 		if ($iban) {
 			$bankAccount .= '<br><strong>Ihr hinterlegtes Konto:</strong><br>';
