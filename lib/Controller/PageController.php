@@ -55,10 +55,24 @@ class PageController extends Controller {
 		}
 
 		Util::addStyle(Application::APP_ID, 'main');
-		Util::addScript(Application::APP_ID, 'table-wrapper');
-		Util::addScript(Application::APP_ID, 'admin');
+		Util::addScript(Application::APP_ID, 'admin-config');
 
 		return new TemplateResponse(Application::APP_ID, 'admin');
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function adminMembers(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
+		Util::addScript(Application::APP_ID, 'admin-members');
+
+		return new TemplateResponse(Application::APP_ID, 'admin-members');
 	}
 
 	#[NoAdminRequired]

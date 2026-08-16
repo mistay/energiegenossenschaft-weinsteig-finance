@@ -6,6 +6,7 @@ return [
 	'routes' => [
 		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
 		['name' => 'page#admin', 'url' => '/admin', 'verb' => 'GET'],
+		['name' => 'page#adminMembers', 'url' => '/admin-häuser-personen', 'verb' => 'GET'],
 		['name' => 'page#bankverbindung', 'url' => '/bankverbindung', 'verb' => 'GET'],
 		['name' => 'page#vorschreibungen', 'url' => '/vorschreibungen', 'verb' => 'GET'],
 		['name' => 'page#zahlungen', 'url' => '/zahlungen', 'verb' => 'GET'],
