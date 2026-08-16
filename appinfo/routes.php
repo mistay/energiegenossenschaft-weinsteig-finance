@@ -14,6 +14,7 @@ return [
 		['name' => 'page#journal', 'url' => '/journal', 'verb' => 'GET'],
 		['name' => 'page#profil', 'url' => '/profil', 'verb' => 'GET'],
 		['name' => 'page#sepaDataCarrier', 'url' => '/sepa-datentraeger', 'verb' => 'GET'],
+		['name' => 'api#appVersion', 'url' => '/api/version', 'verb' => 'GET'],
 		['name' => 'api#getConfig', 'url' => '/api/config', 'verb' => 'GET'],
 		['name' => 'api#updateConfig', 'url' => '/api/config', 'verb' => 'POST'],
 		['name' => 'api#members', 'url' => '/api/members', 'verb' => 'GET'],

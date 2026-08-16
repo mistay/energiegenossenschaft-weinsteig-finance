@@ -243,7 +243,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.2.8
+- **Aktuelle Version**: 1.2.9
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 10+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store

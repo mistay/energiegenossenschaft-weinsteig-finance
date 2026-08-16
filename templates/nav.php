@@ -20,7 +20,10 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 			<span style="display: none; @media (min-width: 768px) { display: inline; }">Finance</span>
 		</a>
 
-		<div style="padding: 14px 16px; color: #555; margin-left: auto; display: flex; align-items: center; gap: 16px;">
+		<div style="padding: 14px 16px; color: #555; margin-left: auto; display: flex; align-items: center; gap: 12px;">
+			<div id="app-version-info" style="font-size: 10px; padding: 4px 8px; background: #f5f5f5; border-radius: 3px; color: #999; border: 1px solid #e0e0e0; font-family: monospace;">
+				v?
+			</div>
 			<div id="user-groups-info" style="font-size: 12px; padding: 6px 10px; background: #e3f2fd; border-radius: 4px; color: #0082c9;">
 				Lädt...
 			</div>

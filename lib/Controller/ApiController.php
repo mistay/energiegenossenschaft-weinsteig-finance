@@ -738,6 +738,20 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function appVersion(): DataResponse {
+		// Read version from info.xml
+		$infoPath = __DIR__ . '/../../appinfo/info.xml';
+		if (file_exists($infoPath)) {
+			$xml = simplexml_load_file($infoPath);
+			if ($xml && isset($xml->version)) {
+				return new DataResponse(['version' => (string)$xml->version]);
+			}
+		}
+		return new DataResponse(['version' => 'unknown']);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function myGroups(): DataResponse {
 		$userId = $this->getUserId();
 		if (!$userId) {
