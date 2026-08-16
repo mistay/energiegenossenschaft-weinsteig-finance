@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const table = document.getElementById('members-table');
 	const modal = document.getElementById('assign-modal');
+	const modalBackdrop = document.getElementById('assign-modal-backdrop');
 	const modalAddress = document.getElementById('modal-member-address');
 	const userSelect = document.getElementById('user-select');
 	const assignBtn = document.getElementById('assign-btn');
@@ -31,28 +32,42 @@ document.addEventListener('DOMContentLoaded', function() {
 	function loadAssignments(members, users) {
 		const url = OC.generateUrl('/apps/weinsteigfinance/api/members') + '?loadAssignments=1';
 
-		let html = '';
+		let html = '<div id="members-cards">';
 		members.forEach(member => {
 			// Formatiere offene Beträge: Rot für Rückstand (negativ), Grün für Guthaben (positiv)
 			const amountClass = member.open_amount < -0.01 ? 'amount-negative' : (member.open_amount > 0.01 ? 'amount-positive' : 'amount-zero');
 			const amountText = member.open_amount ? member.open_amount.toFixed(2) + ' €' : '0,00 €';
 			const journalUrl = OC.generateUrl('/apps/weinsteigfinance/journal?member=' + member.id);
+
 			html += `
-				<tr>
-					<td>${escapeHtml(member.address)}</td>
-					<td class="users-col-${member.id}">-</td>
-					<td class="${amountClass}"><strong>${amountText}</strong></td>
-					<td style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-						<button class="assign-btn" data-id="${member.id}" data-addr="${escapeHtml(member.address)}">
-							+ Benutzer
-						</button>
-						<a href="${journalUrl}" style="color: #0082c9; text-decoration: none; font-size: 12px; padding: 4px 8px; border: 1px solid #0082c9; border-radius: 3px; cursor: pointer; display: inline-block;">
-							📊 Journal
-						</a>
-					</td>
-				</tr>
+				<div class="member-card" style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+					<!-- Header: Haus -->
+					<div style="background: #0082c9; color: white; padding: 12px 14px; font-weight: bold; font-size: 14px;">📍 ${escapeHtml(member.address)}</div>
+
+					<!-- Body -->
+					<div style="padding: 12px 14px;">
+						<!-- Benutzer -->
+						<div style="margin-bottom: 12px;">
+							<div style="font-weight: 600; color: #333; margin-bottom: 6px; font-size: 13px;">Zugeordnete Benutzer</div>
+							<div class="users-col-${member.id}" style="background: #f9f9f9; padding: 8px; border-radius: 3px; border: 1px solid #eee; min-height: 32px;">-</div>
+						</div>
+
+						<!-- Offene Beträge -->
+						<div style="margin-bottom: 12px; padding: 8px; background: #f9f9f9; border-radius: 3px; border-left: 3px solid #0082c9;">
+							<div style="font-size: 12px; color: #666; margin-bottom: 4px;">Offene Beträge</div>
+							<div class="${amountClass}" style="font-size: 15px; font-weight: bold;">${amountText}</div>
+						</div>
+
+						<!-- Aktionen -->
+						<div style="display: flex; gap: 6px; flex-wrap: wrap;">
+							<button class="assign-btn" data-id="${member.id}" data-addr="${escapeHtml(member.address)}" style="flex: 1; min-width: 120px; padding: 6px 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 500;">+ Benutzer</button>
+							<a href="${journalUrl}" style="flex: 1; min-width: 120px; padding: 6px 10px; color: white; text-decoration: none; font-size: 12px; border: none; border-radius: 3px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: #0082c9; font-weight: 500;">📊 Journal</a>
+						</div>
+					</div>
+				</div>
 			`;
 		});
+		html += '</div>';
 
 		table.innerHTML = html;
 
@@ -116,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						});
 
 						modal.style.display = 'block';
+						modalBackdrop.style.display = 'block';
 					});
 				});
 			});
@@ -133,15 +149,19 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(r => r.json())
 			.then(data => {
 				if (data.success) {
-					modal.style.display = 'none';
+					closeModal();
 					loadMembers();
 				}
 			});
 	});
 
-	closeBtn.addEventListener('click', function() {
+	function closeModal() {
 		modal.style.display = 'none';
-	});
+		modalBackdrop.style.display = 'none';
+	}
+
+	closeBtn.addEventListener('click', closeModal);
+	modalBackdrop.addEventListener('click', closeModal);
 
 	function escapeHtml(text) {
 		const div = document.createElement('div');
