@@ -56,6 +56,7 @@ class PageController extends Controller {
 
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'admin-config');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'admin');
 	}
@@ -71,6 +72,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'admin-members');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'admin-members');
 	}
@@ -86,6 +88,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'bankverbindung');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'bankverbindung');
 	}
@@ -101,6 +104,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'vorschreibungen');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'vorschreibungen');
 	}
@@ -116,6 +120,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'zahlungen');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'zahlungen');
 	}
@@ -131,6 +136,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'zahlungen-uebersicht');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'zahlungen-uebersicht');
 	}
@@ -146,6 +152,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'journal');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'journal', [
 			'creditorIban' => $this->configService->getCreditorIban(),
@@ -163,6 +170,7 @@ class PageController extends Controller {
 
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'profil');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'profil');
 	}
@@ -178,6 +186,7 @@ class PageController extends Controller {
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'table-wrapper');
 		Util::addScript(Application::APP_ID, 'sepa-datentraeger');
+		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'sepa-datentraeger');
 	}

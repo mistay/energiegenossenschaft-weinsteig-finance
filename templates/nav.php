@@ -20,8 +20,14 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 			<span style="display: none; @media (min-width: 768px) { display: inline; }">Finance</span>
 		</a>
 
+		<div style="padding: 14px 16px; color: #555; margin-left: auto; display: flex; align-items: center; gap: 16px;">
+			<div id="user-groups-info" style="font-size: 12px; padding: 6px 10px; background: #e3f2fd; border-radius: 4px; color: #0082c9;">
+				Lädt...
+			</div>
+		</div>
+
 		<a href="/index.php/apps/weinsteigfinance/profil"
-			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'profil' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s; margin-left: auto;">
+			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'profil' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
 			👤 Profil
 		</a>
 

@@ -738,6 +738,28 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function myGroups(): DataResponse {
+		$userId = $this->getUserId();
+		if (!$userId) {
+			return new DataResponse(['error' => 'Not logged in'], 401);
+		}
+
+		$groups = [];
+		if ($this->groupManager->isInGroup($userId, 'obpersonen')) {
+			$groups[] = 'obpersonen';
+		}
+		if ($this->groupManager->isInGroup($userId, 'mitglieder')) {
+			$groups[] = 'mitglieder';
+		}
+
+		return new DataResponse([
+			'userId' => $userId,
+			'groups' => $groups,
+		]);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function myMember(): DataResponse {
 		$userId = $this->getUserId();
 		if (!$userId || !$this->groupManager->isInGroup($userId, 'mitglieder')) {

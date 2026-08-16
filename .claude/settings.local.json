@@ -8,7 +8,9 @@
       "Bash(make lint *)",
       "Bash(php -l lib/Service/ConfigService.php)",
       "Bash(php -l lib/Controller/ApiController.php)",
-      "Bash(node --check js/vorschreibungen.js)"
+      "Bash(node --check js/vorschreibungen.js)",
+      "Bash(php -l lib/Controller/PageController.php)",
+      "Bash(node --check js/user-groups.js)"
     ]
   }
 }
