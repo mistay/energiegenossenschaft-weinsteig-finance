@@ -11,7 +11,9 @@ $currentPage = 'admin-members';
 	<h2><?php p($l->t('Mitglieder und Personen')); ?></h2>
 	<p><?php p($l->t('Ordne Nextcloud-Benutzerkonten den 22 Häusern zu.')); ?></p>
 
-	<table id="members-table" style="display: none;"></table>
+	<div id="members-table" style="margin-top: 20px;">
+		<p style="color: #999;">Lädt...</p>
+	</div>
 
 	<style>
 		.amount-positive {
