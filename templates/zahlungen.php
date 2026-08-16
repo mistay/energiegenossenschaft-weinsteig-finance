@@ -14,7 +14,7 @@ $currentPage = 'zahlungen';
 #zahlungen-import {
 	background: #f5f5f5;
 	padding: 20px;
-	border-radius: 3px;
+	border-radius: 4px;
 	margin-bottom: 20px;
 }
 
@@ -27,6 +27,7 @@ $currentPage = 'zahlungen';
 	border: 1px solid #ddd;
 	border-radius: 3px;
 	margin-bottom: 10px;
+	box-sizing: border-box;
 }
 
 .import-btn {
@@ -37,58 +38,99 @@ $currentPage = 'zahlungen';
 	border-radius: 3px;
 	cursor: pointer;
 	font-weight: bold;
+	transition: background 0.2s;
 }
 
 .import-btn:hover {
 	background: #0070a8;
 }
 
-#zahlungen-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-top: 20px;
+.zahlung-card {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+	transition: box-shadow 0.2s;
 }
 
-#zahlungen-table th, #zahlungen-table td {
-	border: 1px solid #ddd;
-	padding: 8px;
-	text-align: left;
-}
-
-#zahlungen-table th {
-	background: #f5f5f5;
-	font-weight: bold;
+.zahlung-card:hover {
+	box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
 .match-status-pending {
 	background: #fff3cd;
 	color: #856404;
-	padding: 3px 8px;
+	padding: 4px 8px;
 	border-radius: 3px;
 	font-size: 12px;
+	white-space: nowrap;
 }
 
 .match-status-matched {
 	background: #d4edda;
 	color: #155724;
-	padding: 3px 8px;
+	padding: 4px 8px;
 	border-radius: 3px;
 	font-size: 12px;
+	white-space: nowrap;
 }
 
 .assign-btn {
 	background: #28a745;
 	color: white;
 	border: none;
-	padding: 4px 8px;
+	padding: 6px 12px;
 	border-radius: 3px;
 	cursor: pointer;
-	font-size: 12px;
+	font-size: 13px;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+
+.assign-btn:hover {
+	background: #218838;
+}
+
+.unassign-btn {
+	background: #dc3545;
+	color: white;
+	border: none;
+	padding: 6px 12px;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+
+.unassign-btn:hover {
+	background: #c82333;
 }
 
 .assign-select {
-	padding: 4px;
-	font-size: 12px;
-	margin-right: 5px;
+	padding: 6px;
+	font-size: 13px;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	background: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	#zahlungen-import {
+		padding: 15px;
+	}
+
+	#csv-input {
+		font-size: 11px;
+		height: 120px;
+	}
+
+	.zahlung-card {
+		padding: 12px !important;
+	}
+
+	.assign-btn,
+	.unassign-btn {
+		padding: 5px 10px;
+		font-size: 12px;
+	}
 }
 </style>

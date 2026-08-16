@@ -53,66 +53,82 @@ function load() {
 					html += '</div>';
 				}
 
-				// Unmatched Zahlungen
+				// Unmatched Zahlungen - Card Layout
 				if (unmatched.length > 0) {
-					html += '<h3 style="color: #ff9800;">⚠️ Unzugeordnete Zahlungen (' + unmatched.length + ')</h3>';
-					html += '<table id="zahlungen-table"><thead><tr>';
-					html += '<th>Datum</th><th>Partner</th><th>Zweck</th><th>Betrag</th><th>Match</th><th>Aktion</th>';
-					html += '</tr></thead><tbody>';
+					html += '<h3 style="color: #ff9800; margin-top: 30px;">⚠️ Unzugeordnete Zahlungen (' + unmatched.length + ')</h3>';
 
 					unmatched.forEach(z => {
-						html += '<tr style="background: #fffbea;">';
-						html += '<td>' + escapeHtml(z.valutadatum) + '</td>';
-						html += '<td>' + escapeHtml(z.partnername) + '</td>';
-						html += '<td style="font-size: 11px;">' + escapeHtml(z.verwendungszweck) + '</td>';
-						html += '<td style="text-align: right;">' + parseFloat(z.betrag).toFixed(2) + ' ' + escapeHtml(z.waehrung) + '</td>';
-						html += '<td><span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + '</span></td>';
-						html += '<td>';
-						html += '<select class="assign-select" id="select-' + z.id + '" style="padding: 6px; margin-right: 5px;">';
-						html += '<option value="">-- Wähle Haus --</option>';
+						html += '<div class="zahlung-card" style="background: #fffbea; border: 1px solid #ffd580; border-radius: 4px; padding: 14px; margin-bottom: 12px;">';
+
+						// Header: Datum + Betrag
+						html += '<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 8px;">';
+						html += '<span style="font-weight: 600; color: #333;">' + escapeHtml(z.valutadatum) + '</span>';
+						html += '<span style="font-size: 16px; font-weight: bold; color: #ff9800;">' + parseFloat(z.betrag).toFixed(2) + ' ' + escapeHtml(z.waehrung) + '</span>';
+						html += '</div>';
+
+						// Partner + Status
+						html += '<div style="margin-bottom: 10px; padding: 8px; background: white; border-radius: 3px; border-left: 3px solid #ff9800;">';
+						html += '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px;">';
+						html += '<strong style="color: #333; font-size: 13px;">Von: ' + escapeHtml(z.partnername) + '</strong>';
+						html += '<span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + '</span>';
+						html += '</div>';
+						html += '<div style="font-size: 12px; color: #666; word-break: break-word;">' + escapeHtml(z.verwendungszweck) + '</div>';
+						html += '</div>';
+
+						// Action: Dropdown + Button
+						html += '<div style="display: flex; gap: 6px; flex-wrap: wrap;">';
+						html += '<select class="assign-select" id="select-' + z.id + '" style="flex: 1; min-width: 150px; padding: 6px; border: 1px solid #ddd; border-radius: 3px;">';
+						html += '<option value="">📍 Wähle Haus...</option>';
 						members.forEach(m => {
 							html += '<option value="' + m.id + '">' + escapeHtml(m.address) + '</option>';
 						});
 						html += '</select>';
-						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" >✓ Zuordnen</button>';
-						html += '</td>';
-						html += '</tr>';
-					});
+						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="padding: 6px 12px;">✓ Zuordnen</button>';
+						html += '</div>';
 
-					html += '</tbody></table>';
+						html += '</div>';
+					});
 				}
 
-				// Matched Zahlungen (editierbar)
+				// Matched Zahlungen - Card Layout
 				if (matched.length > 0) {
 					html += '<h3 style="margin-top: 30px; color: #28a745;">✓ Zugeordnete Zahlungen (' + matched.length + ')</h3>';
-					html += '<table id="zahlungen-matched-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;"><thead><tr>';
-					html += '<th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Datum</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Partner</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Zweck</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Betrag</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Haus</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Match</th><th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5;">Aktion</th>';
-					html += '</tr></thead><tbody>';
 
 					matched.forEach(z => {
 						const currentMember = members.find(m => m.id == z.member_id);
-						html += '<tr style="background: #f0fdf4;">';
-						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + escapeHtml(z.valutadatum) + '</td>';
-						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + escapeHtml(z.partnername) + '</td>';
-						html += '<td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">' + escapeHtml(z.verwendungszweck) + '</td>';
-						html += '<td style="border: 1px solid #ddd; padding: 8px; text-align: right;">' + parseFloat(z.betrag).toFixed(2) + ' ' + escapeHtml(z.waehrung) + '</td>';
-						html += '<td style="border: 1px solid #ddd; padding: 8px;">' + (currentMember ? escapeHtml(currentMember.address) : '—') + '</td>';
-						html += '<td style="border: 1px solid #ddd; padding: 8px;"><span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + ' (' + z.match_confidence + '%)</span></td>';
-						html += '<td style="border: 1px solid #ddd; padding: 8px;">';
-						html += '<select class="assign-select" id="select-' + z.id + '" style="padding: 6px; margin-right: 5px;">';
-						html += '<option value="">-- Ändern --</option>';
+						html += '<div class="zahlung-card" style="background: #f0fdf4; border: 1px solid #a6d96a; border-radius: 4px; padding: 14px; margin-bottom: 12px;">';
+
+						// Header: Datum + Betrag
+						html += '<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 8px;">';
+						html += '<span style="font-weight: 600; color: #333;">' + escapeHtml(z.valutadatum) + '</span>';
+						html += '<span style="font-size: 16px; font-weight: bold; color: #28a745;">' + parseFloat(z.betrag).toFixed(2) + ' ' + escapeHtml(z.waehrung) + '</span>';
+						html += '</div>';
+
+						// Partner + Status
+						html += '<div style="margin-bottom: 10px; padding: 8px; background: white; border-radius: 3px; border-left: 3px solid #28a745;">';
+						html += '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">';
+						html += '<strong style="color: #333; font-size: 13px;">Von: ' + escapeHtml(z.partnername) + '</strong>';
+						html += '<span class="match-status-' + escapeHtml(z.status) + '">' + escapeHtml(z.match_type) + ' (' + z.match_confidence + '%)</span>';
+						html += '</div>';
+						html += '<div style="font-size: 12px; color: #666; word-break: break-word; margin-bottom: 6px;">' + escapeHtml(z.verwendungszweck) + '</div>';
+						html += '<div style="font-size: 12px; font-weight: 600; color: #155724;">📍 ' + (currentMember ? escapeHtml(currentMember.address) : '—') + '</div>';
+						html += '</div>';
+
+						// Action: Dropdown + Buttons
+						html += '<div style="display: flex; gap: 6px; flex-wrap: wrap;">';
+						html += '<select class="assign-select" id="select-' + z.id + '" style="flex: 1; min-width: 150px; padding: 6px; border: 1px solid #ddd; border-radius: 3px;">';
+						html += '<option value="">📍 Haus ändern...</option>';
 						members.forEach(m => {
 							const selected = m.id == z.member_id ? ' selected' : '';
 							html += '<option value="' + m.id + '"' + selected + '>' + escapeHtml(m.address) + '</option>';
 						});
 						html += '</select>';
-						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; margin-right: 5px;">✓ Ändern</button>';
-						html += '<button type="button" class="unassign-btn" data-id="' + z.id + '" >↩️ Zurück</button>';
-						html += '</td>';
-						html += '</tr>';
-					});
+						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="padding: 6px 12px;">✓ Ändern</button>';
+						html += '<button type="button" class="unassign-btn" data-id="' + z.id + '" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">↩️ Zurück</button>';
+						html += '</div>';
 
-					html += '</tbody></table>';
+						html += '</div>';
+					});
 				}
 
 				console.log('Setting HTML, length:', html.length);
