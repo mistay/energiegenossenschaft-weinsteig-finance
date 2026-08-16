@@ -98,9 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			return;
 		}
 
-		let html = '<table><thead><tr>' +
-			'<th>Haus</th><th>Zahlungspflichtig</th><th>IBAN</th><th>Mandat</th><th>Unterschriebene Mandate</th><th>Aktion</th>' +
-			'</tr></thead><tbody>';
+		let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 8px;">';
 
 		if (isObperson || isUserView) {
 			members = Array.isArray(members) ? members : [members];
@@ -114,22 +112,40 @@ document.addEventListener('DOMContentLoaded', function() {
 				} else {
 					mandatInfo = '✓ Aktiv';
 				}
-				html += `<tr>
-					<td>${escapeHtml(m.address)}</td>
-					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
-					<td>${escapeHtml(m.iban || '-')}</td>
-					<td>${mandatInfo}</td>
-					<td class="downloads-cell-${m.id}">lädt...</td>
-					<td>
-						<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}">Bearbeiten</button>
-						<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank">📄 Vorlage</a>
-						<button class="upload-signed-btn" data-id="${m.id}">📤 Upload</button>
-					</td>
-				</tr>`;
+				html += `
+					<div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+						<div style="background: #0082c9; color: white; padding: 12px; font-weight: 600;">
+							${escapeHtml(m.address)}
+						</div>
+						<div style="padding: 12px;">
+							<div style="margin-bottom: 10px;">
+								<div style="font-size: 11px; color: #999; font-weight: 600; margin-bottom: 4px;">ZAHLUNGSPFLICHTIG</div>
+								<div>${escapeHtml(m.zahlungspflichtig || '-')}</div>
+							</div>
+							<div style="margin-bottom: 10px;">
+								<div style="font-size: 11px; color: #999; font-weight: 600; margin-bottom: 4px;">IBAN</div>
+								<div style="font-family: monospace; word-break: break-all;">${escapeHtml(m.iban || '-')}</div>
+							</div>
+							<div style="margin-bottom: 10px;">
+								<div style="font-size: 11px; color: #999; font-weight: 600; margin-bottom: 4px;">MANDAT</div>
+								<div>${mandatInfo}</div>
+							</div>
+							<div style="margin-bottom: 12px;">
+								<div style="font-size: 11px; color: #999; font-weight: 600; margin-bottom: 4px;">UNTERSCHRIEBENE MANDATE</div>
+								<div class="downloads-cell-${m.id}" style="font-size: 12px;">lädt...</div>
+							</div>
+							<div style="display: flex; gap: 6px; flex-wrap: wrap;">
+								<button class="edit-btn" data-id="${m.id}" data-addr="${escapeHtml(m.address)}" data-zahl="${escapeHtml(m.zahlungspflichtig || '')}" data-iban="${escapeHtml(m.iban || '')}" style="padding: 6px 10px; font-size: 12px; flex: 1; min-width: 70px;">Bearbeiten</button>
+								<a href="${OC.generateUrl('/apps/weinsteigfinance/api/member/' + m.id + '/mandate-pdf')}" target="_blank" style="padding: 6px 10px; font-size: 12px; flex: 1; min-width: 70px; text-align: center; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; display: flex; align-items: center; justify-content: center;">📄 Vorlage</a>
+								<button class="upload-signed-btn" data-id="${m.id}" style="padding: 6px 10px; font-size: 12px; flex: 1; min-width: 70px;">📤 Upload</button>
+							</div>
+						</div>
+					</div>
+				`;
 			});
 		}
 
-		html += '</tbody></table>';
+		html += '</div>';
 		list.innerHTML = html;
 
 		document.querySelectorAll('.edit-btn').forEach(btn => {
