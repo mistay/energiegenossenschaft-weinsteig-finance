@@ -1230,9 +1230,9 @@ HTML;
 					}
 				}
 
-				// Nur gültige Mandate: Nicht zurückgezogen UND PDF hochgeladen UND Erteilungsdatum gesetzt
-				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
-					// Berechne offene Beträge (exakt wie memberJournal)
+				// Alle Haeuser mit IBAN und nicht zurueckgezogenes Mandat
+				if ($member['iban'] && !$member['mandate_withdrawn_date']) {
+					// Berechne offene Betraege (exakt wie memberJournal)
 					$memberId = $member['id'];
 
 					// ALLE Zahlungen für dieses Mitglied
@@ -1323,12 +1323,12 @@ HTML;
 					}
 				}
 
-				// Nur gültige Mandate
-				if (!$member['mandate_withdrawn_date'] && $member['mandate_granted_date'] && $signedMandateExists) {
-					// Berechne offene Beträge (exakt wie memberJournal)
+				// Alle Haeuser mit IBAN und nicht zurueckgezogenes Mandat
+				if ($member['iban'] && !$member['mandate_withdrawn_date']) {
+					// Berechne offene Betraege (exakt wie memberJournal)
 					$memberId = $member['id'];
 
-					// ALLE Zahlungen für dieses Mitglied
+					// ALLE Zahlungen fuer dieses Mitglied
 					$qb = $this->db->getQueryBuilder();
 					$zahlungen = $qb->select('*')
 						->from('weinsteig_zahlungen')
