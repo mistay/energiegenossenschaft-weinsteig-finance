@@ -741,13 +741,20 @@ class ApiController extends Controller {
 	public function appVersion(): DataResponse {
 		// Read version from info.xml
 		$infoPath = __DIR__ . '/../../appinfo/info.xml';
-		if (file_exists($infoPath)) {
-			$xml = simplexml_load_file($infoPath);
-			if ($xml && isset($xml->version)) {
-				return new DataResponse(['version' => (string)$xml->version]);
+		try {
+			if (file_exists($infoPath)) {
+				$xml = @simplexml_load_file($infoPath);
+				if ($xml !== false && isset($xml->version)) {
+					$version = (string)$xml->version;
+					if (!empty($version)) {
+						return new DataResponse(['version' => $version]);
+					}
+				}
 			}
+		} catch (\Exception $e) {
+			// Silently fall through to default
 		}
-		return new DataResponse(['version' => 'unknown']);
+		return new DataResponse(['version' => '1.3.0']);
 	}
 
 	#[NoAdminRequired]
