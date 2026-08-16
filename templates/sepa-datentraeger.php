@@ -15,31 +15,13 @@ $currentPage = 'sepa-datentraeger';
 </div>
 
 <style>
-#sepa-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-top: 20px;
-	background: white;
+.sepa-card {
+	transition: box-shadow 0.2s, transform 0.2s;
 }
 
-#sepa-table th, #sepa-table td {
-	border: 1px solid #ddd;
-	padding: 12px;
-	text-align: left;
-}
-
-#sepa-table th {
-	background: #f5f5f5;
-	font-weight: bold;
-	color: #333;
-}
-
-#sepa-table tr:hover {
-	background: #f9f9f9;
-}
-
-#sepa-table td {
-	color: #555;
+.sepa-card:hover {
+	box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+	transform: translateY(-1px);
 }
 
 .amount-positive {
@@ -65,7 +47,8 @@ $currentPage = 'sepa-datentraeger';
 	cursor: pointer;
 	font-size: 14px;
 	margin-bottom: 20px;
-	transition: all 0.2s;
+	transition: background 0.2s;
+	font-weight: 500;
 }
 
 .export-btn:hover {
@@ -81,10 +64,13 @@ $currentPage = 'sepa-datentraeger';
 	display: flex;
 	justify-content: space-around;
 	gap: 20px;
+	flex-wrap: wrap;
 }
 
 .stat-item {
 	text-align: center;
+	flex: 1;
+	min-width: 100px;
 }
 
 .stat-label {
@@ -107,5 +93,29 @@ $currentPage = 'sepa-datentraeger';
 	margin-bottom: 20px;
 	font-size: 13px;
 	color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.sepa-card {
+		margin-bottom: 10px;
+	}
+
+	.stat-item {
+		min-width: 80px;
+	}
+
+	.stat-label {
+		font-size: 11px;
+	}
+
+	.stat-value {
+		font-size: 16px;
+	}
+
+	.export-btn {
+		padding: 8px 16px;
+		font-size: 13px;
+	}
 }
 </style>

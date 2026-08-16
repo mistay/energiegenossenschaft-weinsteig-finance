@@ -53,28 +53,53 @@ document.addEventListener('DOMContentLoaded', function() {
 					html += '</div>';
 				}
 
-				// Tabelle
-				html += '<table id="sepa-table"><thead><tr>' +
-					'<th>Haus</th><th>Kontoinhaber</th><th>IBAN</th><th>Mandat gültig seit</th><th>Offene Beträge</th>' +
-					'</tr></thead><tbody>';
-
+				// Mandate als Cards
 				if (mandates.length === 0) {
-					html += '<tr><td colspan="5" style="text-align: center; color: #999;">Keine gültigen Mandate gefunden</td></tr>';
+					html += '<p style="text-align: center; color: #999; padding: 20px;">Keine gültigen Mandate gefunden</p>';
 				} else {
+					html += '<div id="sepa-cards">';
 					mandates.forEach(m => {
 						const amountClass = m.open_amount > 0 ? 'amount-negative' : (m.open_amount < 0 ? 'amount-positive' : 'amount-zero');
 						const amountText = m.open_amount.toFixed(2) + ' €';
-						html += '<tr>';
-						html += '<td><strong>' + escapeHtml(m.address) + '</strong></td>';
-						html += '<td>' + escapeHtml(m.zahlungspflichtig) + '</td>';
-						html += '<td><code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 11px;">' + escapeHtml(m.iban) + '</code></td>';
-						html += '<td>' + escapeHtml(m.mandate_granted_date) + '</td>';
-						html += '<td class="' + amountClass + '">' + amountText + '</td>';
-						html += '</tr>';
-					});
-				}
+						const amountIcon = m.open_amount > 0 ? '⚠️' : '✓';
 
-				html += '</tbody></table>';
+						html += '<div class="sepa-card" style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">';
+
+						// Header: Haus
+						html += '<div style="background: #0082c9; color: white; padding: 12px 14px; font-weight: bold; font-size: 14px;">📍 ' + escapeHtml(m.address) + '</div>';
+
+						// Body: Info-Zeilen
+						html += '<div style="padding: 12px 14px;">';
+
+						// Kontoinhaber
+						html += '<div style="display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">';
+						html += '<span style="color: #666; font-size: 12px; font-weight: 500;">Kontoinhaber</span>';
+						html += '<span style="color: #333; font-size: 13px;">' + escapeHtml(m.zahlungspflichtig) + '</span>';
+						html += '</div>';
+
+						// IBAN
+						html += '<div style="display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; word-break: break-all;">';
+						html += '<span style="color: #666; font-size: 12px; font-weight: 500;">IBAN</span>';
+						html += '<code style="background: #f5f5f5; padding: 4px 6px; border-radius: 3px; font-size: 12px; font-family: monospace;">' + escapeHtml(m.iban) + '</code>';
+						html += '</div>';
+
+						// Mandat
+						html += '<div style="display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">';
+						html += '<span style="color: #666; font-size: 12px; font-weight: 500;">Mandat seit</span>';
+						html += '<span style="color: #333; font-size: 13px;">' + escapeHtml(m.mandate_granted_date) + '</span>';
+						html += '</div>';
+
+						// Offene Beträge (Highlight)
+						html += '<div style="display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 8px 0;">';
+						html += '<span style="color: #666; font-size: 12px; font-weight: 500;">Offene Beträge</span>';
+						html += '<span style="font-size: 14px; font-weight: bold;">' + amountIcon + ' <span class="' + amountClass + '" style="padding: 2px 6px; border-radius: 3px;">' + amountText + '</span></span>';
+						html += '</div>';
+
+						html += '</div>';
+						html += '</div>';
+					});
+					html += '</div>';
+				}
 				container.innerHTML = html;
 
 				// Export Button Handler
