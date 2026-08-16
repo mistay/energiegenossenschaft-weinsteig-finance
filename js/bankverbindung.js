@@ -187,10 +187,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 
 		// Lade unterschriebene Mandate für jedes Mitglied
-		const rows = document.querySelectorAll('tr');
-		rows.forEach(row => {
-			const editBtn = row.querySelector('.edit-btn');
-			if (!editBtn) return;
+		const editBtns = document.querySelectorAll('.edit-btn');
+		editBtns.forEach(editBtn => {
 			const memberId = editBtn.dataset.id;
 			const downloadCell = document.querySelector('.downloads-cell-' + memberId);
 			if (!downloadCell) return;
