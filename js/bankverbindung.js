@@ -105,9 +105,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (isObperson || isUserView) {
 			members = Array.isArray(members) ? members : [members];
 			members.forEach(m => {
-				const mandatInfo = m.mandate_withdrawn_date
-					? `✗ ${escapeHtml(m.mandate_withdrawn_reason || 'Zurückgezogen')}`
-					: '✓ Aktiv';
+				let mandatInfo;
+				if (m.mandate_withdrawn_date) {
+					mandatInfo = `✗ ${escapeHtml(m.mandate_withdrawn_reason || 'Zurückgezogen')}`;
+				} else if (m.mandate_granted_date) {
+					const date = new Date(m.mandate_granted_date).toLocaleDateString('de-AT');
+					mandatInfo = `✓ Aktiv (seit ${date})`;
+				} else {
+					mandatInfo = '✓ Aktiv';
+				}
 				html += `<tr>
 					<td>${escapeHtml(m.address)}</td>
 					<td>${escapeHtml(m.zahlungspflichtig || '-')}</td>
