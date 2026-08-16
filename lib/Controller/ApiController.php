@@ -823,10 +823,7 @@ class ApiController extends Controller {
 		if ($this->isObperson()) {
 			$lastCronRun = $this->config->getAppValue('weinsteigfinance', 'last_cron_run');
 			$lastGenerated = $this->config->getAppValue('weinsteigfinance', 'last_vorschreibungen_generated');
-			$cronStatus = [
-				'lastRun' => $lastCronRun ?: null,
-				'lastGenerated' => $lastGenerated ?: null,
-			];
+			$cronStatus = $this->configService->formatCronStatus($lastCronRun ?: null, $lastGenerated ?: null);
 		}
 
 		// Obpersonen sehen alle Häuser

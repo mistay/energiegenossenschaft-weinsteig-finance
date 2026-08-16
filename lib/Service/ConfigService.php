@@ -101,4 +101,62 @@ class ConfigService {
 
 		return $html;
 	}
+
+	/**
+	 * Formatiere die Cron-Status-Information für die UI.
+	 *
+	 * @param string|null $lastCronRun Timestamp von letztem Cron-Lauf (Y-m-d H:i:s)
+	 * @param string|null $lastGenerated Timestamp von letzter Generierung (Y-m-d H:i:s)
+	 * @return array mit 'cronLastRun', 'nextRunExpected' (Text für UI)
+	 */
+	public function formatCronStatus(?string $lastCronRun, ?string $lastGenerated): array {
+		$now = new \DateTime();
+		$result = [
+			'cronLastRun' => null,
+			'nextRunExpected' => null,
+		];
+
+		// Cron Last Run
+		if ($lastCronRun) {
+			try {
+				$lastRun = new \DateTime($lastCronRun);
+				$result['cronLastRun'] = $this->formatRelativeTime($now, $lastRun);
+			} catch (\Exception) {
+				$result['cronLastRun'] = 'unbekannt';
+			}
+		}
+
+		// Nächster erwarteter Lauf: 1. des Monats
+		$nextFirst = new \DateTime($now->format('Y-m-01'));
+		if ($nextFirst <= $now) {
+			$nextFirst->add(new \DateInterval('P1M')); // nächster Monat
+		}
+		$result['nextRunExpected'] = $this->formatRelativeTime($now, $nextFirst, true);
+
+		return $result;
+	}
+
+	/**
+	 * Formatiere Zeit-Differenz lesbar (z.B. "vor 2 Stunden", "in 3 Tagen").
+	 */
+	private function formatRelativeTime(\DateTime $now, \DateTime $other, bool $future = false): string {
+		$diff = $now->diff($other);
+
+		if ($diff->days > 0) {
+			if ($diff->days === 1) {
+				return $future ? 'morgen' : 'gestern';
+			}
+			return $future ? "in {$diff->days} Tagen" : "vor {$diff->days} Tagen";
+		}
+
+		if ($diff->h > 0) {
+			return $future ? "in {$diff->h}h" : "vor {$diff->h}h";
+		}
+
+		if ($diff->i > 0) {
+			return $future ? "in {$diff->i}min" : "vor {$diff->i}min";
+		}
+
+		return 'gerade eben';
+	}
 }

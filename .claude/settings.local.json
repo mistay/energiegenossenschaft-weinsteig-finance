@@ -5,7 +5,10 @@
       "Bash(git commit -m 'Feature: Admin-UI zum Zuordnen von Benutzern zu Häusern *)",
       "Bash(git push *)",
       "Bash(git commit *)",
-      "Bash(make lint *)"
+      "Bash(make lint *)",
+      "Bash(php -l lib/Service/ConfigService.php)",
+      "Bash(php -l lib/Controller/ApiController.php)",
+      "Bash(node --check js/vorschreibungen.js)"
     ]
   }
 }

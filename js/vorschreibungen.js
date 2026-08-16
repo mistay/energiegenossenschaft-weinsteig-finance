@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
 					html += '</div>';
 
 					// Cron-Status anzeigen
-					html += '<div style="background: #f5f5f5; padding: 10px; border-radius: 3px; margin-bottom: 20px; font-size: 12px;">';
-					if (cronStatus.lastRun) {
-						html += '✓ <strong>Letzter Cron-Lauf:</strong> ' + escapeHtml(cronStatus.lastRun) + '<br>';
+					html += '<div style="background: #e8f4f8; border-left: 4px solid #0082c9; padding: 12px; border-radius: 3px; margin-bottom: 20px; font-size: 13px; line-height: 1.6;">';
+					if (cronStatus.cronLastRun) {
+						html += '✓ <strong>Cron lief:</strong> ' + escapeHtml(cronStatus.cronLastRun) + '<br>';
 					} else {
-						html += '⏳ <strong>Cron-Lauf:</strong> Noch nicht gelaufen<br>';
+						html += '⏳ <strong>Cron-Status:</strong> Noch nicht gelaufen<br>';
 					}
-					if (cronStatus.lastGenerated) {
-						html += '✓ <strong>Zuletzt Vorschreibungen generiert:</strong> ' + escapeHtml(cronStatus.lastGenerated);
+					if (cronStatus.nextRunExpected) {
+						html += '📅 <strong>Nächste Generierung (1. des Monats):</strong> ' + escapeHtml(cronStatus.nextRunExpected);
 					}
 					html += '</div><hr>';
 				}
