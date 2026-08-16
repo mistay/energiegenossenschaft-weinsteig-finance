@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const list = document.getElementById('members-list');
 	const modal = document.getElementById('edit-modal');
+	const modalBackdrop = document.getElementById('edit-modal-backdrop');
 	const withdrawModal = document.getElementById('withdraw-modal');
+	const withdrawModalBackdrop = document.getElementById('withdraw-modal-backdrop');
 	const editAddress = document.getElementById('edit-address');
 	const editZahlungspflichtig = document.getElementById('edit-zahlungspflichtig');
 	const editIban = document.getElementById('edit-iban');
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(data => {
 				if (data.success) {
 					modal.style.display = 'none';
+					modalBackdrop.style.display = 'none';
 					ibanStatus.textContent = '';
 					load();
 				} else if (data.error) {
@@ -155,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				editZahlungspflichtig.value = this.dataset.zahl;
 				editIban.value = this.dataset.iban;
 				modal.style.display = 'block';
+				modalBackdrop.style.display = 'block';
 			});
 		});
 
@@ -230,9 +234,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	withdrawBtn.addEventListener('click', function() {
 		modal.style.display = 'none';
+		modalBackdrop.style.display = 'none';
 		withdrawAddress.textContent = editAddress.textContent;
 		withdrawReason.value = '';
 		withdrawModal.style.display = 'block';
+		withdrawModalBackdrop.style.display = 'block';
 	});
 
 	withdrawConfirmBtn.addEventListener('click', function() {
@@ -247,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			.then(data => {
 				if (data.success) {
 					withdrawModal.style.display = 'none';
+					withdrawModalBackdrop.style.display = 'none';
 					load();
 				} else if (data.error) {
 					alert('Fehler: ' + data.error);
@@ -256,10 +263,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	cancelBtn.addEventListener('click', function() {
 		modal.style.display = 'none';
+		modalBackdrop.style.display = 'none';
 	});
 
 	withdrawCancelBtn.addEventListener('click', function() {
 		withdrawModal.style.display = 'none';
+		withdrawModalBackdrop.style.display = 'none';
+	});
+
+	// Schließe Modal wenn auf Backdrop geklickt wird
+	modalBackdrop.addEventListener('click', function() {
+		modal.style.display = 'none';
+		modalBackdrop.style.display = 'none';
+	});
+
+	withdrawModalBackdrop.addEventListener('click', function() {
+		withdrawModal.style.display = 'none';
+		withdrawModalBackdrop.style.display = 'none';
 	});
 
 	function escapeHtml(text) {
