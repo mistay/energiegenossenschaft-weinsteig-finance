@@ -10,6 +10,15 @@ $groupManager = Server::get(IGroupManager::class);
 $userSession = Server::get(IUserSession::class);
 $user = $userSession->getUser();
 $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
+
+// Get app version
+$appVersion = '1.3.4'; // fallback
+try {
+	$appManager = Server::get(\OCP\App\IAppManager::class);
+	$appVersion = $appManager->getAppVersion('weinsteigfinance');
+} catch (\Throwable $e) {
+	// Use fallback
+}
 ?>
 
 <nav style="background: white; border-bottom: 1px solid #ecf0f1; margin: -16px -16px 24px -16px; padding: 0; sticky top: 0; z-index: 100;">
@@ -21,9 +30,6 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 		</a>
 
 		<div style="margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 14px 16px;">
-			<div id="app-version-info" style="font-size: 10px; padding: 4px 6px; background: #f5f5f5; border-radius: 3px; color: #999; border: 1px solid #e0e0e0; font-family: monospace;">
-				v?
-			</div>
 			<div id="user-groups-info" style="font-size: 12px; padding: 6px 10px; background: #e3f2fd; border-radius: 4px; color: #0082c9;">
 				Lädt...
 			</div>
@@ -77,3 +83,8 @@ $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 		<?php endif; ?>
 	</div>
 </nav>
+
+<!-- Version Display - Bottom Right -->
+<div id="app-version" style="position: fixed; bottom: 12px; right: 12px; font-size: 12px; color: #999; font-family: monospace; background: rgba(255,255,255,0); padding: 4px 8px; border-radius: 3px; z-index: 100; pointer-events: none;">
+	v<?php echo htmlspecialchars($appVersion); ?>
+</div>
