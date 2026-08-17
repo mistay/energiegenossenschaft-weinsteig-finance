@@ -8,17 +8,41 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	function load() {
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/sepa-datentraeger'))
-			.then(r => r.json())
-			.then(data => {
+		// Get user groups and SEPA data in parallel
+		Promise.all([
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-groups')).then(r => r.json()),
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/sepa-datentraeger')).then(r => r.json())
+		])
+			.then(([userInfo, data]) => {
 				if (data.error) {
 					container.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error) + '</p>';
 					return;
 				}
 
 				const mandates = data.mandates || [];
+				const userGroups = userInfo.groups || [];
 
 				let html = '';
+
+				// Info-Box für kassier:innen
+				const authorizedGroups = ['obpersonen', 'kassier:innen'];
+				const hasAuthorization = userGroups.some(g => authorizedGroups.includes(g));
+				if (hasAuthorization && userGroups.length > 0) {
+					const groupIcons = {
+						'obpersonen': '👑',
+						'kassier:innen': '💰'
+					};
+					const visibleGroups = userGroups
+						.filter(g => authorizedGroups.includes(g))
+						.map(g => (groupIcons[g] || '') + ' ' + g)
+						.join(', ');
+
+					if (visibleGroups) {
+						html += '<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;">';
+						html += '<strong>ℹ️ Hinweis:</strong> Es werden alle SEPA Datenträger angezeigt, weil dieses Nutzerkonto in der Gruppe ' + escapeHtml(visibleGroups) + ' geführt wird.';
+						html += '</div>';
+					}
+				}
 
 				// Info-Box
 				html += '<div class="info-box">';

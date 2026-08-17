@@ -1211,7 +1211,10 @@ HTML;
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function sepaDataCarrier(): DataResponse {
-		if (!$this->isObperson()) {
+		// obpersonen und kassier:innen dürfen auf SEPA-Datenträger zugreifen
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
