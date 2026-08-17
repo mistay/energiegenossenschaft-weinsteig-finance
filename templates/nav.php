@@ -23,12 +23,6 @@ try {
 
 <nav style="background: white; border-bottom: 1px solid #ecf0f1; margin: -16px -16px 24px -16px; padding: 0; sticky top: 0; z-index: 100;">
 	<div style="display: flex; gap: 0; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; align-items: stretch;">
-		<a href="/index.php/apps/weinsteigfinance/"
-			style="padding: 14px 16px; color: #2c3e50; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 600; border-bottom: 3px solid transparent; transition: all 0.2s;">
-			<span style="font-size: 16px;">■</span>
-			<span style="display: none; @media (min-width: 768px) { display: inline; }">Finance</span>
-		</a>
-
 		<div style="margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 14px 16px;">
 			<div id="user-groups-info" style="font-size: 12px; padding: 6px 10px; background: #e3f2fd; border-radius: 4px; color: #0082c9;">
 				Lädt...
