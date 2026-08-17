@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 				// Info-Box
 				html += '<div class="info-box">';
-				html += '💡 <strong>SEPA Core Datenträger</strong> – Übersicht aller gültigen SEPA-Mandate und offenen Beträge in Kundenkonten';
+				html += '💡 <strong>SEPA-Datenträger</strong> – Übersicht aller gültigen SEPA-Mandate und offenen Beträge in Kundenkonten';
 				html += '</div>';
 
 				// Export Button

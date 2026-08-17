@@ -7,7 +7,7 @@ $currentPage = 'sepa-datentraeger';
 <div id="weinsteigfinance-sepa-datentraeger" class="app-weinsteigfinance">
 	<?php include 'nav.php'; ?>
 
-	<h2>🏦 SEPA Core Datenträger</h2>
+	<h2>📄 SEPA-Datenträger</h2>
 
 	<div id="sepa-container" style="margin-top: 20px;">
 		<p style="color: #999;">Lädt...</p>
