@@ -171,8 +171,9 @@ Energiegenossenschaft Weinsteig
 </table>
 
 <div class="section" style="margin-top: 20px;">
-<strong>Der fällige Betrag wird von folgendem Konto eingezogen:</strong><br><br>
-{$bankAccount}
+<strong>Ihr hinterlegtes Konto</strong><br><br>
+{$bankAccount}<br><br>
+<strong>Der fällige Betrag wird von Ihrem hinterlegten Konto per SEPA-Lastschrift eingezogen.</strong>
 </div>
 
 <div class="note">
