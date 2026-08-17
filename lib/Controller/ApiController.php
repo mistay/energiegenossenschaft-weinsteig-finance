@@ -138,9 +138,7 @@ class ApiController extends Controller {
 					->executeQuery()
 					->fetchAll();
 				$row['assigned_users'] = array_map(fn($u) => $u['user_id'], $userRows);
-				error_log('DEBUG: Member ' . $memberId . ' has ' . count($row['assigned_users']) . ' assigned users');
 			} catch (\Exception $e) {
-				error_log('ERROR loading assigned_users for member ' . $memberId . ': ' . $e->getMessage());
 				$row['assigned_users'] = [];
 			}
 		}

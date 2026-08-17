@@ -92,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 					// Haus-Überschrift mit zugeordneten Personen
 					let headerText = escapeHtml(member.address);
-					console.log('Member:', member.address, 'assigned_users:', member.assigned_users);
 					if (member.assigned_users && member.assigned_users.length > 0) {
 						headerText += ' - ' + member.assigned_users.map(u => escapeHtml(u)).join(' / ');
 					}
