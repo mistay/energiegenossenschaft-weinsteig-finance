@@ -90,8 +90,12 @@ document.addEventListener('DOMContentLoaded', function() {
 				members.forEach(member => {
 					html += '<div class="member-card" style="margin-bottom: 30px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">';
 
-					// Haus-Überschrift
-					html += '<div style="background: #0082c9; color: white; padding: 12px 16px; font-weight: bold; font-size: 15px;">' + escapeHtml(member.address) + '</div>';
+					// Haus-Überschrift mit Personen
+					let headerText = escapeHtml(member.address);
+					if (member.zahlungspflichtig) {
+						headerText += ' (' + escapeHtml(member.zahlungspflichtig) + ')';
+					}
+					html += '<div style="background: #0082c9; color: white; padding: 12px 16px; font-weight: bold; font-size: 15px;">' + headerText + '</div>';
 
 					// Vorschreibungen als Liste (neuste oben)
 					html += '<div style="padding: 12px 16px;">';
