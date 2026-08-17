@@ -90,10 +90,10 @@ document.addEventListener('DOMContentLoaded', function() {
 				members.forEach(member => {
 					html += '<div class="member-card" style="margin-bottom: 30px; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">';
 
-					// Haus-Überschrift mit Personen
+					// Haus-Überschrift mit zugeordneten Personen
 					let headerText = escapeHtml(member.address);
-					if (member.zahlungspflichtig) {
-						headerText += ' (' + escapeHtml(member.zahlungspflichtig) + ')';
+					if (member.assigned_users && member.assigned_users.length > 0) {
+						headerText += ' (' + member.assigned_users.map(u => escapeHtml(u)).join(' / ') + ')';
 					}
 					html += '<div style="background: #0082c9; color: white; padding: 12px 16px; font-weight: bold; font-size: 15px;">' + headerText + '</div>';
 

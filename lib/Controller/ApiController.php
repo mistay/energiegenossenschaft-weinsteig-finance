@@ -128,6 +128,16 @@ class ApiController extends Controller {
 
 			// Saldo = eingegangene Zahlungen - offene Vorschreibungen (wie memberJournal)
 			$row['open_amount'] = round($totalZahlungen - $openVorschreibungen, 2);
+
+			// Lade zugeordnete Benutzer
+			$qb = $this->db->getQueryBuilder();
+			$userRows = $qb->select('u.uid')
+				->from('weinsteig_user_members', 'um')
+				->innerJoin('um', 'oc_users', 'u', $qb->expr()->eq('um.user_id', 'u.uid'))
+				->where($qb->expr()->eq('um.member_id', $qb->createNamedParameter($memberId)))
+				->executeQuery()
+				->fetchAll();
+			$row['assigned_users'] = array_map(fn($u) => $u['uid'], $userRows);
 		}
 
 		if ($this->request->getParam('loadAssignments') === '1') {
