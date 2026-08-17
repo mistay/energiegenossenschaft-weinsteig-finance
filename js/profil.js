@@ -31,7 +31,8 @@ function load() {
 					if (userInfo.groups && userInfo.groups.length > 0) {
 						const groupLabels = {
 							'obpersonen': '👑 Admin',
-							'mitglieder': '🏠 Mitglied'
+							'mitglieder': '🏠 Mitglied',
+							'kassier:innen': '💰 Kassier:in'
 						};
 						const labels = userInfo.groups.map(g => groupLabels[g] || g).join(', ');
 						html += '<div class="profil-field">';

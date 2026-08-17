@@ -772,6 +772,9 @@ class ApiController extends Controller {
 		if ($this->groupManager->isInGroup($userId, 'mitglieder')) {
 			$groups[] = 'mitglieder';
 		}
+		if ($this->groupManager->isInGroup($userId, 'kassier:innen')) {
+			$groups[] = 'kassier:innen';
+		}
 
 		return new DataResponse([
 			'userId' => $userId,
