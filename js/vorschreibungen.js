@@ -76,9 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 					// Next Generation
 					if (cronStatus.nextRunDate) {
-						html += '📅 <strong>Nächste Generierung:</strong> ' + escapeHtml(cronStatus.nextRunDate) + ' (' + escapeHtml(cronStatus.nextRunExpected) + ')<br>';
-						if (cronStatus.daysUntilNext !== null) {
-							html += '⏳ <strong>Verbleibende Zeit:</strong> ' + cronStatus.daysUntilNext + ' Tage';
+						html += '📅 <strong>Nächste Generierung:</strong> ' + escapeHtml(cronStatus.nextRunDate) + '<br>';
+						if (cronStatus.nextRunExpected) {
+							html += '⏳ <strong>Verbleibende Zeit:</strong> ' + escapeHtml(cronStatus.nextRunExpected);
 						}
 					}
 					html += '</div><hr>';
