@@ -23,12 +23,6 @@ try {
 
 <nav style="background: white; border-bottom: 1px solid #ecf0f1; margin: -16px -16px 24px -16px; padding: 0; sticky top: 0; z-index: 100;">
 	<div style="display: flex; gap: 0; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; align-items: stretch;">
-		<div style="margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 14px 16px;">
-			<div id="user-groups-info" style="font-size: 12px; padding: 6px 10px; background: #e3f2fd; border-radius: 4px; color: #0082c9;">
-				Lädt...
-			</div>
-		</div>
-
 		<a href="/index.php/apps/weinsteigfinance/profil"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'profil' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
 			👤 Profil
