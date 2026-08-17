@@ -1306,7 +1306,10 @@ HTML;
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function sepaDataCarrierCsv(): Response {
-		if (!$this->isObperson()) {
+		// obpersonen und kassier:innen dürfen CSV exportieren
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
