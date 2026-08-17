@@ -929,8 +929,22 @@ class ApiController extends Controller {
 		$dataDir = $this->config->getSystemValue('datadirectory');
 
 		foreach ($members as &$member) {
+			$memberId = $member['id'];
 			$member['vorschreibungen'] = [];
 			$address = $member['address'];
+
+			// Lade zugeordnete Benutzer
+			try {
+				$qb = $this->db->getQueryBuilder();
+				$userRows = $qb->select('um.user_id')
+					->from('weinsteig_user_members', 'um')
+					->where($qb->expr()->eq('um.member_id', $qb->createNamedParameter($memberId)))
+					->executeQuery()
+					->fetchAll();
+				$member['assigned_users'] = array_map(fn($u) => $u['user_id'], $userRows);
+			} catch (\Exception $e) {
+				$member['assigned_users'] = [];
+			}
 
 			foreach ($months as $month) {
 				$filename = sprintf('%04d-%02d-vorschreibung.pdf', $month['year'], $month['month']);
