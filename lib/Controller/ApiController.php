@@ -130,13 +130,19 @@ class ApiController extends Controller {
 			$row['open_amount'] = round($totalZahlungen - $openVorschreibungen, 2);
 
 			// Lade zugeordnete Benutzer
-			$qb = $this->db->getQueryBuilder();
-			$userRows = $qb->select('um.user_id')
-				->from('weinsteig_user_members', 'um')
-				->where($qb->expr()->eq('um.member_id', $qb->createNamedParameter($memberId)))
-				->executeQuery()
-				->fetchAll();
-			$row['assigned_users'] = array_map(fn($u) => $u['user_id'], $userRows);
+			try {
+				$qb = $this->db->getQueryBuilder();
+				$userRows = $qb->select('um.user_id')
+					->from('weinsteig_user_members', 'um')
+					->where($qb->expr()->eq('um.member_id', $qb->createNamedParameter($memberId)))
+					->executeQuery()
+					->fetchAll();
+				$row['assigned_users'] = array_map(fn($u) => $u['user_id'], $userRows);
+				error_log('DEBUG: Member ' . $memberId . ' has ' . count($row['assigned_users']) . ' assigned users');
+			} catch (\Exception $e) {
+				error_log('ERROR loading assigned_users for member ' . $memberId . ': ' . $e->getMessage());
+				$row['assigned_users'] = [];
+			}
 		}
 
 		if ($this->request->getParam('loadAssignments') === '1') {
