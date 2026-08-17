@@ -23,7 +23,7 @@ function load() {
 					html += '<h3 style="margin-top: 0;">Persönliche Informationen</h3>';
 
 					html += '<div class="profil-field">';
-					html += '<div class="profil-field-label">Benutzername:</div>';
+					html += '<div class="profil-field-label">Benutzer:in:</div>';
 					html += '<div class="profil-field-value">' + escapeHtml(userInfo.userId) + '</div>';
 					html += '</div>';
 
