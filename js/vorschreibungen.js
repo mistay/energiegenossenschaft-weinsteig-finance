@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
 				const authorizedGroups = ['obpersonen', 'kassier:innen'];
 				const hasAuthorization = userGroups.some(g => authorizedGroups.includes(g));
 				if (hasAuthorization && userGroups.length > 0) {
-					const groupLabels = {
-						'obpersonen': '👑 Admin',
-						'kassier:innen': '💰 Kassier:in'
+					const groupIcons = {
+						'obpersonen': '👑',
+						'kassier:innen': '💰'
 					};
 					const visibleGroups = userGroups
 						.filter(g => authorizedGroups.includes(g))
-						.map(g => groupLabels[g] || g)
+						.map(g => (groupIcons[g] || '') + ' ' + g)
 						.join(', ');
 
 					if (visibleGroups) {
