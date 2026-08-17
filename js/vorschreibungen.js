@@ -92,8 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 					// Haus-Überschrift mit zugeordneten Personen
 					let headerText = escapeHtml(member.address);
+					console.log('Member:', member.address, 'assigned_users:', member.assigned_users);
 					if (member.assigned_users && member.assigned_users.length > 0) {
-						headerText += ' (' + member.assigned_users.map(u => escapeHtml(u)).join(' / ') + ')';
+						headerText += ' - ' + member.assigned_users.map(u => escapeHtml(u)).join(' / ');
 					}
 					html += '<div style="background: #0082c9; color: white; padding: 12px 16px; font-weight: bold; font-size: 15px;">' + headerText + '</div>';
 
