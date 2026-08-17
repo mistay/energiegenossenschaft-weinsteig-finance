@@ -76,8 +76,10 @@ class ApiController extends Controller {
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function members(): DataResponse {
-		// Nur obpersonen dürfen alle Häuser sehen
-		if (!$this->isObperson()) {
+		// Nur obpersonen und kassier:innen dürfen alle Häuser sehen
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
