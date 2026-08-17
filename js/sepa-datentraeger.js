@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 					if (visibleGroups) {
 						html += '<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;">';
-						html += '<strong>ℹ️ Hinweis:</strong> Es werden alle SEPA Datenträger angezeigt, weil dieses Nutzerkonto in der Gruppe ' + escapeHtml(visibleGroups) + ' geführt wird.';
+						html += '<strong>ℹ️ Hinweis:</strong> Du hast Zugriff auf die SEPA-Datenträger, weil dieses Nutzerkonto in der Gruppe ' + escapeHtml(visibleGroups) + ' geführt wird.';
 						html += '</div>';
 					}
 				}
