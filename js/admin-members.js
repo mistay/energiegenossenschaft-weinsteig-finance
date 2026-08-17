@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	let allUsers = [];
 
 	function loadMembers() {
+		// Show info box for obpersonen
+		let html = '<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;">';
+		html += '<strong>ℹ️ Hinweis:</strong> Du kannst diese Seite nur sehen, weil dein Nutzerkonto in der Gruppe 👑 obperson geführt wird.';
+		html += '</div>';
+		table.innerHTML = html;
+
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
 			.then(r => r.json())
 			.then(members => {
