@@ -35,7 +35,8 @@ $currentPage = 'sepa-datentraeger';
 }
 
 .amount-zero {
-	color: #999;
+	color: #28a745;
+	font-weight: bold;
 }
 
 .export-btn {
