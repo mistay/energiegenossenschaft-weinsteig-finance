@@ -55,13 +55,16 @@ class ApiController extends Controller {
 	}
 
 	private function canEditMember(int $memberId): bool {
-		// Obpersonen dürfen alles bearbeiten
+		// Obpersonen und kassier:innen dürfen alles bearbeiten
 		if ($this->isObperson()) {
+			return true;
+		}
+		$userId = $this->getUserId();
+		if ($this->groupManager->isInGroup($userId, 'kassier:innen')) {
 			return true;
 		}
 
 		// Mitglieder nur ihr eigenes Haus
-		$userId = $this->getUserId();
 		$qb = $this->db->getQueryBuilder();
 		$exists = $qb->select('id')
 			->from('weinsteig_user_members')
