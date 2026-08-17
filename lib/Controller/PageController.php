@@ -179,7 +179,9 @@ class PageController extends Controller {
 	#[NoCSRFRequired]
 	public function sepaDataCarrier(): TemplateResponse|RedirectResponse {
 		$user = $this->userSession->getUser();
-		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
+		$isKassier = $user && $this->groupManager->isInGroup($user->getUID(), 'kassier:innen');
+		$isObperson = $user && $this->groupManager->isInGroup($user->getUID(), 'obpersonen');
+		if (!$user || (!$isObperson && !$isKassier)) {
 			return new RedirectResponse('/index.php');
 		}
 

@@ -10,6 +10,7 @@ $groupManager = Server::get(IGroupManager::class);
 $userSession = Server::get(IUserSession::class);
 $user = $userSession->getUser();
 $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
+$isKassier = $user && $groupManager->isInGroup($user->getUID(), 'kassier:innen');
 
 // Get app version from appinfo/info.xml
 $appVersion = 'unknown'; // fallback
@@ -66,7 +67,14 @@ try {
 
 		<a href="/index.php/apps/weinsteigfinance/sepa-datentraeger"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'sepa-datentraeger' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
-			🏦 Admin: SEPA Core
+			🏦 <?= $isKassier && !$isAdmin ? 'SEPA Core' : 'Admin: SEPA Core' ?>
+		</a>
+		<?php endif; ?>
+
+		<?php if ($isKassier && !$isAdmin): ?>
+		<a href="/index.php/apps/weinsteigfinance/sepa-datentraeger"
+			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'sepa-datentraeger' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
+			🏦 SEPA Core
 		</a>
 		<?php endif; ?>
 	</div>
