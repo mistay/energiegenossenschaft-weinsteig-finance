@@ -866,11 +866,11 @@ class ApiController extends Controller {
 			$current->modify('first day of next month');
 		}
 
-		// Hol Cron-Status für obpersonen
+		// Hol Cron-Status für obpersonen und kassier:innen
 		$cronStatus = null;
 		$userId = $this->getUserId();
 		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
-		if ($this->isObperson()) {
+		if ($this->isObperson() || $isKassier) {
 			$lastCronRun = $this->config->getAppValue('weinsteigfinance', 'last_cron_run');
 			$lastGenerated = $this->config->getAppValue('weinsteigfinance', 'last_vorschreibungen_generated');
 			$cronStatus = $this->configService->formatCronStatus($lastCronRun ?: null, $lastGenerated ?: null);
