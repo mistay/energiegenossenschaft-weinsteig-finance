@@ -66,13 +66,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 					// Cron-Status anzeigen
 					html += '<div style="background: #e8f4f8; border-left: 4px solid #0082c9; padding: 12px; border-radius: 3px; margin-bottom: 20px; font-size: 13px; line-height: 1.6;">';
-					if (cronStatus.cronLastRun) {
-						html += '✓ <strong>Cron lief:</strong> ' + escapeHtml(cronStatus.cronLastRun) + '<br>';
+
+					// Cron Last Run
+					if (cronStatus.cronLastRunDetail) {
+						html += '✓ <strong>Cron lief zuletzt:</strong> ' + escapeHtml(cronStatus.cronLastRun) + ' (' + escapeHtml(cronStatus.cronLastRunDetail) + ')<br>';
 					} else {
-						html += '⏳ <strong>Cron-Status:</strong> Noch nicht gelaufen<br>';
+						html += '⚠️ <strong>Cron-Status:</strong> ' + escapeHtml(cronStatus.cronLastRun) + '<br>';
 					}
-					if (cronStatus.nextRunExpected) {
-						html += '📅 <strong>Nächste Generierung (1. des Monats):</strong> ' + escapeHtml(cronStatus.nextRunExpected);
+
+					// Next Generation
+					if (cronStatus.nextRunDate) {
+						html += '📅 <strong>Nächste Generierung:</strong> ' + escapeHtml(cronStatus.nextRunDate) + ' (' + escapeHtml(cronStatus.nextRunExpected) + ')<br>';
+						if (cronStatus.daysUntilNext !== null) {
+							html += '⏳ <strong>Verbleibende Zeit:</strong> ' + cronStatus.daysUntilNext + ' Tage';
+						}
 					}
 					html += '</div><hr>';
 				}

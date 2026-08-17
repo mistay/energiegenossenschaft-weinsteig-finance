@@ -113,7 +113,10 @@ class ConfigService {
 		$now = new \DateTime();
 		$result = [
 			'cronLastRun' => null,
+			'cronLastRunDetail' => null,
 			'nextRunExpected' => null,
+			'nextRunDate' => null,
+			'daysUntilNext' => null,
 		];
 
 		// Cron Last Run
@@ -121,9 +124,12 @@ class ConfigService {
 			try {
 				$lastRun = new \DateTime($lastCronRun);
 				$result['cronLastRun'] = $this->formatRelativeTime($now, $lastRun);
+				$result['cronLastRunDetail'] = $lastRun->format('d.m.Y H:i');
 			} catch (\Exception) {
 				$result['cronLastRun'] = 'unbekannt';
 			}
+		} else {
+			$result['cronLastRun'] = 'Cron hat noch keine Ticks erhalten';
 		}
 
 		// Nächster erwarteter Lauf: 1. des Monats
@@ -131,7 +137,26 @@ class ConfigService {
 		if ($nextFirst <= $now) {
 			$nextFirst->add(new \DateInterval('P1M')); // nächster Monat
 		}
-		$result['nextRunExpected'] = $this->formatRelativeTime($now, $nextFirst, true);
+
+		$diff = $now->diff($nextFirst);
+		$daysRemaining = $diff->days;
+
+		// Format: "in X Tagen" oder mit Stunden wenn < 2 Tage
+		if ($daysRemaining === 0) {
+			$result['nextRunExpected'] = "heute noch in {$diff->h}h {$diff->i}min";
+		} elseif ($daysRemaining === 1) {
+			$result['nextRunExpected'] = "morgen in {$diff->h}h {$diff->i}min";
+		} elseif ($daysRemaining <= 2) {
+			// Letzte 2 Tage: zeige Stunden
+			$totalHours = $daysRemaining * 24 + $diff->h;
+			$result['nextRunExpected'] = "in {$totalHours}h {$diff->i}min";
+		} else {
+			// Mehr als 2 Tage: nur Tage
+			$result['nextRunExpected'] = "in {$daysRemaining} Tagen";
+		}
+
+		$result['nextRunDate'] = $nextFirst->format('d.m.Y');
+		$result['daysUntilNext'] = $daysRemaining;
 
 		return $result;
 	}
