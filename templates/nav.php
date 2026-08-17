@@ -11,8 +11,8 @@ $userSession = Server::get(IUserSession::class);
 $user = $userSession->getUser();
 $isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 
-// Get app version
-$appVersion = '1.3.4'; // fallback
+// Get app version from appinfo/info.xml
+$appVersion = 'unknown'; // fallback
 try {
 	$appManager = Server::get(\OCP\App\IAppManager::class);
 	$appVersion = $appManager->getAppVersion('weinsteigfinance');
