@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				const months = data.months || [];
 				const members = data.members || [];
 				const isObperson = data.isObperson || false;
+				const isKassier = data.isKassier || false;
 				const cronStatus = data.cronStatus || {};
 
 				if (members.length === 0) {
@@ -24,6 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 				// Generate-Button für obpersonen
 				let html = '';
+
+				// Info-Box für kassier:innen
+				if (isKassier && !isObperson) {
+					html += '<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;">';
+					html += '<strong>ℹ️ Hinweis:</strong> Es werden alle Vorschreibungen angezeigt, weil dieses Nutzerkonto in der Gruppe <strong>Kassier:innen</strong> geführt wird.';
+					html += '</div>';
+				}
+
 				if (isObperson && months.length > 0) {
 					const latestMonth = months[months.length - 1];
 					html += '<div style="margin-bottom: 20px;">';

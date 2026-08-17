@@ -868,14 +868,16 @@ class ApiController extends Controller {
 
 		// Hol Cron-Status für obpersonen
 		$cronStatus = null;
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
 		if ($this->isObperson()) {
 			$lastCronRun = $this->config->getAppValue('weinsteigfinance', 'last_cron_run');
 			$lastGenerated = $this->config->getAppValue('weinsteigfinance', 'last_vorschreibungen_generated');
 			$cronStatus = $this->configService->formatCronStatus($lastCronRun ?: null, $lastGenerated ?: null);
 		}
 
-		// Obpersonen sehen alle Häuser
-		if ($this->isObperson()) {
+		// Obpersonen und kassier:innen sehen alle Häuser
+		if ($this->isObperson() || $isKassier) {
 			$qb = $this->db->getQueryBuilder();
 			$members = $qb->select('*')
 				->from('weinsteig_members')
@@ -883,11 +885,10 @@ class ApiController extends Controller {
 				->executeQuery()
 				->fetchAll();
 			$members = $this->enrichMembersWithVorschreibungDates($members, $months);
-			return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => true, 'cronStatus' => $cronStatus]);
+			return new DataResponse(['months' => $months, 'members' => $members, 'isObperson' => true, 'isKassier' => $isKassier, 'cronStatus' => $cronStatus]);
 		}
 
 		// Mitglieder sehen nur ihr Haus
-		$userId = $this->getUserId();
 		$qb = $this->db->getQueryBuilder();
 		$member = $qb->select('m.*')
 			->from('weinsteig_members', 'm')
