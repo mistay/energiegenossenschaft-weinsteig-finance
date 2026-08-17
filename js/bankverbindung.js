@@ -70,37 +70,50 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	function load() {
-		// Get user groups first
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-groups'))
-			.then(r => r.json())
-			.then(userInfo => {
-				// Erst obperson-Liste versuchen
-				fetch(OC.generateUrl('/apps/weinsteigfinance/api/members'))
-					.then(r => r.json())
-					.then(members => {
-						// Wenn Fehler (Unauthorized) oder nicht Array → Mitglied
-						if (!Array.isArray(members)) {
-							// Nicht obperson - eigenes Mitglied laden
-							fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
-								.then(r => r.json())
-								.then(data => {
-									if (data.error) {
-										list.innerHTML = '<p>Fehler: ' + data.error + '</p>';
-										return;
-									}
-									isUserView = true;
-									renderMembers([data]);
-								});
-							return;
-						}
+		// Get user groups and members in parallel
+		Promise.all([
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-groups')).then(r => r.json()),
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/members')).then(r => r.json())
+		])
+			.then(([userInfo, members]) => {
+				// Wenn Fehler (Unauthorized) oder nicht Array → Mitglied
+				if (!Array.isArray(members)) {
+					// Nicht obperson/kassier - eigenes Mitglied laden
+					fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
+						.then(r => r.json())
+						.then(data => {
+							if (data.error) {
+								list.innerHTML = '<p>Fehler: ' + data.error + '</p>';
+								return;
+							}
+							isUserView = true;
+							renderMembers([data]);
+						});
+					return;
+				}
 
-						isObperson = true;
-						// Show info box if user is kassier:innen
-						if (userInfo.groups && userInfo.groups.includes('kassier:innen')) {
-							showKassierInfoBox();
-						}
-						renderMembers(members);
-					});
+				isObperson = true;
+				// Show info box for authorized groups
+				const userGroups = userInfo.groups || [];
+				const authorizedGroups = ['obpersonen', 'kassier:innen'];
+				const hasAuthorization = userGroups.some(g => authorizedGroups.includes(g));
+
+				if (hasAuthorization && userGroups.length > 0) {
+					const groupLabels = {
+						'obpersonen': '👑 Admin',
+						'kassier:innen': '💰 Kassier:in'
+					};
+					const visibleGroups = userGroups
+						.filter(g => authorizedGroups.includes(g))
+						.map(g => groupLabels[g] || g)
+						.join(', ');
+
+					if (visibleGroups) {
+						showInfoBox(visibleGroups);
+					}
+				}
+
+				renderMembers(members);
 			})
 			.catch(() => {
 				// Fallback: try loading members directly
@@ -115,15 +128,22 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 	}
 
-	function showKassierInfoBox() {
+	function showInfoBox(groupLabels) {
 		const infoBox = document.createElement('div');
 		infoBox.style.cssText = 'background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;';
-		infoBox.innerHTML = '<strong>ℹ️ Hinweis:</strong> Es werden alle Bankverbindungen angezeigt, weil dieses Nutzerkonto in der Gruppe <strong>Kassier:innen</strong> geführt wird.';
+		infoBox.innerHTML = '<strong>ℹ️ Hinweis:</strong> Es werden alle Bankverbindungen angezeigt, weil dieses Nutzerkonto in der Gruppe ' + escapeHtml(groupLabels) + ' geführt wird.';
 
 		const listElement = document.getElementById('members-list');
 		if (listElement && listElement.parentNode) {
 			listElement.parentNode.insertBefore(infoBox, listElement);
 		}
+	}
+
+	function escapeHtml(text) {
+		if (!text) return '';
+		const div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
 	}
 
 	function renderMembers(members) {

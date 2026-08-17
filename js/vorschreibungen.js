@@ -3,9 +3,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	let currentData = {};
 
 	function load() {
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/vorschreibungen'))
-			.then(r => r.json())
-			.then(data => {
+		// Get user groups and vorschreibungen in parallel
+		Promise.all([
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-groups')).then(r => r.json()),
+			fetch(OC.generateUrl('/apps/weinsteigfinance/api/vorschreibungen')).then(r => r.json())
+		])
+			.then(([userInfo, data]) => {
 				if (data.error) {
 					container.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error) + '</p>';
 					return;
@@ -15,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				const months = data.months || [];
 				const members = data.members || [];
 				const isObperson = data.isObperson || false;
-				const isKassier = data.isKassier || false;
 				const cronStatus = data.cronStatus || {};
+				const userGroups = userInfo.groups || [];
 
 				if (members.length === 0) {
 					container.innerHTML = '<p>Keine Häuser gefunden.</p>';
@@ -26,11 +29,24 @@ document.addEventListener('DOMContentLoaded', function() {
 				// Generate-Button für obpersonen
 				let html = '';
 
-				// Info-Box für kassier:innen
-				if (isKassier && !isObperson) {
-					html += '<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;">';
-					html += '<strong>ℹ️ Hinweis:</strong> Es werden alle Vorschreibungen angezeigt, weil dieses Nutzerkonto in der Gruppe <strong>Kassier:innen</strong> geführt wird.';
-					html += '</div>';
+				// Info-Box für berechtigte Gruppen (obpersonen, kassier:innen)
+				const authorizedGroups = ['obpersonen', 'kassier:innen'];
+				const hasAuthorization = userGroups.some(g => authorizedGroups.includes(g));
+				if (hasAuthorization && userGroups.length > 0) {
+					const groupLabels = {
+						'obpersonen': '👑 Admin',
+						'kassier:innen': '💰 Kassier:in'
+					};
+					const visibleGroups = userGroups
+						.filter(g => authorizedGroups.includes(g))
+						.map(g => groupLabels[g] || g)
+						.join(', ');
+
+					if (visibleGroups) {
+						html += '<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 16px; border-radius: 4px; margin-bottom: 20px; color: #0082c9;">';
+						html += '<strong>ℹ️ Hinweis:</strong> Es werden alle Vorschreibungen angezeigt, weil dieses Nutzerkonto in der Gruppe ' + escapeHtml(visibleGroups) + ' geführt wird.';
+						html += '</div>';
+					}
 				}
 
 				if (isObperson && months.length > 0) {
