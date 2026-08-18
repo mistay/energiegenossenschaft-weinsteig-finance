@@ -213,6 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 
+		const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+
 		document.querySelectorAll('.upload-signed-btn').forEach(btn => {
 			btn.addEventListener('click', function() {
 				const memberId = this.dataset.id;
@@ -221,8 +223,19 @@ document.addEventListener('DOMContentLoaded', function() {
 				input.accept = 'application/pdf';
 				input.addEventListener('change', function() {
 					if (!this.files.length) return;
+
+					const file = this.files[0];
+
+					// Dateigrößen-Validierung
+					if (file.size > MAX_FILE_SIZE) {
+						const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+						const maxMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
+						alert(`Die Datei ist zu groß!\n\nDateigröße: ${sizeMB} MB\nMaximale Größe: ${maxMB} MB\n\nBitte komprimieren Sie das PDF und versuchen Sie es erneut.`);
+						return;
+					}
+
 					const formData = new FormData();
-					formData.append('file', this.files[0]);
+					formData.append('file', file);
 					fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed'), {
 						method: 'POST',
 						body: formData
@@ -235,6 +248,9 @@ document.addEventListener('DOMContentLoaded', function() {
 							} else {
 								alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
 							}
+						})
+						.catch(err => {
+							alert('Fehler beim Upload: ' + err.message);
 						});
 				});
 				input.click();

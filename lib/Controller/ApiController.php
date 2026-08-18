@@ -377,13 +377,41 @@ class ApiController extends Controller {
 		}
 
 		if (empty($_FILES['file'])) {
-			return new DataResponse(['error' => 'No file provided'], 400);
+			return new DataResponse(['error' => 'Keine Datei hochgeladen'], 400);
 		}
 
 		try {
 			$file = $_FILES['file'];
+
+			// Sprechende Fehlermeldungen für Upload-Fehler
 			if ($file['error'] !== UPLOAD_ERR_OK) {
-				return new DataResponse(['error' => 'Upload error: ' . $file['error']], 400);
+				$errorMessages = [
+					UPLOAD_ERR_INI_SIZE => 'Datei ist größer als in php.ini definiert (upload_max_filesize)',
+					UPLOAD_ERR_FORM_SIZE => 'Datei ist größer als in MAX_FILE_SIZE definiert',
+					UPLOAD_ERR_PARTIAL => 'Datei wurde nur teilweise hochgeladen',
+					UPLOAD_ERR_NO_FILE => 'Keine Datei wurde hochgeladen',
+					UPLOAD_ERR_NO_TMP_DIR => 'Temporärer Ordner fehlt',
+					UPLOAD_ERR_CANT_WRITE => 'Fehler beim Schreiben der Datei auf den Server',
+					UPLOAD_ERR_EXTENSION => 'Upload wurde durch eine PHP-Extension gestoppt',
+				];
+				$errorMsg = $errorMessages[$file['error']] ?? 'Unbekannter Upload-Fehler (' . $file['error'] . ')';
+
+				// Besondere Behandlung für zu große Dateien
+				if ($file['error'] === UPLOAD_ERR_INI_SIZE) {
+					$errorMsg = 'Datei ist zu groß! Bitte komprimieren Sie das PDF und versuchen Sie es erneut. ' .
+						'Die maximale Dateigröße ist auf dem Server begrenzt.';
+				}
+
+				return new DataResponse(['error' => $errorMsg], 400);
+			}
+
+			// Zusätzliche Größenprüfung auf Server-Seite (2 MB)
+			$maxSize = 2 * 1024 * 1024; // 2 MB
+			if ($file['size'] > $maxSize) {
+				$sizeMB = round($file['size'] / (1024 * 1024), 2);
+				return new DataResponse([
+					'error' => sprintf('Datei ist zu groß (%.1f MB). Maximal 2 MB erlaubt.', $sizeMB)
+				], 400);
 			}
 
 			// Daten laden
@@ -395,7 +423,7 @@ class ApiController extends Controller {
 				->fetch();
 
 			if (!$member) {
-				return new DataResponse(['error' => 'Member not found'], 404);
+				return new DataResponse(['error' => 'Mitglied nicht gefunden'], 404);
 			}
 
 			$address = $member['address'];
@@ -422,7 +450,7 @@ class ApiController extends Controller {
 			return new DataResponse(['success' => true]);
 		} catch (\Throwable $e) {
 			\OCP\Server::get(\OCP\Log\ILogFactory::class)->getLogFile()?->log(0, 'Upload error: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
-			return new DataResponse(['error' => $e->getMessage() ?: 'Upload failed'], 400);
+			return new DataResponse(['error' => 'Upload-Fehler: ' . ($e->getMessage() ?: 'Datei konnte nicht gespeichert werden')], 400);
 		}
 	}
 
