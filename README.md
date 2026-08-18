@@ -28,6 +28,9 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Digitale Mandate-Verwaltung** mit Versionskontrolle und Timestamping
 - **Automatische PDF-Mandate-Generierung** mit Energiegenossenschaft-Branding und -Adresse
 - **Digitale Mandate hochladen** mit Versionierung (v1, v2, etc.) und Zeitstempel
+- **Dynamische Upload-Größen-Validierung** mit PHP-Konfiguration (respektiert `upload_max_filesize` und `post_max_size`)
+- **Intelligente Fehlermeldungen** bei zu großen Dateien (zeigt tatsächliche Limit + Dateigröße in Deutsch)
+- **Server- und Client-seitige Validierung** für robuste Dateigrößen-Prüfung
 - **Mandate widerrufen** mit Grund-Angabe und Widerrufsdatum-Tracking
 - **Widerrufsrecht** online für Mitglieder verfügbar
 - **Mandate-Status-Anzeige** (✓ aktiv, ⚠️ zurückgezogen, ⏳ nicht erteilt)
@@ -221,7 +224,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 
 ### Voraussetzungen
 - **Nextcloud**: Version 30-34
-- **PHP**: 8.1+
+- **PHP**: 8.1+ mit `upload_max_filesize` und `post_max_size` konfiguriert (mindestens 2M, empfohlen 20M für PDF-Uploads)
 - **Datenbank**: MySQL 8+ / PostgreSQL 12+
 - **Composer**: Für Dependency-Management
 
@@ -237,16 +240,31 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 4. Benutzer in Gruppen zuordnen
 5. Creditor ID, IBAN und BIC unter "Admin: Häuser & Benutzer" → "Einstellungen" eintragen
 6. Häuser unter "Admin: Häuser & Benutzer" verwalten
-7. Start!
+7. **PHP Upload-Limits konfigurieren** (optional, Standard: 2M):
+   - In `php.ini` oder `.htaccess`:
+     ```ini
+     upload_max_filesize = 20M
+     post_max_size = 20M
+     ```
+   - Die App respektiert automatisch diese Limits und zeigt sie in den Fehlermeldungen
+8. Start!
+
+### Upload-Limits
+Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post_max_size`) und nutzt das kleinere Limit. Das Limit wird über die API `/api/upload-limits` bereitgestellt und auf Client- sowie Server-Seite validiert.
 
 ---
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.3.1
+- **Aktuelle Version**: 1.3.37
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 10+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.3.3x)**:
+  - 📤 Dynamische Upload-Größen-Validierung basierend auf PHP-Konfiguration
+  - ⚠️ Aussagekräftige Fehlermeldungen bei zu großen Dateien (zeigt echtes Limit und Dateigröße)
+  - 🔒 Doppelte Validierung: Client-Seite + Server-Seite für robuste Dateigrößen-Prüfung
+  - 📊 API-Endpoint `/api/upload-limits` für Server-Limit-Abfrage
 - **Neue Features (v1.1.x)**:
   - ✨ Admin Journal-Zugriff mit Quick-Links
   - 📊 Farbliche Saldo-Formatierung in Verwaltung
