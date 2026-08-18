@@ -405,12 +405,16 @@ class ApiController extends Controller {
 				return new DataResponse(['error' => $errorMsg], 400);
 			}
 
-			// Zusätzliche Größenprüfung auf Server-Seite (2 MB)
-			$maxSize = 2 * 1024 * 1024; // 2 MB
+			// Zusätzliche Größenprüfung auf Server-Seite (PHP Limits verwenden)
+			$uploadMaxFilesize = ini_get('upload_max_filesize');
+			$postMaxSize = ini_get('post_max_size');
+			$maxSize = min($this->parsePhpSize($uploadMaxFilesize), $this->parsePhpSize($postMaxSize));
+
 			if ($file['size'] > $maxSize) {
 				$sizeMB = round($file['size'] / (1024 * 1024), 2);
+				$maxMB = round($maxSize / (1024 * 1024), 1);
 				return new DataResponse([
-					'error' => sprintf('Datei ist zu groß (%.1f MB). Maximal 2 MB erlaubt.', $sizeMB)
+					'error' => sprintf('Datei ist zu groß (%.1f MB). Maximal %.1f MB erlaubt.', $sizeMB, $maxMB)
 				], 400);
 			}
 
@@ -801,6 +805,45 @@ class ApiController extends Controller {
 			// Silently fall through to default
 		}
 		return new DataResponse(['version' => '1.3.0']);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function uploadLimits(): DataResponse {
+		// Get PHP upload limits
+		$uploadMaxFilesize = ini_get('upload_max_filesize');
+		$postMaxSize = ini_get('post_max_size');
+
+		// Convert to bytes
+		$uploadMaxBytes = $this->parsePhpSize($uploadMaxFilesize);
+		$postMaxBytes = $this->parsePhpSize($postMaxSize);
+
+		// Use the smaller of the two limits
+		$maxBytes = min($uploadMaxBytes, $postMaxBytes);
+
+		return new DataResponse([
+			'maxBytes' => $maxBytes,
+			'maxMB' => round($maxBytes / (1024 * 1024), 1),
+			'uploadMaxFilesize' => $uploadMaxFilesize,
+			'postMaxSize' => $postMaxSize,
+		]);
+	}
+
+	private function parsePhpSize(string $value): int {
+		$value = trim($value);
+		if (!$value || $value === '-1') {
+			return PHP_INT_MAX;
+		}
+
+		$unit = strtoupper(substr($value, -1));
+		$number = (int)substr($value, 0, -1);
+
+		return match ($unit) {
+			'K' => $number * 1024,
+			'M' => $number * 1024 * 1024,
+			'G' => $number * 1024 * 1024 * 1024,
+			default => (int)$value, // If no unit, it's already in bytes
+		};
 	}
 
 	#[NoAdminRequired]

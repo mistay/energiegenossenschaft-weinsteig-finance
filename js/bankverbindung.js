@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	let currentMemberId = null;
 	let isObperson = false;
 	let isUserView = false;
+	let maxFileSize = 2 * 1024 * 1024; // Fallback: 2 MB (wird vom Server überschrieben)
 	const ibanStatus = document.getElementById('iban-status');
 
 	// Live IBAN Validierung
@@ -213,26 +214,25 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 
-		const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+		function setupUploadButtons() {
+			document.querySelectorAll('.upload-signed-btn').forEach(btn => {
+				btn.addEventListener('click', function() {
+					const memberId = this.dataset.id;
+					const input = document.createElement('input');
+					input.type = 'file';
+					input.accept = 'application/pdf';
+					input.addEventListener('change', function() {
+						if (!this.files.length) return;
 
-		document.querySelectorAll('.upload-signed-btn').forEach(btn => {
-			btn.addEventListener('click', function() {
-				const memberId = this.dataset.id;
-				const input = document.createElement('input');
-				input.type = 'file';
-				input.accept = 'application/pdf';
-				input.addEventListener('change', function() {
-					if (!this.files.length) return;
+						const file = this.files[0];
 
-					const file = this.files[0];
-
-					// Dateigrößen-Validierung
-					if (file.size > MAX_FILE_SIZE) {
-						const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-						const maxMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
-						alert(`Die Datei ist zu groß!\n\nDateigröße: ${sizeMB} MB\nMaximale Größe: ${maxMB} MB\n\nBitte komprimieren Sie das PDF und versuchen Sie es erneut.`);
-						return;
-					}
+						// Dateigrößen-Validierung
+						if (file.size > maxFileSize) {
+							const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+							const maxMB = (maxFileSize / (1024 * 1024)).toFixed(1);
+							alert(`Die Datei ist zu groß!\n\nDateigröße: ${sizeMB} MB\nMaximale Größe: ${maxMB} MB\n\nBitte komprimieren Sie das PDF und versuchen Sie es erneut.`);
+							return;
+						}
 
 					const formData = new FormData();
 					formData.append('file', file);
@@ -256,6 +256,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				input.click();
 			});
 		});
+		}
+		setupUploadButtons();
 
 		// Lade unterschriebene Mandate für jedes Mitglied
 		const editBtns = document.querySelectorAll('.edit-btn');
@@ -354,6 +356,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		div.textContent = text;
 		return div.innerHTML;
 	}
+
+	// Load upload limits from server
+	fetch(OC.generateUrl('/apps/weinsteigfinance/api/upload-limits'))
+		.then(r => r.json())
+		.then(data => {
+			if (data.maxBytes) {
+				maxFileSize = data.maxBytes;
+			}
+		})
+		.catch(err => {
+			console.warn('Could not load upload limits from server, using default:', err);
+		});
 
 	load();
 });
