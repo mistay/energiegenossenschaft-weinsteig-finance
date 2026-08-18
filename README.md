@@ -25,6 +25,15 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 ## ✨ Umfassendes Feature-Set
 
 ### 💳 SEPA-Lastschrift-Mandate Management
+
+#### **Mandate-Workflow: 3-Schritte-Prozess**
+1. **Kontoinfo eingeben**: Zahlungspflichtige Person & IBAN werden im System erfasst
+2. **Vorlage generieren**: PDF-Mandat wird automatisch generiert (mit Energiegenossenschaft-Infos, Mandatsinfos, Widerrufsrecht) zum Überprüfen und Unterschreiben
+3. **Unterschriebenes Mandat hochladen**: Mitglied lädt das unterzeichnete PDF hoch (per ID Austria digital oder per Hand mit Kugelschreiber)
+   - App speichert Mandat **versionssicher** (v1, v2, v3, ...) und zeitgestempelt zugeordnet zum Haus
+   - Mehrere Versionen können nebeneinander bestehen (z.B. bei Austausch der IBAN)
+
+#### **Funktionalitäten**
 - **Digitale Mandate-Verwaltung** mit Versionskontrolle und Timestamping
 - **Automatische PDF-Mandate-Generierung** mit Energiegenossenschaft-Branding und -Adresse
 - **Digitale Mandate hochladen** mit Versionierung (v1, v2, etc.) und Zeitstempel
