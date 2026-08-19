@@ -7,6 +7,22 @@ $currentPage = 'backup-status';
 
 	<h1 style="margin-bottom: 30px;">💾 Backup-Status</h1>
 
+	<div style="margin-bottom: 20px;">
+		<button id="create-backup-btn" style="
+			padding: 12px 24px;
+			font-size: 16px;
+			background: #28a745;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-weight: 600;
+		">
+			⚡ Backup jetzt erstellen
+		</button>
+		<span id="create-status" style="margin-left: 12px; vertical-align: middle;"></span>
+	</div>
+
 	<div id="status-container" style="max-width: 900px;">
 		<div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
 			<h2 style="margin-top: 0; font-size: 18px; margin-bottom: 24px;">📊 Status</h2>
@@ -61,15 +77,51 @@ $currentPage = 'backup-status';
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	loadBackupStatus();
+	setupCreateBackupButton();
+	// Reload status every 30 seconds
+	setInterval(loadBackupStatus, 30000);
 });
+
+function setupCreateBackupButton() {
+	const btn = document.getElementById('create-backup-btn');
+	const status = document.getElementById('create-status');
+
+	btn.addEventListener('click', function() {
+		btn.disabled = true;
+		status.textContent = '⏳ Backup wird erstellt...';
+		status.style.color = '#0082c9';
+
+		fetch(OC.generateUrl('/apps/weinsteigfinance/api/backup/export'))
+			.then(r => r.json())
+			.then(data => {
+				if (data.success && data.downloadUrl) {
+					status.textContent = '✓ Backup erstellt!';
+					status.style.color = '#28a745';
+					window.location.href = data.downloadUrl;
+					loadBackupStatus(); // Reload list
+					setTimeout(() => {
+						btn.disabled = false;
+						status.textContent = '';
+					}, 3000);
+				} else {
+					throw new Error(data.error || 'Unbekannter Fehler');
+				}
+			})
+			.catch(err => {
+				status.textContent = '✗ Fehler: ' + err.message;
+				status.style.color = '#dc3545';
+				btn.disabled = false;
+			});
+	});
+}
 
 function loadBackupStatus() {
 	fetch(OC.generateUrl('/apps/weinsteigfinance/api/backup/status'))
 		.then(r => r.json())
 		.then(data => {
-			document.getElementById('last-backup').textContent = data.lastBackupDate;
-			document.getElementById('next-backup').textContent = data.nextBackupDate;
-			document.getElementById('remaining-time').textContent = data.remainingTime;
+			document.getElementById('last-backup').textContent = data.lastBackupDate || '—';
+			document.getElementById('next-backup').textContent = data.nextBackupDate || '—';
+			document.getElementById('remaining-time').textContent = data.remainingTime || '—';
 
 			const tbody = document.getElementById('backups-tbody');
 			tbody.innerHTML = '';
