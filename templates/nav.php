@@ -72,7 +72,7 @@ try {
 
 		<a href="/index.php/apps/weinsteigfinance/backup-status"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'backup-status' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
-			💾 Backup-Status
+			💾 Backup
 		</a>
 		<?php endif; ?>
 
