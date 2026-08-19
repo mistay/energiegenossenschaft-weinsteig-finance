@@ -7,7 +7,7 @@ $currentPage = 'backup-status';
 <div id="weinsteigfinance-backup-status" class="app-weinsteigfinance">
 	<?php include 'nav.php'; ?>
 
-	<h1 style="margin-bottom: 30px;">💾 Backup-Status</h1>
+	<h1 style="margin-bottom: 30px;">💾 Backup</h1>
 
 	<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
 		<p style="margin: 0; color: #0082c9;">
