@@ -1041,10 +1041,18 @@ class ApiController extends Controller {
 			$this->addDirectoryToZip($tempDir, $zip);
 			$zip->close();
 
-			// 4. Download
-			header('Content-Type: application/zip');
+			// 4. Download - clear all previous headers and set ZIP headers
+			header_remove('Content-Encoding');
+			header_remove('Content-Type');
+			header_remove('Content-Disposition');
+
+			header('Content-Type: application/zip; charset=utf-8');
 			header('Content-Disposition: attachment; filename="' . $filename . '"');
 			header('Content-Length: ' . filesize($zipFile));
+			header('Cache-Control: no-cache, no-store, must-revalidate');
+			header('Pragma: no-cache');
+			header('Expires: 0');
+
 			readfile($zipFile);
 
 			// Cleanup
