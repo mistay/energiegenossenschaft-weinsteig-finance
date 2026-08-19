@@ -39,8 +39,8 @@ $currentPage = 'backup-status';
 		</p>
 	</div>
 
-	<div style="background: #fff9e6; border-left: 4px solid #ff9800; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
-		<p style="margin: 0; color: #e65100;">
+	<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
+		<p style="margin: 0; color: #2e7d32;">
 			<strong>📦 Im ZIP-Backup enthalten:</strong><br>
 			<strong>database.sql</strong> – MySQL SQL-Dump aller Tabellen<br>
 			<strong>generated/</strong> – Verzeichnisstruktur mit hochgeladenen Mandaten<br>
@@ -49,8 +49,8 @@ $currentPage = 'backup-status';
 		</p>
 	</div>
 
-	<div style="background: #f3e5f5; border-left: 4px solid #9c27b0; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
-		<p style="margin: 0; color: #6a1b9a;">
+	<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
+		<p style="margin: 0; color: #0082c9;">
 			<strong>🔄 Wie Sie ein Backup wiederherstellen:</strong><br>
 			1. ZIP-Datei extrahieren<br>
 			2. SQL einspielen: <code style="background: #f0f0f0; padding: 2px 4px;">mysql &lt; database.sql</code><br>
