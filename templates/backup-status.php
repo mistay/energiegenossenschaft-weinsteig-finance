@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+style('weinsteigfinance', 'style');
 $currentPage = 'backup-status';
 ?>
 <div id="weinsteigfinance-backup-status" class="app-weinsteigfinance">
@@ -75,7 +76,10 @@ $currentPage = 'backup-status';
 </div>
 
 <script>
+console.log('backup-status.php script loaded');
+
 document.addEventListener('DOMContentLoaded', function() {
+	console.log('DOMContentLoaded fired');
 	loadBackupStatus();
 	setupCreateBackupButton();
 	// Reload status every 30 seconds
@@ -91,7 +95,7 @@ function setupCreateBackupButton() {
 		status.textContent = '⏳ Backup wird erstellt...';
 		status.style.color = '#0082c9';
 
-		fetch(OC.generateUrl('/apps/weinsteigfinance/api/backup/export'))
+		fetch('/index.php/apps/weinsteigfinance/api/backup/export')
 			.then(r => r.json())
 			.then(data => {
 				if (data.success && data.downloadUrl) {
@@ -116,7 +120,7 @@ function setupCreateBackupButton() {
 }
 
 function loadBackupStatus() {
-	const url = OC.generateUrl('/apps/weinsteigfinance/api/backup/status');
+	const url = '/index.php/apps/weinsteigfinance/api/backup/status';
 
 	fetch(url)
 		.then(r => {
