@@ -206,4 +206,19 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'backup');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function backupStatus(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
+		Util::addScript(Application::APP_ID, 'backup-status');
+
+		return new TemplateResponse(Application::APP_ID, 'backup-status');
+	}
 }

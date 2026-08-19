@@ -10,6 +10,7 @@ use OCA\WeinsteigFinance\Service\ConfigService;
 use OCA\WeinsteigFinance\Service\MandateService;
 use OCA\WeinsteigFinance\Service\VorschreibungService;
 use OCA\WeinsteigFinance\Service\ZahlungService;
+use OCA\WeinsteigFinance\Service\BackupService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -37,6 +38,7 @@ class ApiController extends Controller {
 		private VorschreibungService $vorschreibungService,
 		private ZahlungService $zahlungService,
 		private ConfigService $configService,
+		private BackupService $backupService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -939,6 +941,55 @@ class ApiController extends Controller {
 			// Silently fall through to default
 		}
 		return new DataResponse(['version' => '1.3.0']);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function getBackupStatus(): DataResponse {
+		// Nur Obpersonen dürfen Backup-Status sehen
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$info = $this->backupService->getBackupInfo();
+			return new DataResponse($info);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function downloadBackup(string $filename) {
+		// Nur Obpersonen dürfen Backups downloaden
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// Security: nur ZIP-Dateien mit richtigem Naming-Pattern
+			if (!preg_match('/^weinsteig-finance-backup_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.zip$/', $filename)) {
+				return new DataResponse(['error' => 'Invalid filename'], 400);
+			}
+
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$backupFile = "$dataDir/backup/$filename";
+
+			if (!file_exists($backupFile)) {
+				return new DataResponse(['error' => 'Backup not found'], 404);
+			}
+
+			// Download as ZIP
+			header('Content-Type: application/zip');
+			header('Content-Disposition: attachment; filename="' . $filename . '"');
+			header('Content-Length: ' . filesize($backupFile));
+
+			readfile($backupFile);
+			exit;
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
 	}
 
 	#[NoAdminRequired]

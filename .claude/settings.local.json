@@ -10,7 +10,10 @@
       "Bash(php -l lib/Controller/ApiController.php)",
       "Bash(node --check js/vorschreibungen.js)",
       "Bash(php -l lib/Controller/PageController.php)",
-      "Bash(node --check js/user-groups.js)"
+      "Bash(node --check js/user-groups.js)",
+      "Bash(git revert *)",
+      "Bash(php -l lib/BackgroundJob/GenerateBackupJob.php)",
+      "Bash(php -l lib/Service/BackupService.php)"
     ]
   }
 }
