@@ -191,6 +191,22 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Responsive Navigation** mit Sticky-Positionierung
 - **Responsive Tabellen** mit Table-Wrapping für Mobile
 
+### 💾 Datenbank-Backup & Wiederherstellung
+- **Vollständiges ZIP-Backup** mit Datenbank und Dateien
+- **MySQL SQL Dump** aller Tabellen im Standard-Format
+- **Mandate-PDFs** in exakter Dateisystem-Struktur enthalten
+- **Einfache Wiederherstellung**: Extract ZIP → SQL einspielen → Fertig!
+- **Nur für Obpersonen** (Administratoren) zugänglich
+- **Restore-Prozess**:
+  ```bash
+  1. ZIP extrahieren
+  2. mysql < database.sql
+  3. cp -r generated/ /var/www/nextcloud/data/
+  4. Fertig! ✅
+  ```
+- **Struktur im ZIP**: `database.sql` + `generated/` (exakte Live-Struktur)
+- **Regelmäßige Backups** für Disaster Recovery empfohlen
+
 ### 🎯 Administrator-Features & Verwaltung
 - **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded) mit offenen Beträgen
 - **Offene Beträge Übersicht**: Farblich formatiert (🔴 Rückstand, 🟢 Guthaben, ⚪ ausgeglichen)
@@ -275,10 +291,15 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.3.38
+- **Aktuelle Version**: 1.3.40
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12 Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.3.40)**:
+  - 💾 Vollständiges Datenbank-Backup als ZIP-Archive
+  - 📦 MySQL SQL Dump + alle Mandate-PDFs in einem Download
+  - 🔄 Einfache Wiederherstellung: SQL einspielen + Dateien kopieren
+  - 📋 Exakte Dateisystem-Struktur für 1:1 Restore
 - **Neue Features (v1.3.38)**:
   - ✅ Mandate-Approval-Workflow: Kassier:innen/Obpersonen können Mandate genehmigen
   - 📋 Approval-Status-Anzeige mit Farben (Ausstehend = gelb, Genehmigt = grün)
