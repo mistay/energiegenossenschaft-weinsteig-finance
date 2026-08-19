@@ -12,6 +12,12 @@ $currentPage = 'backup';
 <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
 	<h1 style="margin-bottom: 30px;">💾 Datenbank-Backup</h1>
 
+	<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+		<p style="margin: 0; color: #0082c9;">
+			<strong>ℹ️ Hinweis:</strong> Du hast Zugriff auf diese Funktion, weil dieses Nutzerkonto in der Gruppe <strong>👑 obpersonen</strong> geführt wird.
+		</p>
+	</div>
+
 	<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
 		<p style="margin: 0; color: #0082c9;">
 			<strong>Sicherung aller Daten</strong><br>
