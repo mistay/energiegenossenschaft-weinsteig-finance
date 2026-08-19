@@ -24,6 +24,14 @@ $currentPage = 'backup-status';
 		<span id="create-status" style="margin-left: 12px; vertical-align: middle;"></span>
 	</div>
 
+	<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
+		<p style="margin: 0; color: #2e7d32;">
+			<strong>✅ Automatische Backups:</strong><br>
+			Die Datenbank wird täglich um 02:00 Uhr automatisch gesichert.
+			Alle Backups werden im Ordner <code style="background: #f0f0f0; padding: 2px 4px;">/data/backup/</code> gespeichert.
+		</p>
+	</div>
+
 	<div id="status-container" style="max-width: 900px;">
 		<div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
 			<h2 style="margin-top: 0; font-size: 18px; margin-bottom: 24px;">📊 Status</h2>
@@ -64,14 +72,6 @@ $currentPage = 'backup-status';
 				</table>
 			</div>
 		</div>
-
-		<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-top: 30px;">
-			<p style="margin: 0; color: #2e7d32;">
-				<strong>✅ Automatische Backups:</strong><br>
-				Die Datenbank wird täglich um 02:00 Uhr automatisch gesichert.
-				Alle Backups werden im Ordner <code style="background: #f0f0f0; padding: 2px 4px;">/data/backup/</code> gespeichert.
-			</p>
-		</div>
 	</div>
 </div>
 
@@ -106,6 +106,7 @@ function setupCreateBackupButton() {
 			headers: {
 				'Accept': 'application/json',
 			},
+			credentials: 'include',
 		})
 			.then(r => {
 				console.log('Response status:', r.status);
@@ -149,6 +150,7 @@ function loadBackupStatus() {
 		headers: {
 			'Accept': 'application/json',
 		},
+		credentials: 'include',
 	})
 		.then(r => {
 			console.log('loadBackupStatus response status:', r.status);
