@@ -16,7 +16,8 @@
       "Bash(php -l lib/Service/BackupService.php)",
       "Bash(sed -i '1113,1118d' lib/Controller/ApiController.php)",
       "Bash(sed -i '1112s/$/\\\\n\\\\t\\\\t$dataDir = $this->config->getSystemValue\\(\"datadirectory\"\\);\\\\n\\\\t\\\\t$backupDir = \"$dataDir\\\\/backup\";\\\\n\\\\t\\\\tif \\(!is_dir\\($backupDir\\)\\) {\\\\n\\\\t\\\\t\\\\tmkdir\\($backupDir, 0750, true\\);\\\\n\\\\t\\\\t}\\\\n\\\\t\\\\t$backupFile = \"$backupDir\\\\/$filename\";\\\\n\\\\t\\\\trename\\($zipFile, $backupFile\\);\\\\n\\\\t\\\\t$this->removeDirectory\\($tempDir\\);\\\\n\\\\n\\\\t\\\\t$response = new StreamResponse\\(fopen\\($backupFile, \"r\"\\)\\);\\\\n\\\\t\\\\t$response->addHeader\\(\"Content-Type\", \"application\\\\/zip\"\\);\\\\n\\\\t\\\\t$response->addHeader\\(\"Content-Disposition\", \"attachment; filename=\\\\\"\" . $filename . \"\\\\\"\"\\);\\\\n\\\\t\\\\t$response->addHeader\\(\"Content-Length\", filesize\\($backupFile\\)\\);\\\\n\\\\t\\\\treturn $response;/' lib/Controller/ApiController.php)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(php *)"
     ]
   }
 }

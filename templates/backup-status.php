@@ -116,9 +116,23 @@ function setupCreateBackupButton() {
 }
 
 function loadBackupStatus() {
-	fetch(OC.generateUrl('/apps/weinsteigfinance/api/backup/status'))
-		.then(r => r.json())
+	const url = OC.generateUrl('/apps/weinsteigfinance/api/backup/status');
+
+	fetch(url)
+		.then(r => {
+			if (!r.ok) {
+				console.error('API returned', r.status, r.statusText);
+				throw new Error('API status: ' + r.status);
+			}
+			return r.json();
+		})
 		.then(data => {
+			console.log('Backup status data:', data);
+
+			if (data.error) {
+				throw new Error(data.error);
+			}
+
 			document.getElementById('last-backup').textContent = data.lastBackupDate || '—';
 			document.getElementById('next-backup').textContent = data.nextBackupDate || '—';
 			document.getElementById('remaining-time').textContent = data.remainingTime || '—';
@@ -126,7 +140,7 @@ function loadBackupStatus() {
 			const tbody = document.getElementById('backups-tbody');
 			tbody.innerHTML = '';
 
-			if (data.backups.length === 0) {
+			if (!data.backups || data.backups.length === 0) {
 				tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">Keine Backups vorhanden</td></tr>';
 				return;
 			}
@@ -154,7 +168,8 @@ function loadBackupStatus() {
 			});
 		})
 		.catch(err => {
-			document.getElementById('backups-tbody').innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #dc3545;">Fehler beim Laden</td></tr>';
+			console.error('Error loading backup status:', err);
+			document.getElementById('backups-tbody').innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #dc3545;">Fehler beim Laden: ' + err.message + '</td></tr>';
 		});
 }
 </script>
