@@ -31,11 +31,31 @@ $currentPage = 'backup-status';
 		<span id="create-status" style="margin-left: 12px; vertical-align: middle;"></span>
 	</div>
 
-	<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
+	<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 20px; max-width: 900px;">
 		<p style="margin: 0; color: #2e7d32;">
 			<strong>✅ Automatische Backups:</strong><br>
 			Die Datenbank wird täglich um 02:00 Uhr automatisch gesichert.
 			Alle Backups werden im Ordner <code style="background: #f0f0f0; padding: 2px 4px;">/data/backup/</code> gespeichert.
+		</p>
+	</div>
+
+	<div style="background: #fff9e6; border-left: 4px solid #ff9800; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
+		<p style="margin: 0; color: #e65100;">
+			<strong>📦 Im ZIP-Backup enthalten:</strong><br>
+			<strong>database.sql</strong> – MySQL SQL-Dump aller Tabellen<br>
+			<strong>generated/</strong> – Verzeichnisstruktur mit hochgeladenen Mandaten<br>
+			<br>
+			Die Struktur entspricht exakt dem Nextcloud Dateiverzeichnis, sodass das Backup direkt wiederhergestellt werden kann.
+		</p>
+	</div>
+
+	<div style="background: #f3e5f5; border-left: 4px solid #9c27b0; padding: 20px; border-radius: 4px; margin-bottom: 30px; max-width: 900px;">
+		<p style="margin: 0; color: #6a1b9a;">
+			<strong>🔄 Wie Sie ein Backup wiederherstellen:</strong><br>
+			1. ZIP-Datei extrahieren<br>
+			2. SQL einspielen: <code style="background: #f0f0f0; padding: 2px 4px;">mysql &lt; database.sql</code><br>
+			3. Verzeichnis <code style="background: #f0f0f0; padding: 2px 4px;">generated/</code> nach <code style="background: #f0f0f0; padding: 2px 4px;">/var/www/nextcloud/data/</code> kopieren<br>
+			4. Fertig! ✅
 		</p>
 	</div>
 
