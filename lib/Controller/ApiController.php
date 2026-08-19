@@ -1065,19 +1065,9 @@ class ApiController extends Controller {
 		}
 
 		try {
-			$timestamp = (new DateTime())->format('Y-m-d_H-i-s');
-			$filename = "weinsteig-finance-backup_$timestamp.zip";
-
-			$dataDir = $this->config->getSystemValue('datadirectory');
-			$backupDir = "$dataDir/backup";
-			if (!is_dir($backupDir)) {
-				mkdir($backupDir, 0750, true);
-			}
-
-			$backupFile = "$backupDir/$filename";
-
 			// Erstelle die ZIP über BackupService
-			$this->backupService->createBackupZip($filename);
+			$backupFile = $this->backupService->createBackup();
+			$filename = basename($backupFile);
 
 			// Gebe Download-URL zurück
 			$downloadUrl = $this->urlGenerator->linkToRoute('weinsteigfinance.api.downloadBackup', ['filename' => $filename]);
