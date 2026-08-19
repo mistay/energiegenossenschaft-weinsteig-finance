@@ -199,6 +199,8 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Mandate-PDFs** in exakter Dateisystem-Struktur enthalten
 - **Einfache Wiederherstellung**: Extract ZIP → SQL einspielen → Fertig!
 - **On-Demand-Download** auf der Backup-Seite verfügbar
+- **⚡ Sofort-Backup-Button** auf Backup-Status Seite zum Ad-hoc Backup erstellen
+- **Status-Feedback** während Backup-Erstellung (mit Farbanzeigen)
 
 #### **Automatische Cron-Backups** ⏰
 - **Täglich um 02:00 Uhr** automatisches Backup
@@ -207,9 +209,16 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **ZIP-Format**: `database.sql` + `generated/` Verzeichnisstruktur
 - **Backup-Status-Seite**: Zeigt:
   - 🕐 Letztes Backup (Datum + Zeit)
-  - ⏱️ Nächstes Backup (Datum + Zeit)
-  - ⏳ Verbleibende Zeit bis nächstes Backup
+  - ⏱️ Nächstes Backup (Datum + Zeit, täglich um 02:00 Uhr)
+  - ⏳ Verbleibende Zeit bis nächstes Backup (berechnet in Stunden:Minuten)
   - 📥 Download-Liste der letzten 10 Backups
+  - ⚡ "Backup jetzt erstellen" Button für manuelle Trigger
+
+#### **Status-Dashboard Features**
+- **Live-Aktualisierung** alle 30 Sekunden
+- **Automatische Info-Box** mit Erklärung zu automatischen Backups
+- **Farbliche Feedback** bei Button-Aktion (blau: lädt, grün: erfolgreich, rot: fehler)
+- **Fehler-Anzeige** direkt im Browser bei API-Problemen
 
 #### **Restore-Prozess** (identisch für Manual & Cron):
 ```bash
@@ -224,6 +233,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Background-Job** für Automation (kein manueller Cron nötig)
 - **Zeitstempel im Filename** für automatische Archivierung
 - **Große Dateien OK**: kein Größenlimit für Backups
+- **Nextcloud CSP-konform**: External JavaScript mit Content-Security-Policy Compliance
 
 ### 🎯 Administrator-Features & Verwaltung
 - **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded) mit offenen Beträgen
@@ -309,10 +319,17 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.4.0
+- **Aktuelle Version**: 1.4.7
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.4.7)**:
+  - ⚡ Manual Backup Button auf Backup-Status Seite
+  - 🔄 Sofortiges Backup erstellen mit "Backup jetzt erstellen" Button
+  - 🔐 Verbesserte Authentifizierung für API-Aufrufe (credentials: 'include')
+  - 🔒 CSP-Sicherheit: External JavaScript-Loading statt Inline-Scripts
+  - 📊 Bessere Status-Anzeige mit Live-Aktualisierung alle 30 Sekunden
+  - 🎨 Verbessertes UI-Layout (Info-Box oben, bessere Übersicht)
 - **Neue Features (v1.4.0)**:
   - ⏰ Automatisches tägliches Backup (02:00 Uhr via Background-Job)
   - 📁 Backup-Speicherung im Dateisystem (`/data/backup/`)
