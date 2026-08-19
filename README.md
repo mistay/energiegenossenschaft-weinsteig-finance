@@ -26,23 +26,33 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 
 ### 💳 SEPA-Lastschrift-Mandate Management
 
-#### **Mandate-Workflow: 3-Schritte-Prozess**
+#### **Mandate-Workflow: 4-Schritte-Prozess mit Approval**
 1. **Kontoinfo eingeben**: Zahlungspflichtige Person & IBAN werden im System erfasst
 2. **Vorlage generieren**: PDF-Mandat wird automatisch generiert (mit Energiegenossenschaft-Infos, Mandatsinfos, Widerrufsrecht) zum Überprüfen und Unterschreiben
 3. **Unterschriebenes Mandat hochladen**: Mitglied lädt das unterzeichnete PDF hoch (per ID Austria digital oder per Hand mit Kugelschreiber)
    - App speichert Mandat **versionssicher** (v1, v2, v3, ...) und zeitgestempelt zugeordnet zum Haus
    - Mehrere Versionen können nebeneinander bestehen (z.B. bei Austausch der IBAN)
+4. **Mandat-Review & Approval**: Kassier:innen/Administratoren prüfen und genehmigen die hochgeladenen Mandate
+   - **Status-Anzeige**: Ausstehend (gelb) oder Genehmigt (grün)
+   - **Approve-Button** (✓ OK): Nur Kassier:innen & Obpersonen
+   - **Lösch-Button** (🗑️): 
+     - **Nicht genehmigte Dateien**: Alle Rollen können löschen (zum Austausch/Korrektur)
+     - **Genehmigte Dateien**: Nur Kassier:innen & Obpersonen können löschen (Schutz vor versehentlichem Löschen)
+   - **Audit-Trail**: Wer genehmigt hat und wann (mit Timestamp)
 
 #### **Funktionalitäten**
 - **Digitale Mandate-Verwaltung** mit Versionskontrolle und Timestamping
 - **Automatische PDF-Mandate-Generierung** mit Energiegenossenschaft-Branding und -Adresse
 - **Digitale Mandate hochladen** mit Versionierung (v1, v2, etc.) und Zeitstempel
+- **Mandate-Approval-Workflow**: Kassier:innen/Obpersonen können hochgeladene Mandate überprüfen und genehmigen
+- **Approval-Status-Tracking**: Zeigt an, ob Mandat genehmigt ist und von wem (mit Timestamp)
+- **Mandate löschen**: Nicht genehmigte Dateien von allen löschbar, genehmigte nur von Kassier:innen/Obpersonen
 - **Dynamische Upload-Größen-Validierung** mit PHP-Konfiguration (respektiert `upload_max_filesize` und `post_max_size`)
 - **Intelligente Fehlermeldungen** bei zu großen Dateien (zeigt tatsächliche Limit + Dateigröße in Deutsch)
 - **Server- und Client-seitige Validierung** für robuste Dateigrößen-Prüfung
 - **Mandate widerrufen** mit Grund-Angabe und Widerrufsdatum-Tracking
 - **Widerrufsrecht** online für Mitglieder verfügbar
-- **Mandate-Status-Anzeige** (✓ aktiv, ⚠️ zurückgezogen, ⏳ nicht erteilt)
+- **Mandate-Status-Anzeige** (✓ aktiv, ⚠️ zurückgezogen, ⏳ nicht erteilt, ✓ genehmigt)
 - **SEPA-Core-Standard-Compliance** für maximale Bankkompatibilität
 - **IBAN-Validierung** mit ISO 7064 mod-97 Checksum-Algorithmus (Client + Server)
 - **Mandate-Erteilungs-Datum** zentral erfasst und angezeigt
@@ -265,10 +275,15 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.3.37
+- **Aktuelle Version**: 1.3.38
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
-- **Backward-Kompatibilität**: Alle 10+ Migrationen vollständig unterstützt
+- **Backward-Kompatibilität**: Alle 12 Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.3.38)**:
+  - ✅ Mandate-Approval-Workflow: Kassier:innen/Obpersonen können Mandate genehmigen
+  - 📋 Approval-Status-Anzeige mit Farben (Ausstehend = gelb, Genehmigt = grün)
+  - 🗑️ Intelligente Lösch-Funktion: Nicht genehmigte Dateien von allen löschbar, genehmigte nur von Kassier:innen/Obpersonen
+  - 🔍 Audit-Trail für Approvals (wer genehmigt hat, wann)
 - **Neue Features (v1.3.3x)**:
   - 📤 Dynamische Upload-Größen-Validierung basierend auf PHP-Konfiguration
   - ⚠️ Aussagekräftige Fehlermeldungen bei zu großen Dateien (zeigt echtes Limit und Dateigröße)
