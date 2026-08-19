@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	let currentMemberId = null;
 	let isObperson = false;
+	let isKassier = false;
 	let isUserView = false;
 	let maxFileSize = 2 * 1024 * 1024; // Fallback: 2 MB (wird vom Server überschrieben)
 	const ibanStatus = document.getElementById('iban-status');
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				}
 
 				isObperson = true;
+				isKassier = userInfo.groups && userInfo.groups.includes('kassier:innen');
 				// Show info box for authorized groups
 				const userGroups = userInfo.groups || [];
 				const authorizedGroups = ['obpersonen', 'kassier:innen'];
@@ -272,16 +274,85 @@ document.addEventListener('DOMContentLoaded', function() {
 					if (data.exists && data.files && data.files.length > 0) {
 						downloadCell.innerHTML = '';
 						data.files.forEach(f => {
+							const container = document.createElement('div');
+							container.style.marginBottom = '8px';
+							container.style.padding = '6px';
+							container.style.backgroundColor = f.approved ? '#e8f5e9' : '#fff3cd';
+							container.style.borderRadius = '4px';
+							container.style.fontSize = '11px';
+
 							const link = document.createElement('a');
 							link.href = f.downloadUrl;
-							link.style.display = 'block';
-							link.style.marginBottom = '4px';
+							link.style.display = 'inline-block';
 							link.style.color = '#28a745';
 							link.style.textDecoration = 'none';
-							link.style.fontSize = '12px';
+							link.style.fontWeight = 'bold';
+							link.style.marginRight = '6px';
 							const date = new Date(f.mtime * 1000).toLocaleDateString('de-AT');
-							link.innerHTML = `📥 v${f.version} (${date})`;
-							downloadCell.appendChild(link);
+							const statusIcon = f.approved ? '✓' : '⏳';
+							const statusText = f.approved ? 'Genehmigt' : 'Ausstehend';
+							link.innerHTML = `📥 v${f.version} (${date}) ${statusIcon} ${statusText}`;
+							container.appendChild(link);
+
+							// Approve Button (nur für Kassier:innen und obpersonen)
+							if (!f.approved && (isObperson || isKassier)) {
+								const approveBtn = document.createElement('button');
+								approveBtn.textContent = '✓ OK';
+								approveBtn.style.marginRight = '4px';
+								approveBtn.style.padding = '2px 6px';
+								approveBtn.style.fontSize = '10px';
+								approveBtn.style.backgroundColor = '#28a745';
+								approveBtn.style.color = 'white';
+								approveBtn.style.border = 'none';
+								approveBtn.style.borderRadius = '3px';
+								approveBtn.style.cursor = 'pointer';
+								approveBtn.addEventListener('click', function() {
+									fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed/' + f.version + '/approve'), {
+										method: 'POST'
+									})
+										.then(r => r.json())
+										.then(data => {
+											if (data.success) {
+												load();
+											} else {
+												alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+											}
+										});
+								});
+								container.appendChild(approveBtn);
+							}
+
+							// Delete Button
+							const deleteBtn = document.createElement('button');
+							deleteBtn.textContent = '🗑️ Löschen';
+							deleteBtn.style.padding = '2px 6px';
+							deleteBtn.style.fontSize = '10px';
+							deleteBtn.style.backgroundColor = f.approved && !(isObperson || isKassier) ? '#ccc' : '#dc3545';
+							deleteBtn.style.color = 'white';
+							deleteBtn.style.border = 'none';
+							deleteBtn.style.borderRadius = '3px';
+							deleteBtn.style.cursor = f.approved && !(isObperson || isKassier) ? 'not-allowed' : 'pointer';
+							deleteBtn.disabled = f.approved && !(isObperson || isKassier);
+							deleteBtn.title = f.approved && !(isObperson || isKassier) ?
+								'Nur Kassier:innen/Administratoren können approvte Mandate löschen' : 'Mandat löschen';
+							deleteBtn.addEventListener('click', function() {
+								if (confirm('Möchten Sie dieses Mandat (v' + f.version + ') wirklich löschen?')) {
+									fetch(OC.generateUrl('/apps/weinsteigfinance/api/member/' + memberId + '/mandate-signed/' + f.version), {
+										method: 'DELETE'
+									})
+										.then(r => r.json())
+										.then(data => {
+											if (data.success) {
+												load();
+											} else {
+												alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
+											}
+										});
+								}
+							});
+							container.appendChild(deleteBtn);
+
+							downloadCell.appendChild(container);
 						});
 					} else {
 						downloadCell.innerHTML = '<span style="font-size: 12px; color: #999;">—</span>';

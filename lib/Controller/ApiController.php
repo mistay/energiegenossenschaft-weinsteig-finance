@@ -491,11 +491,25 @@ class ApiController extends Controller {
 				$dir = scandir($folderPath, SCANDIR_SORT_DESCENDING);
 				foreach ($dir as $file) {
 					if (preg_match('/^mandat_unterschrieben_v(\d+)\.pdf$/', $file, $m)) {
+						$version = (int)$m[1];
+
+						// Approval-Status laden
+						$qb = $this->db->getQueryBuilder();
+						$approval = $qb->select('*')
+							->from('weinsteig_mandate_approvals')
+							->where($qb->expr()->eq('member_id', $qb->createNamedParameter($id)))
+							->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($version)))
+							->executeQuery()
+							->fetch();
+
 						$files[] = [
-							'version' => (int)$m[1],
+							'version' => $version,
 							'filename' => $file,
-							'downloadUrl' => $this->urlGenerator->linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id, 'v' => (int)$m[1]]),
-							'mtime' => filemtime("$folderPath/$file")
+							'downloadUrl' => $this->urlGenerator->linkToRoute('weinsteigfinance.api.downloadSignedMandate', ['id' => $id, 'v' => $version]),
+							'mtime' => filemtime("$folderPath/$file"),
+							'approved' => $approval ? (bool)$approval['approved'] : false,
+							'approved_by' => $approval ? $approval['approved_by'] : null,
+							'approved_at' => $approval ? $approval['approved_at'] : null,
 						];
 					}
 				}
@@ -507,6 +521,126 @@ class ApiController extends Controller {
 				return new DataResponse(['exists' => false]);
 			}
 		} catch (\Throwable $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function approveMandatePdf(int $id, int $v): DataResponse {
+		// Nur obpersonen und kassier:innen dürfen approven
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot edit other members'], 403);
+		}
+
+		try {
+			$qb = $this->db->getQueryBuilder();
+			$approval = $qb->select('*')
+				->from('weinsteig_mandate_approvals')
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($id)))
+				->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($v)))
+				->executeQuery()
+				->fetch();
+
+			$now = (new DateTime())->format('Y-m-d H:i:s');
+
+			if ($approval) {
+				// Update existing approval
+				$qb = $this->db->getQueryBuilder();
+				$qb->update('weinsteig_mandate_approvals')
+					->set('approved', $qb->createNamedParameter(true))
+					->set('approved_by', $qb->createNamedParameter($userId))
+					->set('approved_at', $qb->createNamedParameter($now))
+					->where($qb->expr()->eq('member_id', $qb->createNamedParameter($id)))
+					->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($v)))
+					->executeStatement();
+			} else {
+				// Create new approval record
+				$qb = $this->db->getQueryBuilder();
+				$qb->insert('weinsteig_mandate_approvals')
+					->values([
+						'member_id' => $qb->createNamedParameter($id),
+						'version' => $qb->createNamedParameter($v),
+						'approved' => $qb->createNamedParameter(true),
+						'approved_by' => $qb->createNamedParameter($userId),
+						'approved_at' => $qb->createNamedParameter($now),
+						'created_at' => $qb->createNamedParameter($now),
+					])
+					->executeStatement();
+			}
+
+			return new DataResponse(['success' => true]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function deleteSignedMandatePdf(int $id, int $v): DataResponse {
+		if (!$this->canEdit()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!$this->canEditMember($id)) {
+			return new DataResponse(['error' => 'Cannot edit other members'], 403);
+		}
+
+		try {
+			// Approval-Status laden
+			$qb = $this->db->getQueryBuilder();
+			$approval = $qb->select('*')
+				->from('weinsteig_mandate_approvals')
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($id)))
+				->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($v)))
+				->executeQuery()
+				->fetch();
+
+			// Nur Kassier:innen und obpersonen dürfen approvte Dateien löschen
+			$userId = $this->getUserId();
+			$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+			if ($approval && $approval['approved'] && !$this->isObperson() && !$isKassier) {
+				return new DataResponse(['error' => 'Cannot delete approved mandates'], 403);
+			}
+
+			// Datei löschen
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('*')
+				->from('weinsteig_members')
+				->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
+				->executeQuery()
+				->fetch();
+
+			if (!$member) {
+				return new DataResponse(['error' => 'Member not found'], 404);
+			}
+
+			$address = $member['address'];
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$folderPath = "$dataDir/generated/{$address}/sepa";
+			$filePath = "$folderPath/mandat_unterschrieben_v{$v}.pdf";
+
+			if (file_exists($filePath)) {
+				unlink($filePath);
+			}
+
+			// Approval-Record löschen
+			if ($approval) {
+				$qb = $this->db->getQueryBuilder();
+				$qb->delete('weinsteig_mandate_approvals')
+					->where($qb->expr()->eq('member_id', $qb->createNamedParameter($id)))
+					->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($v)))
+					->executeStatement();
+			}
+
+			return new DataResponse(['success' => true]);
+		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
 	}
