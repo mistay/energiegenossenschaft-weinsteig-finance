@@ -191,21 +191,39 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Responsive Navigation** mit Sticky-Positionierung
 - **Responsive Tabellen** mit Table-Wrapping für Mobile
 
-### 💾 Datenbank-Backup & Wiederherstellung
+### 💾 Datenbank-Backup & Automatische Cron-Sicherung
+
+#### **Manuelle Backups**
 - **Vollständiges ZIP-Backup** mit Datenbank und Dateien
 - **MySQL SQL Dump** aller Tabellen im Standard-Format
 - **Mandate-PDFs** in exakter Dateisystem-Struktur enthalten
 - **Einfache Wiederherstellung**: Extract ZIP → SQL einspielen → Fertig!
+- **On-Demand-Download** auf der Backup-Seite verfügbar
+
+#### **Automatische Cron-Backups** ⏰
+- **Täglich um 02:00 Uhr** automatisches Backup
+- **Speicherung**: `/data/backup/` Verzeichnis (Dateisystem)
+- **Kein Backup-Rekursion**: Alte Backups werden NICHT ins neue Backup eingepackt
+- **ZIP-Format**: `database.sql` + `generated/` Verzeichnisstruktur
+- **Backup-Status-Seite**: Zeigt:
+  - 🕐 Letztes Backup (Datum + Zeit)
+  - ⏱️ Nächstes Backup (Datum + Zeit)
+  - ⏳ Verbleibende Zeit bis nächstes Backup
+  - 📥 Download-Liste der letzten 10 Backups
+
+#### **Restore-Prozess** (identisch für Manual & Cron):
+```bash
+1. ZIP extrahieren
+2. mysql < database.sql
+3. cp -r generated/ /var/www/nextcloud/data/
+4. Fertig! ✅
+```
+
+#### **Features**
 - **Nur für Obpersonen** (Administratoren) zugänglich
-- **Restore-Prozess**:
-  ```bash
-  1. ZIP extrahieren
-  2. mysql < database.sql
-  3. cp -r generated/ /var/www/nextcloud/data/
-  4. Fertig! ✅
-  ```
-- **Struktur im ZIP**: `database.sql` + `generated/` (exakte Live-Struktur)
-- **Regelmäßige Backups** für Disaster Recovery empfohlen
+- **Background-Job** für Automation (kein manueller Cron nötig)
+- **Zeitstempel im Filename** für automatische Archivierung
+- **Große Dateien OK**: kein Größenlimit für Backups
 
 ### 🎯 Administrator-Features & Verwaltung
 - **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded) mit offenen Beträgen
@@ -291,10 +309,17 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.3.40
+- **Aktuelle Version**: 1.4.0
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
-- **Backward-Kompatibilität**: Alle 12 Migrationen vollständig unterstützt
+- **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.4.0)**:
+  - ⏰ Automatisches tägliches Backup (02:00 Uhr via Background-Job)
+  - 📁 Backup-Speicherung im Dateisystem (`/data/backup/`)
+  - 📊 Backup-Status-Seite mit Cron-Info und Download-Liste
+  - 🕐 Status-Dashboard: Letztes Backup, Nächstes Backup, Verbleibende Zeit
+  - 🚫 Smart Backup: Alte Backups werden NICHT eingepackt (keine Rekursion)
+  - 📥 Download-Geschichte: Letzte 10 Backups verfügbar
 - **Neue Features (v1.3.40)**:
   - 💾 Vollständiges Datenbank-Backup als ZIP-Archive
   - 📦 MySQL SQL Dump + alle Mandate-PDFs in einem Download
