@@ -1015,44 +1015,148 @@ class ApiController extends Controller {
 
 		try {
 			$timestamp = (new DateTime())->format('Y-m-d_H-i-s');
-			$filename = "weinsteig-finance-backup_$timestamp.json";
+			$filename = "weinsteig-finance-backup_$timestamp.zip";
+			$tempDir = sys_get_temp_dir() . '/weinsteig-backup-' . bin2hex(random_bytes(8));
+			mkdir($tempDir);
 
-			$tables = [
-				'weinsteig_members',
-				'weinsteig_user_members',
-				'weinsteig_vorschreibungen',
-				'weinsteig_zahlungen',
-				'weinsteig_zahlung_vorschreibung',
-				'weinsteig_config',
-				'weinsteig_mandate_approvals',
-			];
+			// 1. SQL Dump erstellen
+			$sqlDump = $this->createSqlDump();
+			file_put_contents("$tempDir/database.sql", $sqlDump);
 
-			$backup = [
-				'timestamp' => $timestamp,
-				'app_version' => '1.3.38',
-				'tables' => [],
-			];
+			// 2. Mandate-Dateien kopieren
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$generatedPath = "$dataDir/generated";
 
-			foreach ($tables as $table) {
-				$qb = $this->db->getQueryBuilder();
-				$rows = $qb->select('*')
-					->from($table)
-					->executeQuery()
-					->fetchAll();
-
-				$backup['tables'][$table] = $rows;
+			if (is_dir($generatedPath)) {
+				$this->copyDirectory($generatedPath, "$tempDir/generated");
 			}
 
-			$json = json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+			// 3. ZIP erstellen
+			$zipFile = sys_get_temp_dir() . '/' . $filename;
+			$zip = new \ZipArchive();
+			if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+				throw new \Exception('Cannot create ZIP file');
+			}
 
-			header('Content-Type: application/json; charset=utf-8');
+			$this->addDirectoryToZip($tempDir, $zip);
+			$zip->close();
+
+			// 4. Download
+			header('Content-Type: application/zip');
 			header('Content-Disposition: attachment; filename="' . $filename . '"');
-			header('Content-Length: ' . strlen($json));
-			echo $json;
+			header('Content-Length: ' . filesize($zipFile));
+			readfile($zipFile);
+
+			// Cleanup
+			unlink($zipFile);
+			$this->removeDirectory($tempDir);
+
 			exit;
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
+	}
+
+	private function createSqlDump(): string {
+		$tables = [
+			'weinsteig_members',
+			'weinsteig_user_members',
+			'weinsteig_vorschreibungen',
+			'weinsteig_zahlungen',
+			'weinsteig_zahlung_vorschreibung',
+			'weinsteig_config',
+			'weinsteig_mandate_approvals',
+		];
+
+		$sql = "-- Weinsteig Finance Database Backup\n";
+		$sql .= "-- Created: " . (new DateTime())->format('Y-m-d H:i:s') . "\n\n";
+
+		foreach ($tables as $table) {
+			// DROP TABLE
+			$sql .= "DROP TABLE IF EXISTS `oc_$table`;\n\n";
+
+			// CREATE TABLE
+			$qb = $this->db->getQueryBuilder();
+			$result = $this->db->executeQuery("SHOW CREATE TABLE `oc_$table`");
+			$row = $result->fetch();
+			if ($row) {
+				$sql .= $row['Create Table'] . ";\n\n";
+			}
+
+			// INSERT DATA
+			$qb = $this->db->getQueryBuilder();
+			$rows = $qb->select('*')
+				->from($table)
+				->executeQuery()
+				->fetchAll();
+
+			if ($rows) {
+				foreach ($rows as $dataRow) {
+					$values = array_map(fn($v) => $v === null ? 'NULL' : "'" . str_replace("'", "''", (string)$v) . "'", $dataRow);
+					$sql .= "INSERT INTO `oc_$table` VALUES (" . implode(', ', $values) . ");\n";
+				}
+				$sql .= "\n";
+			}
+		}
+
+		return $sql;
+	}
+
+	private function copyDirectory(string $source, string $dest): void {
+		if (!is_dir($dest)) {
+			mkdir($dest, 0750, true);
+		}
+
+		$files = scandir($source);
+		foreach ($files as $file) {
+			if ($file === '.' || $file === '..') {
+				continue;
+			}
+
+			$srcPath = "$source/$file";
+			$destPath = "$dest/$file";
+
+			if (is_dir($srcPath)) {
+				$this->copyDirectory($srcPath, $destPath);
+			} else {
+				copy($srcPath, $destPath);
+			}
+		}
+	}
+
+	private function addDirectoryToZip(string $dir, \ZipArchive $zip, string $zipPath = ''): void {
+		$files = scandir($dir);
+		foreach ($files as $file) {
+			if ($file === '.' || $file === '..') {
+				continue;
+			}
+
+			$filePath = "$dir/$file";
+			$archivePath = $zipPath ? "$zipPath/$file" : $file;
+
+			if (is_dir($filePath)) {
+				$this->addDirectoryToZip($filePath, $zip, $archivePath);
+			} else {
+				$zip->addFile($filePath, $archivePath);
+			}
+		}
+	}
+
+	private function removeDirectory(string $dir): void {
+		$files = scandir($dir);
+		foreach ($files as $file) {
+			if ($file === '.' || $file === '..') {
+				continue;
+			}
+
+			$filePath = "$dir/$file";
+			if (is_dir($filePath)) {
+				$this->removeDirectory($filePath);
+			} else {
+				unlink($filePath);
+			}
+		}
+		rmdir($dir);
 	}
 
 	#[NoAdminRequired]

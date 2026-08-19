@@ -21,10 +21,11 @@ $currentPage = 'backup';
 	</div>
 
 	<div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-		<h2 style="margin-top: 0; font-size: 18px; margin-bottom: 16px;">📦 Backup herunterladen</h2>
+		<h2 style="margin-top: 0; font-size: 18px; margin-bottom: 16px;">📦 Vollständiges Backup herunterladen</h2>
 
 		<p style="color: #666; margin-bottom: 24px;">
-			Klicken Sie auf den Button unten, um ein Backup der kompletten Datenbank herunterzuladen.
+			Laden Sie ein ZIP-Archiv herunter, das die komplette Datenbank und alle hochgeladenen Mandate-Dateien enthält.
+			Dieses Backup kann direkt zur Wiederherstellung verwendet werden.
 		</p>
 
 		<button id="export-btn" style="
@@ -46,22 +47,30 @@ $currentPage = 'backup';
 	</div>
 
 	<div style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-top: 30px;">
-		<h3 style="margin-top: 0;">📋 Im Backup enthaltene Tabellen:</h3>
+		<h3 style="margin-top: 0;">📦 Im ZIP-Backup enthalten:</h3>
 		<ul style="margin: 0; padding-left: 20px; color: #666; font-size: 14px;">
-			<li>Mitglieder (Häuser)</li>
-			<li>Benutzer-Zuordnungen</li>
-			<li>Vorschreibungen (Rechnungen)</li>
-			<li>Zahlungen</li>
-			<li>Zahlungs-Vorschreibungs-Zuordnungen</li>
-			<li>Konfiguration (SEPA-Daten)</li>
-			<li>Mandat-Genehmigungen</li>
+			<li><strong>database.sql</strong> - MySQL SQL-Dump aller Tabellen</li>
+			<li><strong>generated/</strong> - Gesamte Verzeichnis-Struktur mit hochgeladenen Mandaten</li>
 		</ul>
+		<p style="margin: 12px 0 0 0; color: #666; font-size: 13px;">
+			Die Struktur entspricht exakt dem Nextcloud Dateiverzeichnis, sodass das Backup direkt wiederhergestellt werden kann.
+		</p>
+	</div>
+
+	<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-top: 30px;">
+		<h4 style="margin-top: 0; color: #2e7d32;">✅ Wie Sie das Backup wiederherstellen:</h4>
+		<ol style="margin: 0; padding-left: 20px; color: #2e7d32; font-size: 13px;">
+			<li>ZIP-Datei extrahieren</li>
+			<li>SQL einspielen: <code style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px;">mysql &lt; database.sql</code></li>
+			<li>Verzeichnis <code style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px;">generated/</code> nach <code style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px;">/var/www/nextcloud/data/</code> kopieren</li>
+			<li>Fertig! ✅</li>
+		</ol>
 	</div>
 
 	<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 4px; margin-top: 30px;">
 		<p style="margin: 0; color: #856404;">
-			<strong>⚠️ Hinweis:</strong> Backups sollten regelmäßig gemacht und an einem sicheren Ort gespeichert werden.
-			Hochgeladene Mandate-PDFs sind in diesem Backup nicht enthalten (diese werden separat im Dateisystem gespeichert).
+			<strong>⚠️ Empfehlung:</strong> Erstellen Sie regelmäßig Backups und speichern Sie diese an einem sicheren Ort.
+			Testen Sie die Wiederherstellung in regelmäßigen Abständen!
 		</p>
 	</div>
 </div>
