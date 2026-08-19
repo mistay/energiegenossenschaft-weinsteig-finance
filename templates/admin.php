@@ -12,6 +12,26 @@ $currentPage = 'admin';
 	<h2><?php p($l->t('Einstellungen')); ?></h2>
 	<p><?php p($l->t('Bankverbindung der Genossenschaft und Gläubiger-Identifikationsnummer für SEPA-Mandate.')); ?></p>
 
+	<div style="background: #f0f7ff; border: 1px solid #0082c9; border-radius: 8px; padding: 16px; margin-bottom: 30px;">
+		<a href="/index.php/apps/weinsteigfinance/backup" style="
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 10px 16px;
+			background: #0082c9;
+			color: white;
+			text-decoration: none;
+			border-radius: 4px;
+			font-weight: 500;
+			transition: background 0.2s;
+		" onmouseover="this.style.background='#0066a3'" onmouseout="this.style.background='#0082c9'">
+			💾 Datenbank-Backup
+		</a>
+		<p style="margin: 12px 0 0 0; color: #0082c9; font-size: 13px;">
+			Exportieren Sie die gesamte Datenbank als JSON-Backup für Sicherungszwecke.
+		</p>
+	</div>
+
 	<div id="config-box" style="margin-bottom: 25px; max-width: 400px;">
 		<div style="margin-bottom: 12px;">
 			<label style="display: block; margin-bottom: 4px; font-weight: 500; color: #333;">
