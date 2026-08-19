@@ -163,43 +163,68 @@ class BackupService {
 	}
 
 	public function getBackupInfo(): array {
-		$dataDir = $this->config->getSystemValue('datadirectory');
-		$backupDir = "$dataDir/backup";
+		try {
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			if (!$dataDir) {
+				throw new \Exception('datadirectory not configured');
+			}
 
-		$lastBackupTime = (int)$this->config->getAppValue('weinsteigfinance', 'last_backup_run', '0');
-		$lastBackupDate = $lastBackupTime ? (new DateTime())->setTimestamp($lastBackupTime)->format('d.m.Y H:i') : 'Nie';
+			$backupDir = "$dataDir/backup";
 
-		// Nächstes Backup: täglich um 2 AM
-		$nextBackupTime = $this->getNextBackupTime();
-		$nextBackupDate = (new DateTime())->setTimestamp($nextBackupTime)->format('d.m.Y H:i');
+			$lastBackupTime = (int)$this->config->getAppValue('weinsteigfinance', 'last_backup_run', '0');
+			$lastBackupDate = $lastBackupTime ? (new DateTime())->setTimestamp($lastBackupTime)->format('d.m.Y H:i') : 'Nie';
 
-		$remaining = $nextBackupTime - time();
-		$hours = floor($remaining / 3600);
-		$minutes = floor(($remaining % 3600) / 60);
-		$remainingTime = sprintf('%d:%02d Stunden', $hours, $minutes);
+			// Nächstes Backup: täglich um 2 AM
+			$nextBackupTime = $this->getNextBackupTime();
+			$nextBackupDate = (new DateTime())->setTimestamp($nextBackupTime)->format('d.m.Y H:i');
 
-		// Liste der Backups
-		$backups = [];
-		if (is_dir($backupDir)) {
-			$files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
-			foreach ($files as $file) {
-				if (preg_match('/^weinsteig-finance-backup_(.+)\.zip$/', $file, $m)) {
-					$backups[] = [
-						'filename' => $file,
-						'date' => $m[1],
-						'size' => filesize("$backupDir/$file"),
-						'url' => '/index.php/apps/weinsteigfinance/api/backup/download/' . urlencode($file),
-					];
+			$remaining = $nextBackupTime - time();
+			$hours = floor($remaining / 3600);
+			$minutes = floor(($remaining % 3600) / 60);
+			$remainingTime = sprintf('%d:%02d Stunden', $hours, $minutes);
+
+			// Liste der Backups
+			$backups = [];
+			if (is_dir($backupDir)) {
+				$files = scandir($backupDir, SCANDIR_SORT_DESCENDING);
+				if ($files !== false) {
+					foreach ($files as $file) {
+						if (preg_match('/^weinsteig-finance-backup_(.+)\.zip$/', $file, $m)) {
+							$filePath = "$backupDir/$file";
+							if (file_exists($filePath)) {
+								$backups[] = [
+									'filename' => $file,
+									'date' => $m[1],
+									'size' => filesize($filePath),
+									'url' => '/index.php/apps/weinsteigfinance/api/backup/download/' . urlencode($file),
+								];
+							}
+						}
+					}
 				}
 			}
-		}
 
-		return [
-			'lastBackupDate' => $lastBackupDate,
-			'nextBackupDate' => $nextBackupDate,
-			'remainingTime' => $remainingTime,
-			'backups' => array_slice($backups, 0, 10), // Letzte 10 Backups
-		];
+			return [
+				'lastBackupDate' => $lastBackupDate,
+				'nextBackupDate' => $nextBackupDate,
+				'remainingTime' => $remainingTime,
+				'backups' => array_slice($backups, 0, 10), // Letzte 10 Backups
+			];
+		} catch (\Exception $e) {
+			// Return at least the calculated times even if backup dir doesn't exist
+			$nextBackupTime = $this->getNextBackupTime();
+			$remaining = $nextBackupTime - time();
+			$hours = floor($remaining / 3600);
+			$minutes = floor(($remaining % 3600) / 60);
+
+			return [
+				'lastBackupDate' => 'Nie',
+				'nextBackupDate' => (new DateTime())->setTimestamp($nextBackupTime)->format('d.m.Y H:i'),
+				'remainingTime' => sprintf('%d:%02d Stunden', $hours, $minutes),
+				'backups' => [],
+				'_debug' => 'Fehler beim Laden der Backups: ' . $e->getMessage(),
+			];
+		}
 	}
 
 	private function getNextBackupTime(): int {
