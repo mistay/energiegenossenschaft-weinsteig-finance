@@ -90,19 +90,39 @@ function setupCreateBackupButton() {
 	const btn = document.getElementById('create-backup-btn');
 	const status = document.getElementById('create-status');
 
+	if (!btn) {
+		console.error('create-backup-btn not found');
+		return;
+	}
+
 	btn.addEventListener('click', function() {
+		console.log('Backup button clicked');
 		btn.disabled = true;
 		status.textContent = '⏳ Backup wird erstellt...';
 		status.style.color = '#0082c9';
 
-		fetch('/index.php/apps/weinsteigfinance/api/backup/export')
-			.then(r => r.json())
+		fetch('/index.php/apps/weinsteigfinance/api/backup/export', {
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+			},
+		})
+			.then(r => {
+				console.log('Response status:', r.status);
+				if (!r.ok) {
+					throw new Error('HTTP ' + r.status + ': ' + r.statusText);
+				}
+				return r.json();
+			})
 			.then(data => {
+				console.log('Response data:', data);
 				if (data.success && data.downloadUrl) {
 					status.textContent = '✓ Backup erstellt!';
 					status.style.color = '#28a745';
 					window.location.href = data.downloadUrl;
-					loadBackupStatus(); // Reload list
+					setTimeout(() => {
+						loadBackupStatus(); // Reload list
+					}, 500);
 					setTimeout(() => {
 						btn.disabled = false;
 						status.textContent = '';
@@ -112,6 +132,7 @@ function setupCreateBackupButton() {
 				}
 			})
 			.catch(err => {
+				console.error('Error:', err);
 				status.textContent = '✗ Fehler: ' + err.message;
 				status.style.color = '#dc3545';
 				btn.disabled = false;
@@ -121,12 +142,18 @@ function setupCreateBackupButton() {
 
 function loadBackupStatus() {
 	const url = '/index.php/apps/weinsteigfinance/api/backup/status';
+	console.log('Loading backup status from:', url);
 
-	fetch(url)
+	fetch(url, {
+		method: 'GET',
+		headers: {
+			'Accept': 'application/json',
+		},
+	})
 		.then(r => {
+			console.log('loadBackupStatus response status:', r.status);
 			if (!r.ok) {
-				console.error('API returned', r.status, r.statusText);
-				throw new Error('API status: ' + r.status);
+				throw new Error('API status: ' + r.status + ' ' + r.statusText);
 			}
 			return r.json();
 		})
