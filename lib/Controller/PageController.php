@@ -192,4 +192,18 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'sepa-datentraeger');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function backup(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		if (!$user || !$this->groupManager->isInGroup($user->getUID(), 'obpersonen')) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'backup');
+
+		return new TemplateResponse(Application::APP_ID, 'backup');
+	}
 }

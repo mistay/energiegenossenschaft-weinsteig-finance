@@ -14,6 +14,7 @@ return [
 		['name' => 'page#journal', 'url' => '/journal', 'verb' => 'GET'],
 		['name' => 'page#profil', 'url' => '/profil', 'verb' => 'GET'],
 		['name' => 'page#sepaDataCarrier', 'url' => '/sepa-datentraeger', 'verb' => 'GET'],
+		['name' => 'page#backup', 'url' => '/backup', 'verb' => 'GET'],
 		['name' => 'api#appVersion', 'url' => '/api/version', 'verb' => 'GET'],
 		['name' => 'api#uploadLimits', 'url' => '/api/upload-limits', 'verb' => 'GET'],
 		['name' => 'api#getConfig', 'url' => '/api/config', 'verb' => 'GET'],
@@ -46,5 +47,6 @@ return [
 		['name' => 'api#memberJournal', 'url' => '/api/member/{memberId}/journal', 'verb' => 'GET'],
 		['name' => 'api#sepaDataCarrier', 'url' => '/api/sepa-datentraeger', 'verb' => 'GET'],
 		['name' => 'api#sepaDataCarrierCsv', 'url' => '/api/sepa-datentraeger/export', 'verb' => 'GET'],
+		['name' => 'api#exportDatabase', 'url' => '/api/backup/export', 'verb' => 'GET'],
 	],
 ];

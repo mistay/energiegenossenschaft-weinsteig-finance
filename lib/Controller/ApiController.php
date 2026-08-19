@@ -1007,6 +1007,56 @@ class ApiController extends Controller {
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function exportDatabase() {
+		// Nur Obpersonen dürfen exportieren
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$timestamp = (new DateTime())->format('Y-m-d_H-i-s');
+			$filename = "weinsteig-finance-backup_$timestamp.json";
+
+			$tables = [
+				'weinsteig_members',
+				'weinsteig_user_members',
+				'weinsteig_vorschreibungen',
+				'weinsteig_zahlungen',
+				'weinsteig_zahlung_vorschreibung',
+				'weinsteig_config',
+				'weinsteig_mandate_approvals',
+			];
+
+			$backup = [
+				'timestamp' => $timestamp,
+				'app_version' => '1.3.38',
+				'tables' => [],
+			];
+
+			foreach ($tables as $table) {
+				$qb = $this->db->getQueryBuilder();
+				$rows = $qb->select('*')
+					->from($table)
+					->executeQuery()
+					->fetchAll();
+
+				$backup['tables'][$table] = $rows;
+			}
+
+			$json = json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+			header('Content-Type: application/json; charset=utf-8');
+			header('Content-Disposition: attachment; filename="' . $filename . '"');
+			header('Content-Length: ' . strlen($json));
+			echo $json;
+			exit;
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function myMember(): DataResponse {
 		$userId = $this->getUserId();
 		if (!$userId || !$this->groupManager->isInGroup($userId, 'mitglieder')) {
