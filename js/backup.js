@@ -8,31 +8,23 @@ document.addEventListener('DOMContentLoaded', function() {
 		status.style.color = '#0082c9';
 
 		fetch(OC.generateUrl('/apps/weinsteigfinance/api/backup/export'))
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Export fehlgeschlagen: ' + response.status);
+			.then(response => response.json())
+			.then(data => {
+				if (data.success && data.downloadUrl) {
+					status.textContent = '✓ Backup erstellt. Lädt herunter...';
+					status.style.color = '#28a745';
+
+					// Starte Download via downloadUrl
+					window.location.href = data.downloadUrl;
+
+					// Reset nach 3 Sekunden
+					setTimeout(() => {
+						exportBtn.disabled = false;
+						status.textContent = '';
+					}, 3000);
+				} else {
+					throw new Error(data.error || 'Unbekannter Fehler');
 				}
-				return response.blob();
-			})
-			.then(blob => {
-				// Filename aus Content-Disposition Header oder Fallback
-				const url = window.URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = url;
-				a.download = `weinsteig-finance-backup_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
-				document.body.appendChild(a);
-				a.click();
-				window.URL.revokeObjectURL(url);
-				document.body.removeChild(a);
-
-				status.textContent = '✓ Backup erfolgreich heruntergeladen!';
-				status.style.color = '#28a745';
-
-				// Reset nach 3 Sekunden
-				setTimeout(() => {
-					exportBtn.disabled = false;
-					status.textContent = '';
-				}, 3000);
 			})
 			.catch(error => {
 				console.error('Error:', error);

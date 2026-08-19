@@ -1067,50 +1067,27 @@ class ApiController extends Controller {
 		try {
 			$timestamp = (new DateTime())->format('Y-m-d_H-i-s');
 			$filename = "weinsteig-finance-backup_$timestamp.zip";
-			$tempDir = sys_get_temp_dir() . '/weinsteig-backup-' . bin2hex(random_bytes(8));
-			mkdir($tempDir);
 
-			// 1. SQL Dump erstellen
-			$sqlDump = $this->createSqlDump();
-			file_put_contents("$tempDir/database.sql", $sqlDump);
-
-			// 2. Mandate-Dateien kopieren
 			$dataDir = $this->config->getSystemValue('datadirectory');
-			$generatedPath = "$dataDir/generated";
-
-			if (is_dir($generatedPath)) {
-				$this->copyDirectory($generatedPath, "$tempDir/generated");
+			$backupDir = "$dataDir/backup";
+			if (!is_dir($backupDir)) {
+				mkdir($backupDir, 0750, true);
 			}
 
-			// 3. ZIP erstellen
-			$zipFile = sys_get_temp_dir() . '/' . $filename;
-			$zip = new \ZipArchive();
-			if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-				throw new \Exception('Cannot create ZIP file');
-			}
+			$backupFile = "$backupDir/$filename";
 
-			$this->addDirectoryToZip($tempDir, $zip);
-			$zip->close();
+			// Erstelle die ZIP über BackupService
+			$this->backupService->createBackupZip($filename);
 
-			// 4. Download - clear all previous headers and set ZIP headers
-			header_remove('Content-Encoding');
-			header_remove('Content-Type');
-			header_remove('Content-Disposition');
+			// Gebe Download-URL zurück
+			$downloadUrl = $this->urlGenerator->linkToRoute('weinsteigfinance.api.downloadBackup', ['filename' => $filename]);
 
-			header('Content-Type: application/zip; charset=utf-8');
-			header('Content-Disposition: attachment; filename="' . $filename . '"');
-			header('Content-Length: ' . filesize($zipFile));
-			header('Cache-Control: no-cache, no-store, must-revalidate');
-			header('Pragma: no-cache');
-			header('Expires: 0');
-
-			readfile($zipFile);
-
-			// Cleanup
-			unlink($zipFile);
-			$this->removeDirectory($tempDir);
-
-			exit;
+			return new DataResponse([
+				'success' => true,
+				'filename' => $filename,
+				'downloadUrl' => $downloadUrl,
+				'message' => 'Backup erstellt. Klicke auf den Link zum Herunterladen oder verwende den Download-Button.'
+			]);
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);
 		}
