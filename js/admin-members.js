@@ -197,6 +197,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 
+	// Export Attendance PDF
+	const exportAttendanceBtn = document.getElementById('export-attendance-pdf-btn');
+	if (exportAttendanceBtn) {
+		exportAttendanceBtn.addEventListener('click', function() {
+			window.location.href = OC.generateUrl('/apps/weinsteigfinance/api/export-users/attendance');
+		});
+		exportAttendanceBtn.addEventListener('mouseover', function() {
+			this.style.background = '#e89400';
+		});
+		exportAttendanceBtn.addEventListener('mouseout', function() {
+			this.style.background = '#ff9800';
+		});
+	}
+
 	function escapeHtml(text) {
 		const div = document.createElement('div');
 		div.textContent = text;

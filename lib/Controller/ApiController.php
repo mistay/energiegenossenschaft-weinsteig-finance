@@ -2151,4 +2151,73 @@ HTML;
 			return new DataResponse(['error' => 'Fehler beim PDF-Export: ' . $e->getMessage()], 400);
 		}
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function exportMembersAttendancePDF(): Response {
+		// Nur obpersonen dürfen Anwesenheitslisten exportieren
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// Simple PDF-Erzeugung mit mPDF
+			$mpdfClass = 'Mpdf\Mpdf';
+			if (!class_exists($mpdfClass)) {
+				return new DataResponse(['error' => 'PDF-Bibliothek nicht verfügbar'], 400);
+			}
+
+			$mpdf = new $mpdfClass([
+				'mode' => 'de_DE',
+				'format' => 'A4-L', // Landscape für mehr Platz
+				'margin_left' => 10,
+				'margin_right' => 10,
+				'margin_top' => 15,
+				'margin_bottom' => 10,
+			]);
+
+			// HTML für PDF generieren
+			$html = '<html><head><meta charset="UTF-8"></head><body style="font-family: Arial, sans-serif;">';
+			$html .= '<h2 style="margin-bottom: 5px;">Anwesenheitsliste - Mitgliederversammlung</h2>';
+			$html .= '<p style="margin: 0 0 15px 0; color: #666; font-size: 13px;">Energiegenossenschaft Weinsteig | Datum: ________________</p>';
+
+			$html .= '<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px;">';
+			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
+			$html .= '<th style="text-align: left; width: 30%;">Name</th>';
+			$html .= '<th style="text-align: left; width: 35%;">E-Mail</th>';
+			$html .= '<th style="text-align: center; width: 35%;">Unterschrift</th>';
+			$html .= '</tr></thead><tbody>';
+
+			// Alle Benutzer laden
+			$rowNum = 0;
+			foreach ($this->userManager->search('') as $user) {
+				$uid = htmlspecialchars($user->getUID());
+				$displayName = htmlspecialchars($user->getDisplayName() ?: $user->getUID());
+
+				// Zeile mit alternierenden Farben
+				$bgColor = ($rowNum % 2 === 0) ? '#f9f9f9' : '#ffffff';
+				$html .= '<tr style="background-color: ' . $bgColor . '; min-height: 40px;">';
+				$html .= '<td style="vertical-align: top; padding-top: 10px;">' . $displayName . '</td>';
+				$html .= '<td style="vertical-align: top; padding-top: 10px; font-size: 12px;">' . $uid . '</td>';
+				$html .= '<td style="vertical-align: top; height: 50px;"></td>';
+				$html .= '</tr>';
+				$rowNum++;
+			}
+
+			$html .= '</tbody></table>';
+			$html .= '<p style="margin-top: 30px; font-size: 11px; color: #666;">Unterschrift = Bestätigung der Anwesenheit bei der Mitgliederversammlung</p>';
+			$html .= '</body></html>';
+
+			$mpdf->WriteHTML($html);
+
+			// PDF als Download ausliefern
+			header('Content-Type: application/pdf');
+			header('Content-Disposition: attachment; filename="anwesenheitsliste-versammlung-' . date('Y-m-d') . '.pdf"');
+			echo $mpdf->Output('', 'S');
+			exit;
+
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler beim PDF-Export: ' . $e->getMessage()], 400);
+		}
+	}
 }

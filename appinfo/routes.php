@@ -50,6 +50,7 @@ return [
 		['name' => 'api#sepaDataCarrierCsv', 'url' => '/api/sepa-datentraeger/export', 'verb' => 'GET'],
 		['name' => 'api#exportUsersCSV', 'url' => '/api/export-users', 'verb' => 'GET'],
 		['name' => 'api#exportUsersPDF', 'url' => '/api/export-users/pdf', 'verb' => 'GET'],
+		['name' => 'api#exportMembersAttendancePDF', 'url' => '/api/export-users/attendance', 'verb' => 'GET'],
 		['name' => 'api#pendingMandateApprovals', 'url' => '/api/pending-mandate-approvals', 'verb' => 'GET'],
 		['name' => 'api#exportDatabase', 'url' => '/api/backup/export', 'verb' => 'GET'],
 		['name' => 'api#getBackupStatus', 'url' => '/api/backup/status', 'verb' => 'GET'],

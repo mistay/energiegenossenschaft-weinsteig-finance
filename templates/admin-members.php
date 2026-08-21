@@ -18,6 +18,9 @@ $currentPage = 'admin-members';
 		<button id="export-users-pdf-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
 			📄 PDF exportieren
 		</button>
+		<button id="export-attendance-pdf-btn" style="padding: 10px 20px; background: #ff9800; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
+			✍️ Anwesenheitsliste (PDF)
+		</button>
 	</div>
 
 	<div id="members-table" style="margin-top: 20px;">
