@@ -48,6 +48,7 @@ return [
 		['name' => 'api#memberJournal', 'url' => '/api/member/{memberId}/journal', 'verb' => 'GET'],
 		['name' => 'api#sepaDataCarrier', 'url' => '/api/sepa-datentraeger', 'verb' => 'GET'],
 		['name' => 'api#sepaDataCarrierCsv', 'url' => '/api/sepa-datentraeger/export', 'verb' => 'GET'],
+		['name' => 'api#pendingMandateApprovals', 'url' => '/api/pending-mandate-approvals', 'verb' => 'GET'],
 		['name' => 'api#exportDatabase', 'url' => '/api/backup/export', 'verb' => 'GET'],
 		['name' => 'api#getBackupStatus', 'url' => '/api/backup/status', 'verb' => 'GET'],
 		['name' => 'api#downloadBackup', 'url' => '/api/backup/download/{filename}', 'verb' => 'GET'],

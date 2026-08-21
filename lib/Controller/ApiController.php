@@ -1746,6 +1746,66 @@ HTML;
 
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
+	public function pendingMandateApprovals(): DataResponse {
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$dataDir = $this->config->getSystemValue('datadirectory');
+			$qb = $this->db->getQueryBuilder();
+			$members = $qb->select('m.id', 'm.address', 'm.zahlungspflichtig', 'm.iban')
+				->from('weinsteig_members', 'm')
+				->orderBy('m.address')
+				->executeQuery()
+				->fetchAll();
+
+			$pending = [];
+			foreach ($members as $member) {
+				$memberId = $member['id'];
+				$address = $member['address'];
+				$folderPath = "$dataDir/generated/{$address}/sepa";
+				$latestVersion = 0;
+
+				if (is_dir($folderPath)) {
+					$files = scandir($folderPath);
+					foreach ($files as $file) {
+						if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
+							$latestVersion = max($latestVersion, (int)$m[1]);
+						}
+					}
+				}
+
+				if ($latestVersion > 0) {
+					$qb = $this->db->getQueryBuilder();
+					$approval = $qb->select('approved', 'approved_at')
+						->from('weinsteig_mandate_approvals')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+						->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($latestVersion)))
+						->executeQuery()
+						->fetch();
+
+					$isApproved = $approval && $approval['approved'];
+					if (!$isApproved) {
+						$pending[] = [
+							'member_id' => $memberId,
+							'address' => $address,
+							'zahlungspflichtig' => $member['zahlungspflichtig'] ?? '-',
+							'iban' => $member['iban'] ?? '-',
+							'mandate_version' => $latestVersion,
+						];
+					}
+				}
+			}
+
+			return new DataResponse(['success' => true, 'count' => count($pending), 'pending' => $pending]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
 	public function sepaDataCarrier(): DataResponse {
 		// obpersonen und kassier:innen dürfen auf SEPA-Datenträger zugreifen
 		$userId = $this->getUserId();
@@ -1768,22 +1828,38 @@ HTML;
 			$mandates = [];
 
 			foreach ($members as $member) {
-				// Prüfe ob signed mandate existiert
+				// WICHTIG: Prüfe ob Mandat GENEHMIGT ist (nicht nur hochgeladen!)
+				$memberId = $member['id'];
 				$address = $member['address'];
 				$folderPath = "$dataDir/generated/{$address}/sepa";
-				$signedMandateExists = false;
+
+				// Finde höchste Version
+				$latestVersion = 0;
 				if (is_dir($folderPath)) {
 					$files = scandir($folderPath);
 					foreach ($files as $file) {
-						if (preg_match('/^mandat_unterschrieben_v\d+\.(pdf|jpg|jpeg|png)$/', $file)) {
-							$signedMandateExists = true;
-							break;
+						if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
+							$latestVersion = max($latestVersion, (int)$m[1]);
 						}
 					}
 				}
 
-				// Alle Haeuser mit IBAN und nicht zurueckgezogenes Mandat
-				if ($member['iban'] && !$member['mandate_withdrawn_date']) {
+				// Prüfe ob höchste Version genehmigt ist
+				$mandateApproved = false;
+				if ($latestVersion > 0) {
+					$qb = $this->db->getQueryBuilder();
+					$approval = $qb->select('approved')
+						->from('weinsteig_mandate_approvals')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+						->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($latestVersion)))
+						->executeQuery()
+						->fetch();
+
+					$mandateApproved = $approval && $approval['approved'];
+				}
+
+				// Alle Haeuser mit IBAN, genehmigtem Mandat und nicht zurückgezogenem Mandat
+				if ($member['iban'] && !$member['mandate_withdrawn_date'] && $mandateApproved) {
 					// Berechne offene Betraege (exakt wie memberJournal)
 					$memberId = $member['id'];
 
@@ -1864,24 +1940,39 @@ HTML;
 			$csvLines[] = 'Haus;Kontoinhaber;IBAN;Mandat gültig seit;Offene Beträge (€)';
 
 			foreach ($members as $member) {
-				// Prüfe ob signed mandate existiert
+				// WICHTIG: Prüfe ob Mandat GENEHMIGT ist (nicht nur hochgeladen!)
+				$memberId = $member['id'];
 				$address = $member['address'];
 				$folderPath = "$dataDir/generated/{$address}/sepa";
-				$signedMandateExists = false;
+
+				// Finde höchste Version
+				$latestVersion = 0;
 				if (is_dir($folderPath)) {
 					$files = scandir($folderPath);
 					foreach ($files as $file) {
-						if (preg_match('/^mandat_unterschrieben_v\d+\.(pdf|jpg|jpeg|png)$/', $file)) {
-							$signedMandateExists = true;
-							break;
+						if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
+							$latestVersion = max($latestVersion, (int)$m[1]);
 						}
 					}
 				}
 
-				// Alle Haeuser mit IBAN und nicht zurueckgezogenes Mandat
-				if ($member['iban'] && !$member['mandate_withdrawn_date']) {
+				// Prüfe ob höchste Version genehmigt ist
+				$mandateApproved = false;
+				if ($latestVersion > 0) {
+					$qb = $this->db->getQueryBuilder();
+					$approval = $qb->select('approved')
+						->from('weinsteig_mandate_approvals')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+						->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($latestVersion)))
+						->executeQuery()
+						->fetch();
+
+					$mandateApproved = $approval && $approval['approved'];
+				}
+
+				// Alle Haeuser mit IBAN, genehmigtem Mandat und nicht zurückgezogenem Mandat
+				if ($member['iban'] && !$member['mandate_withdrawn_date'] && $mandateApproved) {
 					// Berechne offene Betraege (exakt wie memberJournal)
-					$memberId = $member['id'];
 
 					// ALLE Zahlungen fuer dieses Mitglied
 					$qb = $this->db->getQueryBuilder();
