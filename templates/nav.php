@@ -60,7 +60,7 @@ try {
 			⚙️ Einstellungen
 		</a>
 
-		<a href="/index.php/apps/weinsteigfinance/admin-haeuser-personen"
+		<a href="/index.php/apps/weinsteigfinance/haeuser"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'admin-members' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
 			👑 Häuser & Benutzer
 		</a>
