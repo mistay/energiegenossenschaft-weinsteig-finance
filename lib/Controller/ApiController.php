@@ -2036,7 +2036,7 @@ HTML;
 
 		try {
 			// CSV Header
-			$csvLines = ['Benutzername;Anzeigename;E-Mail;Rollen'];
+			$csvLines = ['Anzeigename;E-Mail;Rollen'];
 
 			// Alle Benutzer laden
 			$users = [];
@@ -2048,7 +2048,6 @@ HTML;
 			foreach ($users as $user) {
 				$uid = $user->getUID();
 				$displayName = $user->getDisplayName() ?: $uid;
-				$email = $user->getEMailAddress() ?: '-';
 
 				// Gruppen/Rollen ermitteln
 				$groups = [];
@@ -2060,10 +2059,9 @@ HTML;
 				// CSV-Zeile hinzufügen (mit Escape für Semikolons und Anführungszeichen)
 				$uid = str_replace('"', '""', $uid);
 				$displayName = str_replace('"', '""', $displayName);
-				$email = str_replace('"', '""', $email);
 				$rolesStr = str_replace('"', '""', $rolesStr);
 
-				$csvLines[] = "\"$uid\";\"$displayName\";\"$email\";\"$rolesStr\"";
+				$csvLines[] = "\"$displayName\";\"$uid\";\"$rolesStr\"";
 			}
 
 			$csv = implode("\r\n", $csvLines);
@@ -2110,7 +2108,6 @@ HTML;
 			$html .= '<p>Energiegenossenschaft Weinsteig - Exportiert am ' . date('d.m.Y H:i:s') . '</p>';
 			$html .= '<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">';
 			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
-			$html .= '<th style="text-align: left;">Benutzername</th>';
 			$html .= '<th style="text-align: left;">Anzeigename</th>';
 			$html .= '<th style="text-align: left;">E-Mail</th>';
 			$html .= '<th style="text-align: left;">Rollen</th>';
@@ -2121,7 +2118,6 @@ HTML;
 			foreach ($this->userManager->search('') as $user) {
 				$uid = htmlspecialchars($user->getUID());
 				$displayName = htmlspecialchars($user->getDisplayName() ?: $user->getUID());
-				$email = htmlspecialchars($user->getEMailAddress() ?: '-');
 
 				// Gruppen/Rollen ermitteln
 				$groups = [];
@@ -2133,9 +2129,8 @@ HTML;
 				// Zeile mit alternierenden Farben
 				$bgColor = ($rowNum % 2 === 0) ? '#f9f9f9' : '#ffffff';
 				$html .= '<tr style="background-color: ' . $bgColor . ';">';
-				$html .= '<td>' . $uid . '</td>';
 				$html .= '<td>' . $displayName . '</td>';
-				$html .= '<td>' . $email . '</td>';
+				$html .= '<td>' . $uid . '</td>';
 				$html .= '<td>' . $rolesStr . '</td>';
 				$html .= '</tr>';
 				$rowNum++;
