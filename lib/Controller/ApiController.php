@@ -2226,8 +2226,8 @@ HTML;
 
 			// HTML für PDF generieren
 			$html = '<html><head><meta charset="UTF-8"></head><body style="font-family: Arial, sans-serif;">';
-			$html .= '<h2 style="margin-bottom: 5px;">Anwesenheitsliste - Mitgliederversammlung</h2>';
-			$html .= '<p style="margin: 0 0 15px 0; color: #666; font-size: 13px;">Energiegenossenschaft Weinsteig | Datum: ________________</p>';
+			$html .= '<h2 style="margin-bottom: 5px;">Anwesenheitsliste</h2>';
+			$html .= '<p style="margin: 0 0 15px 0; color: #666; font-size: 13px;">Energiegenossenschaft Weinsteig | Anlass: ________________ | Datum: ________________</p>';
 
 			$html .= '<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px;">';
 			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
@@ -2257,7 +2257,7 @@ HTML;
 			}
 
 			$html .= '</tbody></table>';
-			$html .= '<p style="margin-top: 30px; font-size: 11px; color: #666;">Unterschrift = Bestätigung der Anwesenheit bei der Mitgliederversammlung</p>';
+			$html .= '<p style="margin-top: 30px; font-size: 11px; color: #666;">Unterschrift = Bestätigung der Anwesenheit</p>';
 			$html .= '</body></html>';
 
 			$mpdf->WriteHTML($html);
