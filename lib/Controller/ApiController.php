@@ -2070,7 +2070,7 @@ HTML;
 
 			// Header setzen für CSV-Download
 			header('Content-Type: text/csv; charset=utf-8');
-			header('Content-Disposition: attachment; filename="benutzer-' . date('Y-m-d-H-i-s') . '.csv"');
+			header('Content-Disposition: attachment; filename="mitglieder-' . date('Y-m-d-H-i-s') . '.csv"');
 			echo $csv;
 			exit;
 
