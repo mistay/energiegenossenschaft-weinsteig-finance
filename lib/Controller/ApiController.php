@@ -2036,7 +2036,7 @@ HTML;
 
 		try {
 			// CSV Header
-			$csvLines = ['Anzeigename;E-Mail;Rollen'];
+			$csvLines = ['Name;E-Mail;Rollen'];
 
 			// Alle Benutzer laden
 			$users = [];
@@ -2108,7 +2108,7 @@ HTML;
 			$html .= '<p>Energiegenossenschaft Weinsteig - Exportiert am ' . date('d.m.Y H:i:s') . '</p>';
 			$html .= '<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">';
 			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
-			$html .= '<th style="text-align: left;">Anzeigename</th>';
+			$html .= '<th style="text-align: left;">Name</th>';
 			$html .= '<th style="text-align: left;">E-Mail</th>';
 			$html .= '<th style="text-align: left;">Rollen</th>';
 			$html .= '</tr></thead><tbody>';
