@@ -699,30 +699,49 @@ class ApiController extends Controller {
 			$dataDir = $this->config->getSystemValue('datadirectory');
 			$folderPath = "$dataDir/generated/{$address}/sepa";
 
-			// Versionsnummer bestimmen (default: neueste)
-			if ($v === null) {
-				$highestV = 0;
-				if (is_dir($folderPath)) {
-					foreach (scandir($folderPath) as $file) {
-						if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
-							$highestV = max($highestV, (int)$m[1]);
+			// Versionsnummer bestimmen (default: neueste) und tatsächliche Datei finden
+			$filePath = null;
+			$fileExt = null;
+
+			if (is_dir($folderPath)) {
+				foreach (scandir($folderPath) as $file) {
+					if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
+						$fileV = (int)$m[1];
+						$ext = $m[2];
+
+						// Wenn v nicht angegeben: neueste finden
+						if ($v === null) {
+							if ($fileV > ($v ?? 0)) {
+								$v = $fileV;
+								$filePath = "$folderPath/$file";
+								$fileExt = $ext;
+							}
+						}
+						// Wenn v angegeben: genaue Version suchen
+						elseif ($fileV === $v) {
+							$filePath = "$folderPath/$file";
+							$fileExt = $ext;
+							break;
 						}
 					}
 				}
-				if ($highestV === 0) {
-					return new DataResponse(['error' => 'File not found'], 404);
-				}
-				$v = $highestV;
 			}
 
-			$filePath = "$folderPath/mandat_unterschrieben_v{$v}.pdf";
-
-			if (!file_exists($filePath)) {
+			if (!$filePath || !file_exists($filePath)) {
 				return new DataResponse(['error' => 'File not found'], 404);
 			}
 
-			header('Content-Type: application/pdf');
-			header('Content-Disposition: attachment; filename="' . urlencode($address) . '_mandat_v' . $v . '.pdf"');
+			// Content-Type basierend auf Dateiendung
+			$mimeTypes = [
+				'pdf' => 'application/pdf',
+				'jpg' => 'image/jpeg',
+				'jpeg' => 'image/jpeg',
+				'png' => 'image/png',
+			];
+			$contentType = $mimeTypes[$fileExt] ?? 'application/octet-stream';
+
+			header('Content-Type: ' . $contentType);
+			header('Content-Disposition: attachment; filename="' . urlencode($address) . '_mandat_v' . $v . '.' . $fileExt . '"');
 			readfile($filePath);
 			exit;
 		} catch (\Throwable $e) {
