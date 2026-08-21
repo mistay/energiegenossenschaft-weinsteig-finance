@@ -39,7 +39,7 @@ try {
 			📋 Vorschreibungen
 		</a>
 
-		<a href="/index.php/apps/weinsteigfinance/zahlungen-uebersicht"
+		<a href="/index.php/apps/weinsteigfinance/zahlungen"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'zahlungen-uebersicht' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
 			💰 Zahlungen
 		</a>
@@ -50,9 +50,9 @@ try {
 		</a>
 
 		<?php if ($isAdmin): ?>
-		<a href="/index.php/apps/weinsteigfinance/zahlungen"
+		<a href="/index.php/apps/weinsteigfinance/zahlungen-import"
 			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'zahlungen' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
-			💰 Zahlungen
+			💰 Zahlungen (Import)
 		</a>
 
 		<a href="/index.php/apps/weinsteigfinance/admin"

@@ -1,6 +1,6 @@
 <?php
 /** @var \OCP\IL10N $l */
-$currentPage = 'zahlungen';
+$currentPage = 'zahlungen-import';
 ?>
 
 <div class="app-weinsteigfinance">

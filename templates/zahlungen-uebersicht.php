@@ -2,7 +2,7 @@
 declare(strict_types=1);
 /** @var array $_ */
 /** @var \OCP\IL10N $l */
-$currentPage = 'zahlungen-uebersicht';
+$currentPage = 'zahlungen';
 ?>
 
 <div id="zahlungen-uebersicht-container" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
