@@ -28,6 +28,11 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
   - Originalendung beibehalten (`mandat_v1.jpg` nicht `mandat_v1.pdf`)
   - MIME-Type validieren (Sicherheit)
   - Regex muss flexibel sein: `/^name_v(\d+)\.(pdf|jpg|jpeg|png)$/`
+
+### ⚠️ **Terminologie**
+- **Niemals** "whitelist" oder "blacklist" verwenden!
+- Statt dessen: "allowlist" (Erlaubnis-Liste) oder "blocklist" (Block-Liste)
+- Diese Begriffe sind rassistisch geprägt und sollten nicht verwendet werden
 - **CSV-Dateien**: Semikolon-Trennzeichen, DD.MM.YYYY Daten
 - **ZIP-Backups**: Struktur = `/data/backup/weinsteig-finance-backup_YYYY-MM-DD_HH-MM-SS.zip`
 

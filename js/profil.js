@@ -1,141 +1,142 @@
-function load() {
+document.addEventListener('DOMContentLoaded', function() {
 	const container = document.getElementById('profil-container');
+	const myMemberUrl = OCA?.generateUrl?.('/apps/weinsteigfinance/api/my-member') || '/index.php/apps/weinsteigfinance/api/my-member';
 
-	// Load user info first (groups and username)
-	fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-groups'))
+	fetch(myMemberUrl, { credentials: 'include' })
 		.then(r => r.json())
-		.then(userInfo => {
-			if (!userInfo || userInfo.error) {
-				container.innerHTML = '<p style="color: red;">Fehler: Benutzerdaten nicht geladen</p>';
+		.then(data => {
+			if (data.error) {
+				container.innerHTML = '<p style="color: red;">Fehler: ' + data.error + '</p>';
 				return;
 			}
 
-			// Lade Nutzer-Info + Mitglied-Info
-			fetch(OC.generateUrl('/apps/weinsteigfinance/api/my-member'))
-				.then(r => r.json())
-				.then(member => {
-					if (!member || member.error) {
-						container.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(member?.message || 'Nicht gefunden') + '</p>';
-						return;
-					}
+			let html = '<div class="profil-card">';
 
-					let html = '<div class="profil-card">';
-					html += '<h3 style="margin-top: 0;">Persönliche Informationen</h3>';
+			// DisplayName (bearbeitbar)
+			html += '<div class="profil-field">';
+			html += '<div class="profil-field-label">👤 Name</div>';
+			html += '<div class="profil-field-value">';
+			html += '<span id="displayName-text">' + escapeHtml(data.displayName || 'N/A') + '</span>';
+			html += '<button class="edit-name-btn" onclick="toggleEditName()">✏️ Bearbeiten</button>';
+			html += '</div>';
+			html += '</div>';
 
-					html += '<div class="profil-field">';
-					html += '<div class="profil-field-label">Benutzer:in:</div>';
-					html += '<div class="profil-field-value">' + escapeHtml(userInfo.userId) + '</div>';
-					html += '</div>';
+			// Edit-Mode (versteckt)
+			html += '<div id="edit-name-section" style="display: none;">';
+			html += '<input type="text" id="displayName-input" class="edit-name-input" value="' + escapeHtml(data.displayName || '') + '" placeholder="Neuer Name">';
+			html += '<div class="edit-name-actions">';
+			html += '<button class="edit-name-save" onclick="saveDisplayName()">✓ Speichern</button>';
+			html += '<button class="edit-name-cancel" onclick="cancelEditName()">✗ Abbrechen</button>';
+			html += '</div>';
+			html += '<div id="edit-name-message"></div>';
+			html += '</div>';
 
-					// Display roles
-					if (userInfo.groups && userInfo.groups.length > 0) {
-						const groupLabels = {
-							'obpersonen': '👑 Admin',
-							'mitglieder': '🏠 Mitglied',
-							'kassier:innen': '💰 Kassier:in'
-						};
-						const labels = userInfo.groups.map(g => groupLabels[g] || g).join(', ');
-						html += '<div class="profil-field">';
-						html += '<div class="profil-field-label">Rollen:</div>';
-						html += '<div class="profil-field-value">' + escapeHtml(labels) + '</div>';
-						html += '</div>';
-					}
+			// Andere Felder
+			html += '<div class="profil-field">';
+			html += '<div class="profil-field-label">🏠 Liegenschaft</div>';
+			html += '<div class="profil-field-value">' + escapeHtml(data.address || 'N/A') + '</div>';
+			html += '</div>';
 
-					html += '</div>';
+			if (data.iban) {
+				html += '<div class="profil-field">';
+				html += '<div class="profil-field-label">🏦 IBAN</div>';
+				html += '<div class="profil-field-value" style="font-family: monospace;">' + escapeHtml(data.iban) + '</div>';
+				html += '</div>';
+			}
 
-					// Liegenschaft
-					html += '<div class="profil-card">';
-					html += '<h3 style="margin-top: 0;">🏘️ Zugeordnete Liegenschaft</h3>';
-					html += '<div class="liegenschaft-box">';
-					html += '<div style="font-size: 18px; font-weight: 600; color: #0082c9;">' + escapeHtml(member.address) + '</div>';
-					html += '</div>';
-					html += '</div>';
+			if (data.kontoinhaber) {
+				html += '<div class="profil-field">';
+				html += '<div class="profil-field-label">💳 Kontoinhaber</div>';
+				html += '<div class="profil-field-value">' + escapeHtml(data.kontoinhaber) + '</div>';
+				html += '</div>';
+			}
 
-					// SEPA Mandat
-					html += '<div class="profil-card">';
-					html += '<h3 style="margin-top: 0;">🏦 SEPA Mandat</h3>';
+			html += '</div>';
 
-					if (member.zahlungspflichtig) {
-						html += '<div class="profil-field">';
-						html += '<div class="profil-field-label">Zahlungspflichtig:</div>';
-						html += '<div class="profil-field-value">' + escapeHtml(member.zahlungspflichtig) + '</div>';
-						html += '</div>';
-					}
+			// Mandat Status
+			if (data.signed_mandate_exists) {
+				html += '<div class="liegenschaft-box">';
+				html += '<strong>✅ SEPA-Mandat gültig</strong><br>';
+				html += 'Ein unterschriebenes Mandat wurde hochgeladen und ist gültig. Lastschriften können eingezogen werden.';
+				html += '</div>';
+			} else {
+				html += '<div class="liegenschaft-box">';
+				html += '<strong>⏳ SEPA-Mandat erforderlich</strong><br>';
+				html += 'Bitte geben Sie eine IBAN ein und laden Sie ein unterschriebenes Mandat hoch, damit Zahlungen eingezogen werden können.';
+				html += '</div>';
+			}
 
-					if (member.iban) {
-						html += '<div class="profil-field">';
-						html += '<div class="profil-field-label">IBAN:</div>';
-						html += '<div class="profil-field-value"><code style="background: #f5f5f5; padding: 4px 8px; border-radius: 3px; font-size: 12px;">' + escapeHtml(member.iban) + '</code></div>';
-						html += '</div>';
-					} else {
-						html += '<div class="profil-field">';
-						html += '<div class="profil-field-label">IBAN:</div>';
-						html += '<div class="profil-field-value" style="color: #999;">Nicht hinterlegt</div>';
-						html += '</div>';
-					}
-
-					// Mandat Status
-					let mandatHtml = '';
-					if (member.mandate_withdrawn_date) {
-						mandatHtml += '<div class="profil-field">';
-						mandatHtml += '<div class="profil-field-label">Status:</div>';
-						mandatHtml += '<div class="profil-field-value" style="color: #dc3545;"><strong>⚠️ Zurückgezogen</strong></div>';
-						mandatHtml += '</div>';
-						mandatHtml += '<div style="background: #ffebee; padding: 12px; border-radius: 4px; border-left: 4px solid #dc3545; margin-top: 12px;">';
-						mandatHtml += '<div style="color: #dc3545; font-size: 13px;"><strong>Grund:</strong> ' + escapeHtml(member.mandate_withdrawn_reason || 'Grund nicht angegeben') + '</div>';
-						mandatHtml += '</div>';
-					} else if (!member.signed_mandate_exists) {
-						mandatHtml += '<div class="profil-field">';
-						mandatHtml += '<div class="profil-field-label">Status:</div>';
-						mandatHtml += '<div class="profil-field-value" style="color: #ff9800;"><strong>⏳ Nicht gültig</strong></div>';
-						mandatHtml += '</div>';
-						mandatHtml += '<div style="background: #fff3e0; padding: 12px; border-radius: 4px; border-left: 4px solid #ff9800; margin-top: 12px;">';
-						mandatHtml += '<div style="color: #ff9800; font-size: 13px;">';
-						mandatHtml += '<strong>Info:</strong> Es wurde noch kein unterschriebenes SEPA-Mandat hochgeladen. ';
-						mandatHtml += 'Bitte laden Sie das unterzeichnete Mandatsformular im Bereich "SEPA Lastschrift" hoch.';
-						mandatHtml += '</div>';
-						mandatHtml += '</div>';
-					} else if (member.mandate_granted_date) {
-						mandatHtml += '<div class="profil-field">';
-						mandatHtml += '<div class="profil-field-label">Status:</div>';
-						mandatHtml += '<div class="profil-field-value" style="color: #28a745;"><strong>✓ Gültig</strong></div>';
-						mandatHtml += '</div>';
-						mandatHtml += '<div class="profil-field">';
-						mandatHtml += '<div class="profil-field-label">Gültig seit:</div>';
-						mandatHtml += '<div class="profil-field-value">' + escapeHtml(member.mandate_granted_date) + '</div>';
-						mandatHtml += '</div>';
-					} else {
-						mandatHtml += '<div class="profil-field">';
-						mandatHtml += '<div class="profil-field-label">Status:</div>';
-						mandatHtml += '<div class="profil-field-value" style="color: #ff9800;"><strong>⏳ Nicht gültig</strong></div>';
-						mandatHtml += '</div>';
-						mandatHtml += '<div style="background: #fff3e0; padding: 12px; border-radius: 4px; border-left: 4px solid #ff9800; margin-top: 12px;">';
-						mandatHtml += '<div style="color: #ff9800; font-size: 13px;">';
-						mandatHtml += '<strong>Info:</strong> Es wurde noch kein unterschriebenes SEPA-Mandat hochgeladen und kein Erteilungsdatum erfasst. ';
-						mandatHtml += 'Bitte laden Sie das unterzeichnete Mandatsformular im Bereich "SEPA Lastschrift" hoch.';
-						mandatHtml += '</div>';
-						mandatHtml += '</div>';
-					}
-					html += mandatHtml;
-
-					html += '</div>';
-
-					container.innerHTML = html;
-				})
-				.catch(err => {
-					container.innerHTML = '<p style="color: red;">Fehler beim Laden der Liegenschaftsdaten: ' + escapeHtml(err.message) + '</p>';
-				});
+			container.innerHTML = html;
+			window.myMemberData = data;
 		})
 		.catch(err => {
-			container.innerHTML = '<p style="color: red;">Fehler beim Laden der Benutzerdaten: ' + escapeHtml(err.message) + '</p>';
+			container.innerHTML = '<p style="color: red;">Fehler beim Laden: ' + err.message + '</p>';
 		});
-}
+});
 
 function escapeHtml(text) {
-	if (!text) return '';
-	const div = document.createElement('div');
-	div.textContent = text;
-	return div.innerHTML;
+	const map = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	};
+	return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-document.addEventListener('DOMContentLoaded', load);
+function toggleEditName() {
+	document.getElementById('displayName-text').style.display = 'none';
+	document.querySelector('.edit-name-btn').style.display = 'none';
+	document.getElementById('edit-name-section').style.display = 'block';
+	document.getElementById('displayName-input').focus();
+}
+
+function cancelEditName() {
+	document.getElementById('displayName-text').style.display = 'inline';
+	document.querySelector('.edit-name-btn').style.display = 'inline';
+	document.getElementById('edit-name-section').style.display = 'none';
+	document.getElementById('edit-name-message').innerHTML = '';
+}
+
+function saveDisplayName() {
+	const newName = document.getElementById('displayName-input').value.trim();
+	const messageDiv = document.getElementById('edit-name-message');
+
+	if (!newName) {
+		messageDiv.textContent = 'Name darf nicht leer sein';
+		messageDiv.className = 'edit-name-message edit-name-error';
+		return;
+	}
+
+	messageDiv.textContent = '⏳ Speichert...';
+	messageDiv.className = 'edit-name-message';
+
+	const updateUrl = OCA?.generateUrl?.('/apps/weinsteigfinance/api/update-display-name') || '/index.php/apps/weinsteigfinance/api/update-display-name';
+
+	fetch(updateUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({ displayName: newName })
+	})
+		.then(r => r.json())
+		.then(data => {
+			if (data.success) {
+				document.getElementById('displayName-text').textContent = newName;
+				messageDiv.textContent = '✓ Name erfolgreich aktualisiert';
+				messageDiv.className = 'edit-name-message edit-name-success';
+
+				setTimeout(() => {
+					cancelEditName();
+				}, 1500);
+			} else {
+				messageDiv.textContent = 'Fehler: ' + (data.error || 'Unbekannter Fehler');
+				messageDiv.className = 'edit-name-message edit-name-error';
+			}
+		})
+		.catch(err => {
+			messageDiv.textContent = 'Fehler: ' + err.message;
+			messageDiv.className = 'edit-name-message edit-name-error';
+		});
+}
