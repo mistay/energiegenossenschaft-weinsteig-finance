@@ -2025,4 +2025,57 @@ HTML;
 			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
 		}
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function exportUsersCSV(): Response {
+		// Nur obpersonen dürfen Benutzer exportieren
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// CSV Header
+			$csvLines = ['Benutzername;Anzeigename;E-Mail;Rollen'];
+
+			// Alle Benutzer laden
+			$users = [];
+			foreach ($this->userManager->search('') as $user) {
+				$users[] = $user;
+			}
+
+			// Für jeden Benutzer die Daten sammeln
+			foreach ($users as $user) {
+				$uid = $user->getUID();
+				$displayName = $user->getDisplayName() ?: $uid;
+				$email = $user->getEMailAddress() ?: '-';
+
+				// Gruppen/Rollen ermitteln
+				$groups = [];
+				foreach ($this->groupManager->getUserGroups($user) as $group) {
+					$groups[] = $group->getDisplayName() ?: $group->getGID();
+				}
+				$rolesStr = $groups ? implode(', ', $groups) : '-';
+
+				// CSV-Zeile hinzufügen (mit Escape für Semikolons und Anführungszeichen)
+				$uid = str_replace('"', '""', $uid);
+				$displayName = str_replace('"', '""', $displayName);
+				$email = str_replace('"', '""', $email);
+				$rolesStr = str_replace('"', '""', $rolesStr);
+
+				$csvLines[] = "\"$uid\";\"$displayName\";\"$email\";\"$rolesStr\"";
+			}
+
+			$csv = implode("\r\n", $csvLines);
+
+			// Header setzen für CSV-Download
+			header('Content-Type: text/csv; charset=utf-8');
+			header('Content-Disposition: attachment; filename="benutzer-' . date('Y-m-d-H-i-s') . '.csv"');
+			echo $csv;
+			exit;
+
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
+		}
+	}
 }

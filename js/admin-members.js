@@ -169,6 +169,20 @@ document.addEventListener('DOMContentLoaded', function() {
 	closeBtn.addEventListener('click', closeModal);
 	modalBackdrop.addEventListener('click', closeModal);
 
+	// Export Users CSV
+	const exportBtn = document.getElementById('export-users-btn');
+	if (exportBtn) {
+		exportBtn.addEventListener('click', function() {
+			window.location.href = OC.generateUrl('/apps/weinsteigfinance/api/export-users');
+		});
+		exportBtn.addEventListener('mouseover', function() {
+			this.style.background = '#0070a8';
+		});
+		exportBtn.addEventListener('mouseout', function() {
+			this.style.background = '#0082c9';
+		});
+	}
+
 	function escapeHtml(text) {
 		const div = document.createElement('div');
 		div.textContent = text;
