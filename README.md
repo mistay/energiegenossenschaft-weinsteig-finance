@@ -246,9 +246,14 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded) mit offenen Beträgen
 - **Offene Beträge Übersicht**: Farblich formatiert (🔴 Rückstand, 🟢 Guthaben, ⚪ ausgeglichen)
 - **Benutzer-Zuordnung**: Many-to-Many mit Dropdown + Zuordnungs-UI
-- **Mitgliederliste Export**: CSV & PDF Export auf `admin-haeuser-personen/` Seite
-  - 📥 CSV Export: Optimiert für Spreadsheets und Vergleiche
-  - 📄 PDF Export: Professionelle Tabelle mit Header und Timestamp
+- **Mitgliederliste Export**: Drei Export-Formate auf `admin-haeuser-personen/` Seite
+  - 📥 CSV Export: Optimiert für Spreadsheets und Vergleiche (Spalten: Name | E-Mail | Rollen)
+  - 📄 PDF Export: Professionelle Tabelle mit Header und Timestamp (Spalten: Name | E-Mail | Rollen)
+  - ✍️ Anwesenheitsliste PDF: Für Mitgliederversammlungen mit großzügigen Unterschriftsfeldern
+    - Landscape-Format für viel Platz
+    - Spalten: Name | E-Mail | Unterschrift (großes Unterschriftsfeld pro Person)
+    - Automatischer Header + Datumsfeld
+    - Ideal für Compliance-Dokumentation und Abstimmungsprotokoll
   - 🕐 Audit-Trail: Exportiere regelmäßig um Name-Änderungen zu verfolgen
 - **Bulk-Operationen**: Mehrere Häuser mit einem Admin-Benutzer
 - **Import-Management**: CSV-Validierung mit Fehlerbehandlung + Duplikat-Detection
@@ -335,6 +340,12 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.6.5)**:
+  - ✍️ **Anwesenheitsliste PDF** für Mitgliederversammlungen
+  - 📄 Landscape-Format (A4-L) mit großzügigen Unterschriftsfeldern
+  - 🏛️ Header + Datumsfeld für automatische Dokumentation
+  - 💼 Perfekt für: Mitgliederversammlungen, Aufsichtsratssitzungen, Compliance
+  - 🎯 Drei Export-Button jetzt verfügbar: CSV (blau), PDF (grün), Anwesenheit (orange)
 - **Neue Features (v1.6.4)**:
   - 📊 **Mitgliederliste CSV & PDF Export** auf `admin-haeuser-personen/` Seite
   - 📥 **Zwei Export-Button**: CSV (blau) und PDF (grün) mit professionellem Layout
