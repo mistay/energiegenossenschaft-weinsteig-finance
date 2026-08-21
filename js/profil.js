@@ -54,10 +54,16 @@ document.addEventListener('DOMContentLoaded', function() {
 			html += '</div>';
 
 			// Mandat Status
-			if (data.signed_mandate_exists) {
+			// Mandat Status
+			if (data.mandate_approved) {
 				html += '<div class="liegenschaft-box">';
 				html += '<strong>✅ SEPA-Mandat gültig</strong><br>';
-				html += 'Ein unterschriebenes Mandat wurde hochgeladen und ist gültig. Lastschriften können eingezogen werden.';
+				html += 'Ein unterschriebenes Mandat wurde hochgeladen und von den Kassier:innen genehmigt. Lastschriften können eingezogen werden.';
+				html += '</div>';
+			} else if (data.signed_mandate_exists) {
+				html += '<div class="liegenschaft-box">';
+				html += '<strong>⏳ Mandat wartet auf Freigabe</strong><br>';
+				html += 'Ein Mandat wurde hochgeladen und wartet auf die Genehmigung durch die Kassier:innen. Danach können Lastschriften eingezogen werden.';
 				html += '</div>';
 			} else {
 				html += '<div class="liegenschaft-box">';

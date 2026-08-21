@@ -1250,22 +1250,41 @@ class ApiController extends Controller {
 			return new DataResponse(['error' => 'Not found']);
 		}
 
-		// Prüfe, ob ein unterschriebenes Mandat-PDF existiert
+		// Prüfe Mandat-Status (hochgeladen + genehmigt?)
 		$address = $row['address'] ?? '';
 		$dataDir = $this->config->getSystemValue('datadirectory');
 		$folderPath = "$dataDir/generated/{$address}/sepa";
-		$signedMandateExists = false;
+		$mandateUploaded = false;
+		$mandateApproved = false;
+		$latestVersion = 0;
+
+		// 1. Finde höchste Version (hochgeladen)
 		if (is_dir($folderPath)) {
 			$files = scandir($folderPath);
 			foreach ($files as $file) {
-				if (preg_match('/^mandat_unterschrieben_v\d+\.(pdf|jpg|jpeg|png)$/', $file)) {
-					$signedMandateExists = true;
-					break;
+				if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
+					$version = (int)$m[1];
+					$latestVersion = max($latestVersion, $version);
+					$mandateUploaded = true;
 				}
 			}
 		}
 
-		$row['signed_mandate_exists'] = $signedMandateExists;
+		// 2. Prüfe ob höchste Version genehmigt ist
+		if ($mandateUploaded && $latestVersion > 0) {
+			$qb = $this->db->getQueryBuilder();
+			$approval = $qb->select('approved')
+				->from('weinsteig_mandate_approvals')
+				->where($qb->expr()->eq('member_id', $qb->createNamedParameter($row['id'])))
+				->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($latestVersion)))
+				->executeQuery()
+				->fetch();
+
+			$mandateApproved = $approval && $approval['approved'];
+		}
+
+		$row['signed_mandate_exists'] = $mandateUploaded;
+		$row['mandate_approved'] = $mandateApproved;
 
 		// Nextcloud DisplayName hinzufügen
 		$user = $this->userSession->getUser();
