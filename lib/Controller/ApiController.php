@@ -433,7 +433,32 @@ class ApiController extends Controller {
 			}
 
 			$address = $member['address'];
-			$pdfContent = file_get_contents($file['tmp_name']);
+			$fileContent = file_get_contents($file['tmp_name']);
+
+			// Dateiendung validieren (Original-Extension beibehalten)
+			$originalName = basename($file['name']);
+			$fileExt = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+			$allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+
+			if (!in_array($fileExt, $allowedExtensions)) {
+				return new DataResponse([
+					'error' => 'Nicht erlaubter Dateityp: .' . htmlspecialchars($fileExt) .
+						'. Erlaubt sind: PDF, JPG, JPEG, PNG'
+				], 400);
+			}
+
+			// MIME-Type zusätzlich prüfen
+			$finfo = finfo_open(FILEINFO_MIME_TYPE);
+			$mimeType = finfo_file($finfo, $file['tmp_name']);
+			finfo_close($finfo);
+
+			$allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+			if (!in_array($mimeType, $allowedMimeTypes)) {
+				return new DataResponse([
+					'error' => 'Datei ist kein gültiges PDF oder Bild (JPEG/PNG). ' .
+						'Bitte laden Sie ein unterschriebenes PDF oder Foto hoch.'
+				], 400);
+			}
 
 			// Im Nextcloud data/-Verzeichnis speichern
 			$dataDir = $this->config->getSystemValue('datadirectory');
@@ -442,16 +467,16 @@ class ApiController extends Controller {
 			// Ordner erstellen
 			@mkdir($folderPath, 0750, true);
 
-			// Versionsnummer ermitteln
+			// Versionsnummer ermitteln (mit flexibler Extension)
 			$v = 1;
-			while (file_exists("$folderPath/mandat_unterschrieben_v{$v}.pdf")) {
+			while (file_exists("$folderPath/mandat_unterschrieben_v{$v}.{$fileExt}")) {
 				$v++;
 			}
 
-			$filePath = "$folderPath/mandat_unterschrieben_v{$v}.pdf";
+			$filePath = "$folderPath/mandat_unterschrieben_v{$v}.{$fileExt}";
 
 			// Datei speichern
-			file_put_contents($filePath, $pdfContent);
+			file_put_contents($filePath, $fileContent);
 
 			return new DataResponse(['success' => true]);
 		} catch (\Throwable $e) {
@@ -492,7 +517,7 @@ class ApiController extends Controller {
 			if (is_dir($folderPath)) {
 				$dir = scandir($folderPath, SCANDIR_SORT_DESCENDING);
 				foreach ($dir as $file) {
-					if (preg_match('/^mandat_unterschrieben_v(\d+)\.pdf$/', $file, $m)) {
+					if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
 						$version = (int)$m[1];
 
 						// Approval-Status laden
@@ -679,7 +704,7 @@ class ApiController extends Controller {
 				$highestV = 0;
 				if (is_dir($folderPath)) {
 					foreach (scandir($folderPath) as $file) {
-						if (preg_match('/^mandat_unterschrieben_v(\d+)\.pdf$/', $file, $m)) {
+						if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
 							$highestV = max($highestV, (int)$m[1]);
 						}
 					}
@@ -1214,7 +1239,7 @@ class ApiController extends Controller {
 		if (is_dir($folderPath)) {
 			$files = scandir($folderPath);
 			foreach ($files as $file) {
-				if (preg_match('/^mandat_unterschrieben_v\d+\.pdf$/', $file)) {
+				if (preg_match('/^mandat_unterschrieben_v\d+\.(pdf|jpg|jpeg|png)$/', $file)) {
 					$signedMandateExists = true;
 					break;
 				}
@@ -1654,7 +1679,7 @@ HTML;
 				if (is_dir($folderPath)) {
 					$files = scandir($folderPath);
 					foreach ($files as $file) {
-						if (preg_match('/^mandat_unterschrieben_v\d+\.pdf$/', $file)) {
+						if (preg_match('/^mandat_unterschrieben_v\d+\.(pdf|jpg|jpeg|png)$/', $file)) {
 							$signedMandateExists = true;
 							break;
 						}
@@ -1750,7 +1775,7 @@ HTML;
 				if (is_dir($folderPath)) {
 					$files = scandir($folderPath);
 					foreach ($files as $file) {
-						if (preg_match('/^mandat_unterschrieben_v\d+\.pdf$/', $file)) {
+						if (preg_match('/^mandat_unterschrieben_v\d+\.(pdf|jpg|jpeg|png)$/', $file)) {
 							$signedMandateExists = true;
 							break;
 						}
