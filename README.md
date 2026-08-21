@@ -322,10 +322,17 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.4.9
+- **Aktuelle Version**: 1.5.0
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.5.0)**:
+  - 👤 **Editierbarer Display Name** auf Profil-Seite (Selfservice für Namensänderungen)
+  - 🔄 Zukünftige Vorschreibungen nutzen aktualisierten Namen
+  - ✏️ Edit-Button mit inline-Bearbeitung
+  - ✓ Speichern direkt in Nextcloud User-Datenbank
+  - 📖 Nur Selbst-Edit oder Admin-Edit möglich
+  - ✅ Validierung & Success/Error-Feedback
 - **Neue Features (v1.4.9)**:
   - 📄 SEPA-Mandate unterstützen jetzt mehrere Dateiformate (PDF, JPG, PNG)
   - ✅ Dateiendung-Validierung (Whitelist + MIME-Type Check)
