@@ -34,7 +34,11 @@ class BackupService {
 			$sqlDump = $this->createSqlDump();
 			file_put_contents("$tempDir/database.sql", $sqlDump);
 
-			// 2. Mandate-Dateien kopieren (OHNE backup/ Ordner!)
+			// 2. Mitgliederliste als CSV
+			$csvContent = $this->createMembersListCSV();
+			file_put_contents("$tempDir/mitglieder.csv", $csvContent);
+
+			// 3. Mandate-Dateien kopieren (OHNE backup/ Ordner!)
 			$generatedPath = "$dataDir/generated";
 			if (is_dir($generatedPath)) {
 				$this->copyDirectory($generatedPath, "$tempDir/generated");
@@ -57,6 +61,51 @@ class BackupService {
 			$this->removeDirectory($tempDir);
 			throw $e;
 		}
+	}
+
+	private function createMembersListCSV(): string {
+		$csvLines = ['Name;E-Mail;Rollen'];
+
+		try {
+			// Alle Benutzer aus der Datenbank laden
+			$qb = $this->db->getQueryBuilder();
+			$users = $qb->select('uid', 'displayname')
+				->from('users')
+				->orderBy('displayname')
+				->executeQuery()
+				->fetchAll();
+
+			foreach ($users as $user) {
+				$uid = $user['uid'];
+				$displayName = $user['displayname'] ?: $uid;
+
+				// Gruppen/Rollen für diesen Benutzer laden
+				$groupQb = $this->db->getQueryBuilder();
+				$groups = $groupQb->select('gid')
+					->from('group_user')
+					->where($groupQb->expr()->eq('uid', $groupQb->createNamedParameter($uid)))
+					->executeQuery()
+					->fetchAll();
+
+				$groupNames = [];
+				foreach ($groups as $group) {
+					$groupNames[] = $group['gid'];
+				}
+				$rolesStr = $groupNames ? implode(', ', $groupNames) : '-';
+
+				// CSV-Zeile mit Escaping
+				$uid = str_replace('"', '""', $uid);
+				$displayName = str_replace('"', '""', $displayName);
+				$rolesStr = str_replace('"', '""', $rolesStr);
+
+				$csvLines[] = "\"$displayName\";\"$uid\";\"$rolesStr\"";
+			}
+		} catch (\Exception $e) {
+			// Fallback: Nur Header, wenn Fehler
+			$csvLines[] = '"Fehler beim Laden der Mitgliederliste";' . $e->getMessage() . '";"';
+		}
+
+		return implode("\r\n", $csvLines);
 	}
 
 	private function createSqlDump(): string {
