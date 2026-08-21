@@ -11,9 +11,12 @@ $currentPage = 'admin-members';
 	<h2><?php p($l->t('Mitglieder und Personen')); ?></h2>
 	<p><?php p($l->t('Ordne Nextcloud-Benutzerkonten den 22 Häusern zu.')); ?></p>
 
-	<div style="margin-bottom: 20px;">
-		<button id="export-users-btn" style="padding: 10px 20px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
-			📥 Mitgliederliste als CSV exportieren
+	<div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+		<button id="export-users-csv-btn" style="padding: 10px 20px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
+			📥 CSV exportieren
+		</button>
+		<button id="export-users-pdf-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
+			📄 PDF exportieren
 		</button>
 	</div>
 

@@ -170,16 +170,30 @@ document.addEventListener('DOMContentLoaded', function() {
 	modalBackdrop.addEventListener('click', closeModal);
 
 	// Export Users CSV
-	const exportBtn = document.getElementById('export-users-btn');
-	if (exportBtn) {
-		exportBtn.addEventListener('click', function() {
+	const exportCsvBtn = document.getElementById('export-users-csv-btn');
+	if (exportCsvBtn) {
+		exportCsvBtn.addEventListener('click', function() {
 			window.location.href = OC.generateUrl('/apps/weinsteigfinance/api/export-users');
 		});
-		exportBtn.addEventListener('mouseover', function() {
+		exportCsvBtn.addEventListener('mouseover', function() {
 			this.style.background = '#0070a8';
 		});
-		exportBtn.addEventListener('mouseout', function() {
+		exportCsvBtn.addEventListener('mouseout', function() {
 			this.style.background = '#0082c9';
+		});
+	}
+
+	// Export Users PDF
+	const exportPdfBtn = document.getElementById('export-users-pdf-btn');
+	if (exportPdfBtn) {
+		exportPdfBtn.addEventListener('click', function() {
+			window.location.href = OC.generateUrl('/apps/weinsteigfinance/api/export-users/pdf');
+		});
+		exportPdfBtn.addEventListener('mouseover', function() {
+			this.style.background = '#218838';
+		});
+		exportPdfBtn.addEventListener('mouseout', function() {
+			this.style.background = '#28a745';
 		});
 	}
 

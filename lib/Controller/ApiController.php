@@ -2078,4 +2078,82 @@ HTML;
 			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
 		}
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function exportUsersPDF(): Response {
+		// Nur obpersonen dürfen Benutzer exportieren
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// Simple PDF-Erzeugung mit mPDF
+			$mpdfClass = 'Mpdf\Mpdf';
+			if (!class_exists($mpdfClass)) {
+				// Fallback: Verwende einfaches HTML-to-PDF mit Browser-Print
+				return new DataResponse(['error' => 'PDF-Bibliothek nicht verfügbar'], 400);
+			}
+
+			$mpdf = new $mpdfClass([
+				'mode' => 'de_DE',
+				'format' => 'A4',
+				'margin_left' => 10,
+				'margin_right' => 10,
+				'margin_top' => 10,
+				'margin_bottom' => 10,
+			]);
+
+			// HTML für PDF generieren
+			$html = '<html><head><meta charset="UTF-8"></head><body>';
+			$html .= '<h1>Mitgliederliste</h1>';
+			$html .= '<p>Energiegenossenschaft Weinsteig - Exportiert am ' . date('d.m.Y H:i:s') . '</p>';
+			$html .= '<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">';
+			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
+			$html .= '<th style="text-align: left;">Benutzername</th>';
+			$html .= '<th style="text-align: left;">Anzeigename</th>';
+			$html .= '<th style="text-align: left;">E-Mail</th>';
+			$html .= '<th style="text-align: left;">Rollen</th>';
+			$html .= '</tr></thead><tbody>';
+
+			// Alle Benutzer laden
+			$rowNum = 0;
+			foreach ($this->userManager->search('') as $user) {
+				$uid = htmlspecialchars($user->getUID());
+				$displayName = htmlspecialchars($user->getDisplayName() ?: $user->getUID());
+				$email = htmlspecialchars($user->getEMailAddress() ?: '-');
+
+				// Gruppen/Rollen ermitteln
+				$groups = [];
+				foreach ($this->groupManager->getUserGroups($user) as $group) {
+					$groups[] = htmlspecialchars($group->getDisplayName() ?: $group->getGID());
+				}
+				$rolesStr = $groups ? implode(', ', $groups) : '-';
+
+				// Zeile mit alternierenden Farben
+				$bgColor = ($rowNum % 2 === 0) ? '#f9f9f9' : '#ffffff';
+				$html .= '<tr style="background-color: ' . $bgColor . ';">';
+				$html .= '<td>' . $uid . '</td>';
+				$html .= '<td>' . $displayName . '</td>';
+				$html .= '<td>' . $email . '</td>';
+				$html .= '<td>' . $rolesStr . '</td>';
+				$html .= '</tr>';
+				$rowNum++;
+			}
+
+			$html .= '</tbody></table>';
+			$html .= '</body></html>';
+
+			$mpdf->WriteHTML($html);
+
+			// PDF als Download ausliefern
+			header('Content-Type: application/pdf');
+			header('Content-Disposition: attachment; filename="mitglieder-' . date('Y-m-d-H-i-s') . '.pdf"');
+			echo $mpdf->Output('', 'S');
+			exit;
+
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler beim PDF-Export: ' . $e->getMessage()], 400);
+		}
+	}
 }
