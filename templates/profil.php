@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-style('weinsteigfinance', 'style');
+style('weinsteigfinance', 'main');
 script('weinsteigfinance', 'profil');
 /** @var \OCP\IL10N $l */
 $currentPage = 'profil';
