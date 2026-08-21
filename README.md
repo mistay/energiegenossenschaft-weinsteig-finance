@@ -247,13 +247,19 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Offene Beträge Übersicht**: Farblich formatiert (🔴 Rückstand, 🟢 Guthaben, ⚪ ausgeglichen)
 - **Benutzer-Zuordnung**: Many-to-Many mit Dropdown + Zuordnungs-UI
 - **Mitgliederliste Export**: Drei Export-Formate auf `admin-haeuser-personen/` Seite
-  - 📥 CSV Export: Optimiert für Spreadsheets und Vergleiche (Spalten: Name | E-Mail | Rollen)
-  - 📄 PDF Export: Professionelle Tabelle mit Header und Timestamp (Spalten: Name | E-Mail | Rollen)
-  - ✍️ Anwesenheitsliste PDF: Für Mitgliederversammlungen mit großzügigen Unterschriftsfeldern
-    - Landscape-Format für viel Platz
-    - Spalten: Name | E-Mail | Unterschrift (großes Unterschriftsfeld pro Person)
-    - Automatischer Header + Datumsfeld
-    - Ideal für Compliance-Dokumentation und Abstimmungsprotokoll
+  - 📥 CSV Export: Optimiert für Spreadsheets und Vergleiche
+    - Spalten: Haus | Name | E-Mail | Rollen
+    - Semantisch sortiert (2a vor 19)
+  - 📄 PDF Export: Professionelle Tabelle mit Header und Timestamp
+    - Spalten: Haus | Name | E-Mail | Rollen
+    - Semantisch sortiert (Natural Order)
+  - ✍️ Anwesenheitsliste PDF: Flexibel für alle Anlässe
+    - Landscape-Format (A4-L) für viel Platz
+    - Spalten: Haus | Name | E-Mail | Unterschrift
+    - Header: "Anwesenheitsliste" (generisch)
+    - Felder: Anlass: ________ | Datum: ________ (zum Ausfüllen)
+    - Nutzbar für: Mitgliederversammlungen, Abstimmungen, Boardsitzungen, etc.
+  - 🔤 Semantische Sortierung: "2a" vor "19" (Natural Order alphanumeric)
   - 🕐 Audit-Trail: Exportiere regelmäßig um Name-Änderungen zu verfolgen
 - **Bulk-Operationen**: Mehrere Häuser mit einem Admin-Benutzer
 - **Import-Management**: CSV-Validierung mit Fehlerbehandlung + Duplikat-Detection
@@ -340,11 +346,16 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.6.7)**:
+  - 🏠 **Haus-Spalte in allen Exporten**: CSV, PDF, Anwesenheitsliste
+  - 🔤 **Semantische Sortierung** (Natural Order): "2a" vor "19"
+  - ✍️ **Flexible Anwesenheitsliste**: Generischer Header für alle Zwecke
+  - 📝 "Anlass:"-Feld zum Ausfüllen (Versammlung, Abstimmung, etc.)
 - **Neue Features (v1.6.5)**:
-  - ✍️ **Anwesenheitsliste PDF** für Mitgliederversammlungen
+  - ✍️ **Anwesenheitsliste PDF** für verschiedene Anlässe
   - 📄 Landscape-Format (A4-L) mit großzügigen Unterschriftsfeldern
-  - 🏛️ Header + Datumsfeld für automatische Dokumentation
-  - 💼 Perfekt für: Mitgliederversammlungen, Aufsichtsratssitzungen, Compliance
+  - 🏛️ Header + Anlass + Datumsfeld für flexible Dokumentation
+  - 💼 Usable für: Mitgliederversammlungen, Abstimmungen, Boardsitzungen
   - 🎯 Drei Export-Button jetzt verfügbar: CSV (blau), PDF (grün), Anwesenheit (orange)
 - **Neue Features (v1.6.4)**:
   - 📊 **Mitgliederliste CSV & PDF Export** auf `admin-haeuser-personen/` Seite
