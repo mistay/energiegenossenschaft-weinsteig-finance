@@ -197,19 +197,22 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 ### 💾 Datenbank-Backup & Automatische Cron-Sicherung
 
 #### **Manuelle Backups**
-- **Vollständiges ZIP-Backup** mit Datenbank und Dateien
+- **Vollständiges ZIP-Backup** mit Datenbank, Mitgliederliste und Dateien
 - **MySQL SQL Dump** aller Tabellen im Standard-Format
+- **Mitgliederliste CSV** mit Name, E-Mail, Rollen Snapshot zum Zeitpunkt des Backups
 - **Mandate-PDFs** in exakter Dateisystem-Struktur enthalten
 - **Einfache Wiederherstellung**: Extract ZIP → SQL einspielen → Fertig!
 - **On-Demand-Download** auf der Backup-Seite verfügbar
 - **⚡ Sofort-Backup-Button** auf Backup-Status Seite zum Ad-hoc Backup erstellen
 - **Status-Feedback** während Backup-Erstellung (mit Farbanzeigen)
+- **🕐 Audit-Trail der Anzeigenamen**: Vergleiche mitglieder.csv aus verschiedenen Backups um Name-Änderungen zu verfolgten
 
 #### **Automatische Cron-Backups** ⏰
 - **Täglich um 02:00 Uhr** automatisches Backup
 - **Speicherung**: `/data/backup/` Verzeichnis (Dateisystem)
 - **Kein Backup-Rekursion**: Alte Backups werden NICHT ins neue Backup eingepackt
-- **ZIP-Format**: `database.sql` + `generated/` Verzeichnisstruktur
+- **ZIP-Format**: `database.sql` + `mitglieder.csv` + `generated/` Verzeichnisstruktur
+- **Mitgliederliste enthalten**: CSV-Snapshot mit Name, E-Mail, Rollen für Audit-Trail
 - **Backup-Status-Seite**: Zeigt:
   - 🕐 Letztes Backup (Datum + Zeit)
   - ⏱️ Nächstes Backup (Datum + Zeit, täglich um 02:00 Uhr)
@@ -228,7 +231,8 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 1. ZIP extrahieren
 2. mysql < database.sql
 3. cp -r generated/ /var/www/nextcloud/data/
-4. Fertig! ✅
+4. (Optional) mitglieder.csv für Audit-Vergleich archivieren
+5. Fertig! ✅
 ```
 
 #### **Features**
@@ -242,6 +246,10 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Haus-Management**: 22 vordefinierte Liegenschaften (auto-seeded) mit offenen Beträgen
 - **Offene Beträge Übersicht**: Farblich formatiert (🔴 Rückstand, 🟢 Guthaben, ⚪ ausgeglichen)
 - **Benutzer-Zuordnung**: Many-to-Many mit Dropdown + Zuordnungs-UI
+- **Mitgliederliste Export**: CSV & PDF Export auf `admin-haeuser-personen/` Seite
+  - 📥 CSV Export: Optimiert für Spreadsheets und Vergleiche
+  - 📄 PDF Export: Professionelle Tabelle mit Header und Timestamp
+  - 🕐 Audit-Trail: Exportiere regelmäßig um Name-Änderungen zu verfolgen
 - **Bulk-Operationen**: Mehrere Häuser mit einem Admin-Benutzer
 - **Import-Management**: CSV-Validierung mit Fehlerbehandlung + Duplikat-Detection
 - **Statistik-Dashboard**: Überblick über alle Häuser und Zahlungen
@@ -254,6 +262,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **SEPA Core Datenträger**: Listet alle gültigen Mandate mit offenen Beträgen + CSV-Export
 - **Smart Payment Matching**: Intelligente Zuordnung von Zahlungen auch ohne manuelle Zuweisung
 - **Echtzeit Saldo-Berechnung**: Offene Beträge = eingegangene Zahlungen - offene Rechnungen
+- **Automatische Backup-Integration**: Mitgliederliste wird in jedem Backup gespeichert für historisches Tracking
 
 ### ⚙️ Technische Architektur & Stack
 - **Nextcloud 34 AppFramework** Bootstrap Pattern mit PSR-4 Autoloading
@@ -322,10 +331,20 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.5.0
+- **Aktuelle Version**: 1.6.4
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.6.4)**:
+  - 📊 **Mitgliederliste CSV & PDF Export** auf `admin-haeuser-personen/` Seite
+  - 📥 **Zwei Export-Button**: CSV (blau) und PDF (grün) mit professionellem Layout
+  - 📋 **Spaltenformat**: Name | E-Mail | Rollen (optimiert für Audit & Verwaltung)
+  - 💾 **Backup-Integration**: Mitgliederliste wird automatisch ins Backup inkludiert
+  - 🕐 **Audit-Trail für Anzeigenamen**: Vergleiche Backups um zu sehen, wann Namen geändert wurden
+  - 🔐 **Nur für Obpersonen** zugänglich (Zugriffskontrolle)
+  - 📄 **Endpoint-Umbenennungen**: `/backup-status/` → `/backup/` (kürzere URL)
+  - ⚙️ **Menu-Text**: "Obpersonen-Einstellungen" → "Einstellungen" (sprechender Label)
+  - 🎨 **CSS-Fix**: MIME-Type Error bei CSS-Laden behoben
 - **Neue Features (v1.5.0)**:
   - 👤 **Editierbarer Display Name** auf Profil-Seite (Selfservice für Namensänderungen)
   - 🔄 Zukünftige Vorschreibungen nutzen aktualisierten Namen
