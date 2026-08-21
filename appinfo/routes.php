@@ -32,6 +32,7 @@ return [
 		['name' => 'api#downloadSignedMandate', 'url' => '/api/download/{id}', 'verb' => 'GET'],
 		['name' => 'api#myGroups', 'url' => '/api/my-groups', 'verb' => 'GET'],
 		['name' => 'api#myMember', 'url' => '/api/my-member', 'verb' => 'GET'],
+		['name' => 'api#updateDisplayName', 'url' => '/api/update-display-name', 'verb' => 'POST'],
 		['name' => 'api#assignUser', 'url' => '/api/assign', 'verb' => 'POST'],
 		['name' => 'api#unassignUser', 'url' => '/api/unassign', 'verb' => 'POST'],
 		['name' => 'api#vorschreibungPdf', 'url' => '/api/vorschreibung/{id}/{month}', 'verb' => 'GET'],

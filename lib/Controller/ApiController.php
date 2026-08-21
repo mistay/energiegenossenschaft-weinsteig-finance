@@ -1266,7 +1266,65 @@ class ApiController extends Controller {
 		}
 
 		$row['signed_mandate_exists'] = $signedMandateExists;
+
+		// Nextcloud DisplayName hinzufügen
+		$user = $this->userSession->getUser();
+		if ($user) {
+			$row['displayName'] = $user->getDisplayName();
+			$row['userId'] = $userId;
+		}
+
 		return new DataResponse($row);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function updateDisplayName(): DataResponse {
+		$userId = $this->getUserId();
+		if (!$userId) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$displayName = $this->request->getParam('displayName');
+
+			if (empty($displayName)) {
+				return new DataResponse(['error' => 'Display name cannot be empty'], 400);
+			}
+
+			if (strlen($displayName) > 255) {
+				return new DataResponse(['error' => 'Display name too long (max 255 characters)'], 400);
+			}
+
+			// Sanitize input
+			$displayName = trim($displayName);
+
+			// User muss selbst sein oder Admin
+			$requestedUserId = $this->request->getParam('userId');
+			if ($requestedUserId && $requestedUserId !== $userId && !$this->isObperson()) {
+				return new DataResponse(['error' => 'Cannot update other users'], 403);
+			}
+
+			$targetUserId = $requestedUserId ?? $userId;
+			$user = $this->userManager->get($targetUserId);
+
+			if (!$user) {
+				return new DataResponse(['error' => 'User not found'], 404);
+			}
+
+			// DisplayName in Nextcloud aktualisieren
+			$user->setDisplayName($displayName);
+
+			return new DataResponse([
+				'success' => true,
+				'displayName' => $user->getDisplayName(),
+				'message' => 'Display name updated successfully'
+			]);
+		} catch (\Throwable $e) {
+			return new DataResponse([
+				'error' => 'Error updating display name: ' . $e->getMessage()
+			], 400);
+		}
 	}
 
 	#[NoAdminRequired]
