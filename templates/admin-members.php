@@ -13,7 +13,7 @@ $currentPage = 'admin-members';
 
 	<div style="margin-bottom: 20px;">
 		<button id="export-users-btn" style="padding: 10px 20px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s;">
-			📥 Benutzer als CSV exportieren
+			📥 Mitgliederliste als CSV exportieren
 		</button>
 	</div>
 
