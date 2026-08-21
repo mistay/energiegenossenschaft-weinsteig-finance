@@ -2026,6 +2026,63 @@ HTML;
 		}
 	}
 
+	private function getUsersWithHouses(): array {
+		$usersData = [];
+
+		try {
+			// Alle Benutzer laden
+			foreach ($this->userManager->search('') as $user) {
+				$uid = $user->getUID();
+				$displayName = $user->getDisplayName() ?: $uid;
+
+				// Häuser des Benutzers laden (über weinsteig_user_members → weinsteig_members)
+				$houseQb = $this->db->getQueryBuilder();
+				$houses = $houseQb->select('wm.address')
+					->from('weinsteig_user_members', 'wum')
+					->leftJoin('wum', 'weinsteig_members', 'wm', $houseQb->expr()->eq('wum.member_id', 'wm.id'))
+					->where($houseQb->expr()->eq('wum.user_id', $houseQb->createNamedParameter($uid)))
+					->executeQuery()
+					->fetchAll();
+
+				$houseAddresses = array_map(fn($h) => $h['address'] ?: 'Keine Zuordnung', $houses);
+				if (empty($houseAddresses)) {
+					$houseAddresses = ['Keine Zuordnung'];
+				}
+
+				// Gruppen/Rollen ermitteln
+				$groups = [];
+				foreach ($this->groupManager->getUserGroups($user) as $group) {
+					$groups[] = $group->getDisplayName() ?: $group->getGID();
+				}
+				$rolesStr = $groups ? implode(', ', $groups) : '-';
+
+				$usersData[] = [
+					'uid' => $uid,
+					'displayName' => $displayName,
+					'houses' => $houseAddresses,
+					'roles' => $rolesStr,
+				];
+			}
+
+			// Semantisch sortieren (Natural Order Sorting nach Haus, dann Name)
+			usort($usersData, function($a, $b) {
+				$housesA = $a['houses'][0] ?? 'Keine Zuordnung';
+				$housesB = $b['houses'][0] ?? 'Keine Zuordnung';
+				$houseCompare = strnatcmp($housesA, $housesB);
+				if ($houseCompare !== 0) {
+					return $houseCompare;
+				}
+				// Dann nach Name (falls gleiches Haus)
+				return strcasecmp($a['displayName'], $b['displayName']);
+			});
+
+		} catch (\Exception $e) {
+			// Fallback: Empty array wenn Fehler
+		}
+
+		return $usersData;
+	}
+
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function exportUsersCSV(): Response {
@@ -2036,32 +2093,25 @@ HTML;
 
 		try {
 			// CSV Header
-			$csvLines = ['Name;E-Mail;Rollen'];
+			$csvLines = ['Haus;Name;E-Mail;Rollen'];
 
-			// Alle Benutzer laden
-			$users = [];
-			foreach ($this->userManager->search('') as $user) {
-				$users[] = $user;
-			}
+			// Benutzer mit Häusern laden und semantisch sortieren
+			$usersData = $this->getUsersWithHouses();
 
 			// Für jeden Benutzer die Daten sammeln
-			foreach ($users as $user) {
-				$uid = $user->getUID();
-				$displayName = $user->getDisplayName() ?: $uid;
-
-				// Gruppen/Rollen ermitteln
-				$groups = [];
-				foreach ($this->groupManager->getUserGroups($user) as $group) {
-					$groups[] = $group->getDisplayName() ?: $group->getGID();
-				}
-				$rolesStr = $groups ? implode(', ', $groups) : '-';
+			foreach ($usersData as $userData) {
+				$houses = implode(', ', $userData['houses']);
+				$displayName = $userData['displayName'];
+				$uid = $userData['uid'];
+				$rolesStr = $userData['roles'];
 
 				// CSV-Zeile hinzufügen (mit Escape für Semikolons und Anführungszeichen)
-				$uid = str_replace('"', '""', $uid);
+				$houses = str_replace('"', '""', $houses);
 				$displayName = str_replace('"', '""', $displayName);
+				$uid = str_replace('"', '""', $uid);
 				$rolesStr = str_replace('"', '""', $rolesStr);
 
-				$csvLines[] = "\"$displayName\";\"$uid\";\"$rolesStr\"";
+				$csvLines[] = "\"$houses\";\"$displayName\";\"$uid\";\"$rolesStr\"";
 			}
 
 			$csv = implode("\r\n", $csvLines);
@@ -2108,27 +2158,25 @@ HTML;
 			$html .= '<p>Energiegenossenschaft Weinsteig - Exportiert am ' . date('d.m.Y H:i:s') . '</p>';
 			$html .= '<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">';
 			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
+			$html .= '<th style="text-align: left;">Haus</th>';
 			$html .= '<th style="text-align: left;">Name</th>';
 			$html .= '<th style="text-align: left;">E-Mail</th>';
 			$html .= '<th style="text-align: left;">Rollen</th>';
 			$html .= '</tr></thead><tbody>';
 
-			// Alle Benutzer laden
+			// Benutzer mit Häusern laden und sortieren
+			$usersData = $this->getUsersWithHouses();
 			$rowNum = 0;
-			foreach ($this->userManager->search('') as $user) {
-				$uid = htmlspecialchars($user->getUID());
-				$displayName = htmlspecialchars($user->getDisplayName() ?: $user->getUID());
-
-				// Gruppen/Rollen ermitteln
-				$groups = [];
-				foreach ($this->groupManager->getUserGroups($user) as $group) {
-					$groups[] = htmlspecialchars($group->getDisplayName() ?: $group->getGID());
-				}
-				$rolesStr = $groups ? implode(', ', $groups) : '-';
+			foreach ($usersData as $userData) {
+				$houses = htmlspecialchars(implode(', ', $userData['houses']));
+				$displayName = htmlspecialchars($userData['displayName']);
+				$uid = htmlspecialchars($userData['uid']);
+				$rolesStr = htmlspecialchars($userData['roles']);
 
 				// Zeile mit alternierenden Farben
 				$bgColor = ($rowNum % 2 === 0) ? '#f9f9f9' : '#ffffff';
 				$html .= '<tr style="background-color: ' . $bgColor . ';">';
+				$html .= '<td>' . $houses . '</td>';
 				$html .= '<td>' . $displayName . '</td>';
 				$html .= '<td>' . $uid . '</td>';
 				$html .= '<td>' . $rolesStr . '</td>';
@@ -2183,20 +2231,24 @@ HTML;
 
 			$html .= '<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px;">';
 			$html .= '<thead><tr style="background-color: #0082c9; color: white;">';
-			$html .= '<th style="text-align: left; width: 30%;">Name</th>';
-			$html .= '<th style="text-align: left; width: 35%;">E-Mail</th>';
-			$html .= '<th style="text-align: center; width: 35%;">Unterschrift</th>';
+			$html .= '<th style="text-align: left; width: 20%;">Haus</th>';
+			$html .= '<th style="text-align: left; width: 25%;">Name</th>';
+			$html .= '<th style="text-align: left; width: 25%;">E-Mail</th>';
+			$html .= '<th style="text-align: center; width: 30%;">Unterschrift</th>';
 			$html .= '</tr></thead><tbody>';
 
-			// Alle Benutzer laden
+			// Benutzer mit Häusern laden und sortieren
+			$usersData = $this->getUsersWithHouses();
 			$rowNum = 0;
-			foreach ($this->userManager->search('') as $user) {
-				$uid = htmlspecialchars($user->getUID());
-				$displayName = htmlspecialchars($user->getDisplayName() ?: $user->getUID());
+			foreach ($usersData as $userData) {
+				$houses = htmlspecialchars(implode(', ', $userData['houses']));
+				$displayName = htmlspecialchars($userData['displayName']);
+				$uid = htmlspecialchars($userData['uid']);
 
 				// Zeile mit alternierenden Farben
 				$bgColor = ($rowNum % 2 === 0) ? '#f9f9f9' : '#ffffff';
 				$html .= '<tr style="background-color: ' . $bgColor . '; min-height: 40px;">';
+				$html .= '<td style="vertical-align: top; padding-top: 10px; font-size: 12px;">' . $houses . '</td>';
 				$html .= '<td style="vertical-align: top; padding-top: 10px;">' . $displayName . '</td>';
 				$html .= '<td style="vertical-align: top; padding-top: 10px; font-size: 12px;">' . $uid . '</td>';
 				$html .= '<td style="vertical-align: top; height: 50px;"></td>';

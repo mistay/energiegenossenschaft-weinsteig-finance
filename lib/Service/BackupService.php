@@ -64,20 +64,34 @@ class BackupService {
 	}
 
 	private function createMembersListCSV(): string {
-		$csvLines = ['Name;E-Mail;Rollen'];
+		$csvLines = ['Haus;Name;E-Mail;Rollen'];
 
 		try {
 			// Alle Benutzer aus der Datenbank laden
 			$qb = $this->db->getQueryBuilder();
 			$users = $qb->select('uid', 'displayname')
 				->from('users')
-				->orderBy('displayname')
 				->executeQuery()
 				->fetchAll();
 
+			$usersData = [];
 			foreach ($users as $user) {
 				$uid = $user['uid'];
 				$displayName = $user['displayname'] ?: $uid;
+
+				// Häuser des Benutzers laden (über weinsteig_user_members → weinsteig_members)
+				$houseQb = $this->db->getQueryBuilder();
+				$houses = $houseQb->select('wm.address')
+					->from('weinsteig_user_members', 'wum')
+					->leftJoin('wum', 'weinsteig_members', 'wm', $houseQb->expr()->eq('wum.member_id', 'wm.id'))
+					->where($houseQb->expr()->eq('wum.user_id', $houseQb->createNamedParameter($uid)))
+					->executeQuery()
+					->fetchAll();
+
+				$houseAddresses = array_map(fn($h) => $h['address'] ?: 'Keine Zuordnung', $houses);
+				if (empty($houseAddresses)) {
+					$houseAddresses = ['Keine Zuordnung'];
+				}
 
 				// Gruppen/Rollen für diesen Benutzer laden
 				$groupQb = $this->db->getQueryBuilder();
@@ -93,16 +107,42 @@ class BackupService {
 				}
 				$rolesStr = $groupNames ? implode(', ', $groupNames) : '-';
 
+				$usersData[] = [
+					'uid' => $uid,
+					'displayName' => $displayName,
+					'houses' => $houseAddresses,
+					'roles' => $rolesStr,
+				];
+			}
+
+			// Semantisch sortieren (Natural Order)
+			usort($usersData, function($a, $b) {
+				$housesA = $a['houses'][0] ?? 'Keine Zuordnung';
+				$housesB = $b['houses'][0] ?? 'Keine Zuordnung';
+				$houseCompare = strnatcmp($housesA, $housesB);
+				if ($houseCompare !== 0) {
+					return $houseCompare;
+				}
+				return strcasecmp($a['displayName'], $b['displayName']);
+			});
+
+			foreach ($usersData as $userData) {
+				$houses = implode(', ', $userData['houses']);
+				$displayName = $userData['displayName'];
+				$uid = $userData['uid'];
+				$rolesStr = $userData['roles'];
+
 				// CSV-Zeile mit Escaping
-				$uid = str_replace('"', '""', $uid);
+				$houses = str_replace('"', '""', $houses);
 				$displayName = str_replace('"', '""', $displayName);
+				$uid = str_replace('"', '""', $uid);
 				$rolesStr = str_replace('"', '""', $rolesStr);
 
-				$csvLines[] = "\"$displayName\";\"$uid\";\"$rolesStr\"";
+				$csvLines[] = "\"$houses\";\"$displayName\";\"$uid\";\"$rolesStr\"";
 			}
 		} catch (\Exception $e) {
 			// Fallback: Nur Header, wenn Fehler
-			$csvLines[] = '"Fehler beim Laden der Mitgliederliste";' . $e->getMessage() . '";"';
+			$csvLines[] = '"Fehler beim Laden";"";"";""';
 		}
 
 		return implode("\r\n", $csvLines);
