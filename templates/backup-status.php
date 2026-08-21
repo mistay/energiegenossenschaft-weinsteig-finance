@@ -2,7 +2,7 @@
 declare(strict_types=1);
 style('weinsteigfinance', 'style');
 script('weinsteigfinance', 'backup-status');
-$currentPage = 'backup-status';
+$currentPage = 'backup';
 ?>
 <div id="weinsteigfinance-backup-status" class="app-weinsteigfinance">
 	<?php include 'nav.php'; ?>

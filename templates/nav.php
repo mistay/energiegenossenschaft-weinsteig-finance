@@ -70,8 +70,8 @@ try {
 			📄 SEPA-Datenträger
 		</a>
 
-		<a href="/index.php/apps/weinsteigfinance/backup-status"
-			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'backup-status' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
+		<a href="/index.php/apps/weinsteigfinance/backup"
+			style="padding: 14px 16px; color: #555; text-decoration: none; border-bottom: 3px solid <?= $currentPage === 'backup' ? '#0082c9' : 'transparent' ?>; transition: all 0.2s;">
 			💾 Backup
 		</a>
 		<?php endif; ?>
