@@ -232,7 +232,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 ```
 
 #### **Features**
-- **Nur für Obpersonen** (Administratoren) zugänglich
+- **Nur für Obpersonen** zugänglich
 - **Background-Job** für Automation (kein manueller Cron nötig)
 - **Zeitstempel im Filename** für automatische Archivierung
 - **Große Dateien OK**: kein Größenlimit für Backups

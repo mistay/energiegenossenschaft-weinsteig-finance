@@ -10,7 +10,7 @@ use OCP\Server;
 $groupManager = Server::get(IGroupManager::class);
 $userSession = Server::get(IUserSession::class);
 $user = $userSession->getUser();
-$isAdmin = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
+$isObperson = $user && $groupManager->isInGroup($user->getUID(), 'obpersonen');
 $isMember = $user && $groupManager->isInGroup($user->getUID(), 'mitglieder');
 ?>
 <div id="weinsteigfinance" class="app-weinsteigfinance">
@@ -41,10 +41,10 @@ $isMember = $user && $groupManager->isInGroup($user->getUID(), 'mitglieder');
 		</a>
 		<?php endif; ?>
 
-		<?php if ($isAdmin): ?>
+		<?php if ($isObperson): ?>
 		<a href="/index.php/apps/weinsteigfinance/admin" style="display: block; padding: 25px; background: #f5f5f5; border: 2px solid #333; border-radius: 8px; text-decoration: none; transition: all 0.3s;">
-			<div style="font-size: 28px; margin-bottom: 10px;">⚙️</div>
-			<h3 style="margin: 0 0 8px 0; color: #333;">Admin: Mitglieder</h3>
+			<div style="font-size: 28px; margin-bottom: 10px;">👑</div>
+			<h3 style="margin: 0 0 8px 0; color: #333;">👑 Obpersonen: Mitglieder</h3>
 			<p style="margin: 0; color: #666; font-size: 14px;">Häuser & Zuordnungen verwalten</p>
 		</a>
 
