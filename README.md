@@ -43,7 +43,10 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 #### **Funktionalitäten**
 - **Digitale Mandate-Verwaltung** mit Versionskontrolle und Timestamping
 - **Automatische PDF-Mandate-Generierung** mit Energiegenossenschaft-Branding und -Adresse
-- **Digitale Mandate hochladen** mit Versionierung (v1, v2, etc.) und Zeitstempel
+- **Flexible Mandate hochladen** mit Versionierung (v1, v2, etc.) und Zeitstempel
+  - Unterstützte Formate: PDF, JPEG, PNG (ideal für handgeschriebene & gescannte Mandate)
+  - Dateiendung-Validierung (Whitelist + MIME-Type Check)
+  - Dateien behalten ihre Original-Extension
 - **Mandate-Approval-Workflow**: Kassier:innen/Obpersonen können hochgeladene Mandate überprüfen und genehmigen
 - **Approval-Status-Tracking**: Zeigt an, ob Mandat genehmigt ist und von wem (mit Timestamp)
 - **Mandate löschen**: Nicht genehmigte Dateien von allen löschbar, genehmigte nur von Kassier:innen/Obpersonen
@@ -319,10 +322,19 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.4.7
+- **Aktuelle Version**: 1.4.9
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.4.9)**:
+  - 📄 SEPA-Mandate unterstützen jetzt mehrere Dateiformate (PDF, JPG, PNG)
+  - ✅ Dateiendung-Validierung (Whitelist + MIME-Type Check)
+  - 🖼️ JPEG/PNG-Uploads werden mit korrekter Extension gespeichert
+  - 🔧 Download funktioniert jetzt mit allen unterstützten Formaten
+  - 📥 Korrekte Content-Type Header basierend auf Dateityp
+  - 🗑️ Redundante /backup/ Seite entfernt, alles unter /backup-status/
+  - 📖 Neue Benutzer-Anleitung (ANLEITUNG_MITGLIEDER.md)
+  - 📋 Neue Kassier:innen-Anleitung (ANLEITUNG_KASSIERER.md)
 - **Neue Features (v1.4.7)**:
   - ⚡ Manual Backup Button auf Backup-Status Seite
   - 🔄 Sofortiges Backup erstellen mit "Backup jetzt erstellen" Button
