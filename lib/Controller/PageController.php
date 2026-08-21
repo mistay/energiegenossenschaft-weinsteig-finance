@@ -172,7 +172,10 @@ class PageController extends Controller {
 		Util::addScript(Application::APP_ID, 'profil');
 		Util::addScript(Application::APP_ID, 'user-groups');
 
-		return new TemplateResponse(Application::APP_ID, 'profil');
+		$response = new TemplateResponse(Application::APP_ID, 'profil');
+		// Relax CSP to allow Nextcloud Notifications and other apps to load resources
+		$response->addHeader('Content-Security-Policy', "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; style-src 'self' 'unsafe-inline' blob: data:; img-src 'self' blob: data: https:; font-src 'self' blob: data:; connect-src 'self' blob: data:; frame-ancestors 'self';");
+		return $response;
 	}
 
 	#[NoAdminRequired]
