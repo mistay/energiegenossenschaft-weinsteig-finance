@@ -258,6 +258,18 @@ function renderConditions(modal, data) {
 function renderHistory(reminders) {
 	const container = document.getElementById('history-list');
 
+	// Handle error response
+	if (reminders && reminders.error) {
+		container.innerHTML = '<p style="color: #dc3545;">Fehler: ' + reminders.error + '</p>';
+		return;
+	}
+
+	// Ensure reminders is an array
+	if (!Array.isArray(reminders)) {
+		console.error('Expected array, got:', typeof reminders, reminders);
+		reminders = [];
+	}
+
 	if (!reminders || reminders.length === 0) {
 		container.innerHTML = '<p style="color: #999;">Keine Mahnungen vorhanden.</p>';
 		return;
