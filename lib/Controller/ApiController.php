@@ -2553,4 +2553,44 @@ HTML;
 			], 400);
 		}
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function getReminderTexts(): DataResponse {
+		// Nur Obpersonen dürfen Reminder-Texte verwalten
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$texts = $this->reminderService->getReminderTexts();
+			return new DataResponse($texts);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function setReminderText(int $stage, ?string $subject = null, ?string $body = null): DataResponse {
+		// Nur Obpersonen dürfen Reminder-Texte verwalten
+		if (!$this->isObperson()) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		if (!in_array($stage, [1, 2, 3])) {
+			return new DataResponse(['error' => 'Invalid stage: must be 1, 2, or 3'], 400);
+		}
+
+		if (!$subject || !$body) {
+			return new DataResponse(['error' => 'Subject and body are required'], 400);
+		}
+
+		try {
+			$this->reminderService->setReminderText($stage, trim($subject), trim($body));
+			return new DataResponse(['success' => true, 'stage' => $stage]);
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => $e->getMessage()], 400);
+		}
+	}
 }

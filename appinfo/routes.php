@@ -61,5 +61,7 @@ return [
 		['name' => 'api#setReminderStop', 'url' => '/api/member/{memberId}/reminder-stop', 'verb' => 'POST'],
 		['name' => 'api#getReminderHistory', 'url' => '/api/member/{memberId}/reminder-history', 'verb' => 'GET'],
 		['name' => 'api#checkReminderConditions', 'url' => '/api/member/{memberId}/reminder-check', 'verb' => 'GET'],
+		['name' => 'api#getReminderTexts', 'url' => '/api/reminder-texts', 'verb' => 'GET'],
+		['name' => 'api#setReminderText', 'url' => '/api/reminder-texts/{stage}', 'verb' => 'POST'],
 	],
 ];

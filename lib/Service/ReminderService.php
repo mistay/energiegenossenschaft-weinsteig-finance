@@ -15,57 +15,6 @@ class ReminderService {
 		3 => 'Letzte Mahnung',
 	];
 
-	private const REMINDER_TEXTS = [
-		1 => [
-			'subject' => 'Zahlungserinnerung - Energiegenossenschaft Weinsteig',
-			'body' => 'Liebe/r {name},
-
-wir möchten Sie höflich an folgende ausstehende Zahlung erinnern:
-
-Haus: {address}
-Offener Betrag: {amount}€
-Fälligkeitsdatum: {duedate}
-
-Falls Sie die Zahlung bereits getätigt haben, können Sie diese Nachricht ignorieren.
-
-Vielen Dank!
-Energiegenossenschaft Weinsteig',
-		],
-		2 => [
-			'subject' => 'Mahnung - Energiegenossenschaft Weinsteig',
-			'body' => 'Liebe/r {name},
-
-trotz Zahlungserinnerung ist uns der folgende Betrag noch nicht eingegangen:
-
-Haus: {address}
-Offener Betrag: {amount}€
-Ursprüngliches Fälligkeitsdatum: {duedate}
-
-Bitte überweisen Sie den ausstehenden Betrag innerhalb von 14 Tagen.
-
-Bei Fragen: office@langhofer.at
-
-Energiegenossenschaft Weinsteig',
-		],
-		3 => [
-			'subject' => 'Letzte Mahnung - Energiegenossenschaft Weinsteig',
-			'body' => 'Liebe/r {name},
-
-leider haben Sie unsere bisherigen Zahlungsaufforderungen ignoriert.
-
-Haus: {address}
-Offener Betrag: {amount}€
-Jetzt fällig: SOFORT
-
-Falls wir bis {finaldate} keine Zahlung erhalten, sehen wir uns gezwungen, rechtliche Schritte einzuleiten.
-
-Bitte zahlen Sie sofort.
-
-Energiegenossenschaft Weinsteig
-office@langhofer.at',
-		],
-	];
-
 	public function __construct(
 		private IDBConnection $db,
 		private ITimeFactory $timeFactory,
@@ -534,5 +483,51 @@ office@langhofer.at',
 			->set('reminder_stop_until', $qb->createNamedParameter($until, 'datetime'))
 			->where($qb->expr()->eq('id', $qb->createNamedParameter($memberId)))
 			->executeStatement();
+	}
+
+	/**
+	 * Get all reminder texts from database
+	 */
+	public function getReminderTexts(): array {
+		$qb = $this->db->getQueryBuilder();
+		$results = $qb->select('*')
+			->from('weinsteig_reminder_texts')
+			->orderBy('stage', 'ASC')
+			->executeQuery()
+			->fetchAll();
+
+		$texts = [];
+		foreach ($results as $row) {
+			$texts[(int)$row['stage']] = [
+				'subject' => $row['subject'],
+				'body' => $row['body'],
+			];
+		}
+		return $texts;
+	}
+
+	/**
+	 * Update reminder text for a stage
+	 */
+	public function setReminderText(int $stage, string $subject, string $body): void {
+		$now = $this->timeFactory->getDateTime();
+		$qb = $this->db->getQueryBuilder();
+		$qb->update('weinsteig_reminder_texts')
+			->set('subject', $qb->createNamedParameter($subject))
+			->set('body', $qb->createNamedParameter($body))
+			->set('updated_at', $qb->createNamedParameter($now, 'datetime'))
+			->where($qb->expr()->eq('stage', $qb->createNamedParameter($stage)))
+			->executeStatement();
+	}
+
+	/**
+	 * Get reminder text for a specific stage (with fallback to defaults)
+	 */
+	public function getReminderText(int $stage): array {
+		$texts = $this->getReminderTexts();
+		return $texts[$stage] ?? [
+			'subject' => 'Mahnung',
+			'body' => 'Bitte begleichen Sie Ihre ausstehenden Zahlungen.',
+		];
 	}
 }

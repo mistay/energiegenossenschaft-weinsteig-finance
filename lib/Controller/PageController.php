@@ -56,6 +56,7 @@ class PageController extends Controller {
 
 		Util::addStyle(Application::APP_ID, 'main');
 		Util::addScript(Application::APP_ID, 'admin-config');
+		Util::addScript(Application::APP_ID, 'admin-config-reminders');
 		Util::addScript(Application::APP_ID, 'user-groups');
 
 		return new TemplateResponse(Application::APP_ID, 'admin');
