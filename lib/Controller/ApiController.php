@@ -2064,7 +2064,7 @@ HTML;
 
 				// Prüfe höchste Mandatsversion (genehmigt)
 				$latestVersion = 0;
-				$folderPath = $this->config->getSystemValue('datadirectory') . '/generated/' . preg_replace('/[^a-zA-Z0-9 ]/', '', $member['address']);
+				$folderPath = $this->config->getSystemValue('datadirectory') . '/generated/' . preg_replace('/[^a-zA-Z0-9 ]/', '', $member['address']) . '/sepa';
 				if (is_dir($folderPath)) {
 					$files = scandir($folderPath);
 					foreach ($files as $file) {
