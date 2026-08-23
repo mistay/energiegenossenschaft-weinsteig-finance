@@ -118,14 +118,14 @@ function createReminderManual(memberId) {
 			.then(r => r.json())
 			.then(data => {
 				if (data.success) {
-					OC.Notification.showTemporary('✅ Mahnung erstellt und versendet!');
+					showNotification('✅ Mahnung erstellt und versendet!', 'success');
 					loadRemindersData();
 				} else {
-					OC.Notification.showTemporary('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+					showNotification('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'), 'error');
 				}
 			})
 			.catch(err => {
-				OC.Notification.showTemporary('❌ Fehler beim Versand: ' + err.message);
+				showNotification('❌ Fehler beim Versand: ' + err.message, 'error');
 			});
 	}
 }
@@ -204,14 +204,14 @@ function openSuppressDialog(memberId) {
 		.then(r => r.json())
 		.then(data => {
 			if (data.success) {
-				OC.Notification.showTemporary('✅ ' + data.message);
+				showNotification('✅ ' + data.message, 'success');
 				loadRemindersData();
 			} else {
-				OC.Notification.showTemporary('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+				showNotification('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'), 'error');
 			}
 		})
 		.catch(err => {
-			OC.Notification.showTemporary('❌ Fehler: ' + err.message);
+			showNotification('❌ Fehler: ' + err.message, 'error');
 		});
 }
 
@@ -228,14 +228,14 @@ function clearReminderStop(memberId) {
 			.then(r => r.json())
 			.then(data => {
 				if (data.success) {
-					OC.Notification.showTemporary('✅ Mahnstop aufgehoben');
+					showNotification('✅ Mahnstop aufgehoben', 'success');
 					loadRemindersData();
 				} else {
-					OC.Notification.showTemporary('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+					showNotification('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'), 'error');
 				}
 			})
 			.catch(err => {
-				OC.Notification.showTemporary('❌ Fehler: ' + err.message);
+				showNotification('❌ Fehler: ' + err.message, 'error');
 			});
 	}
 }
@@ -251,7 +251,7 @@ function triggerManualGeneration() {
 	if (confirm('Alle ausstehenden Mahnungen jetzt generieren und versenden?')) {
 		// This would call a new API endpoint for bulk generation
 		// For now, we inform the user it's automatic
-		OC.Notification.showTemporary('⚙️ Mahnungen werden automatisch um 02:00 Uhr generiert. Oder erstelle einzelne Mahnungen per Haus.');
+		showNotification('⚙️ Mahnungen werden automatisch um 02:00 Uhr generiert. Oder erstelle einzelne Mahnungen per Haus.', 'info');
 	}
 }
 
@@ -275,4 +275,22 @@ function updateNextGenerationTime() {
 function escapeHtml(text) {
 	const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
 	return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+function showNotification(message, type = 'info') {
+	// Try modern Nextcloud API first (OCP.Toast)
+	if (typeof OCP !== 'undefined' && OCP.Toast) {
+		if (type === 'success') {
+			OCP.Toast.success(message);
+		} else if (type === 'error') {
+			OCP.Toast.error(message);
+		} else {
+			OCP.Toast.info(message);
+		}
+	}
+	// Fallback: use console
+	else {
+		console.log('[' + type.toUpperCase() + ']', message);
+		alert(message);
+	}
 }
