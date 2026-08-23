@@ -71,6 +71,12 @@ function renderRemindersTable(members) {
 					data-address="${escapeHtml(member.address)}">
 					📋 Verlauf
 				</button>
+				<button class="reminder-button" style="background: #6c757d;"
+					data-action="check-conditions"
+					data-member-id="${member.id}"
+					data-address="${escapeHtml(member.address)}">
+					ℹ️ Warum?
+				</button>
 				${getSuppressButton(member.id, isSuppressed, member.reminder_stop_until)}
 			</div>
 		</div>`;
@@ -153,6 +159,87 @@ function openHistoryModal(memberId, address) {
 			document.getElementById('history-list').innerHTML =
 				'<p style="color: #dc3545;">Fehler beim Laden: ' + err.message + '</p>';
 		});
+}
+
+function openConditionsModal(memberId, address) {
+	const modal = document.createElement('div');
+	modal.className = 'modal active';
+	modal.id = 'conditions-modal-' + memberId;
+	modal.innerHTML = `
+		<div class="modal-content">
+			<div class="modal-header">
+				🔍 Warum wird eine Mahnung ${address}?
+			</div>
+			<div class="modal-body" style="text-align: center; padding: 20px;">
+				Lädt...
+			</div>
+			<div class="modal-footer">
+				<button class="modal-close" id="conditions-close-${memberId}">Schließen</button>
+			</div>
+		</div>
+	`;
+	document.body.appendChild(modal);
+
+	// Close button
+	document.getElementById('conditions-close-' + memberId).addEventListener('click', function() {
+		modal.remove();
+	});
+
+	// Close on background click
+	modal.addEventListener('click', function(e) {
+		if (e.target === this) this.remove();
+	});
+
+	fetch(OCA?.generateUrl?.(`/apps/weinsteigfinance/api/member/${memberId}/reminder-check`) ||
+		`/index.php/apps/weinsteigfinance/api/member/${memberId}/reminder-check`,
+		{ credentials: 'include' })
+		.then(r => r.json())
+		.then(data => {
+			renderConditions(modal, data);
+		})
+		.catch(err => {
+			modal.querySelector('.modal-body').innerHTML =
+				'<p style="color: #dc3545;">Fehler beim Laden: ' + err.message + '</p>';
+		});
+}
+
+function renderConditions(modal, data) {
+	const body = modal.querySelector('.modal-body');
+
+	let html = '';
+
+	// Overall status
+	if (data.can_create_reminder) {
+		html += '<div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 4px; margin-bottom: 15px;">';
+		html += '<h3 style="margin: 0 0 10px 0; color: #155724;">✅ MAHNUNG WÜRDE AUSGEGEBEN!</h3>';
+	} else {
+		html += '<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px; margin-bottom: 15px;">';
+		html += '<h3 style="margin: 0 0 10px 0; color: #721c24;">❌ MAHNUNG WIRD NICHT AUSGEGEBEN</h3>';
+	}
+	html += '<p style="margin: 0; font-size: 13px;">' + data.message + '</p></div>';
+
+	// Detailed checks
+	html += '<div style="text-align: left;">';
+	html += '<h4 style="margin: 15px 0 10px 0; color: #333;">Bedingungen:</h4>';
+
+	const checkOrder = ['open_amount', 'suppression', 'bill_age', 'reminder_spacing', 'recent_import'];
+	checkOrder.forEach(key => {
+		const check = data.checks[key];
+		if (!check) return;
+
+		const color = check.passed ? '#155724' : '#721c24';
+		const bg = check.passed ? '#d4edda' : '#f8d7da';
+
+		html += `<div style="background: ${bg}; padding: 10px; margin: 8px 0; border-radius: 3px; border-left: 4px solid ${color};">
+			<div style="color: ${color}; font-weight: 600; font-size: 13px;">
+				${check.message}
+			</div>
+		</div>`;
+	});
+
+	html += '</div>';
+
+	body.innerHTML = html;
 }
 
 function renderHistory(reminders) {
@@ -290,6 +377,9 @@ function setupEventListeners() {
 					break;
 				case 'open-history':
 					openHistoryModal(memberId, address);
+					break;
+				case 'check-conditions':
+					openConditionsModal(memberId, address);
 					break;
 				case 'open-suppress-dialog':
 					openSuppressDialog(memberId);

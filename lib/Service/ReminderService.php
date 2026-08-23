@@ -393,6 +393,136 @@ office@langhofer.at',
 	}
 
 	/**
+	 * Check all conditions for reminder (for debugging)
+	 */
+	public function checkReminderConditions(int $memberId): array {
+		$now = $this->timeFactory->getDateTime();
+
+		// Get member
+		$qb = $this->db->getQueryBuilder();
+		$member = $qb->select('*')
+			->from('weinsteig_members')
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($memberId)))
+			->executeQuery()
+			->fetch();
+
+		if (!$member) {
+			return ['error' => 'Member not found'];
+		}
+
+		$result = [
+			'member_id' => $memberId,
+			'address' => $member['address'],
+			'checks' => [],
+			'can_create_reminder' => false,
+			'reason' => [],
+		];
+
+		// Check 1: Open amount >= 10€
+		$openAmount = $this->calculateOpenAmount($memberId);
+		$check1 = $openAmount >= 10.0;
+		$result['checks']['open_amount'] = [
+			'passed' => $check1,
+			'value' => $openAmount,
+			'message' => $openAmount >= 10.0 ? "✓ Offener Betrag: {$openAmount}€ (≥ 10€)" : "❌ Offener Betrag: {$openAmount}€ (< 10€ - zu klein)"
+		];
+		if (!$check1) $result['reason'][] = "Offener Betrag < 10€";
+
+		// Check 2: Suppression
+		$isSuppressed = false;
+		if ($member['reminder_stop_until']) {
+			$stopDate = new DateTime($member['reminder_stop_until']);
+			$isSuppressed = $stopDate > $now;
+		}
+		$check2 = !$isSuppressed;
+		$result['checks']['suppression'] = [
+			'passed' => $check2,
+			'value' => $isSuppressed ? $member['reminder_stop_until'] : null,
+			'message' => $isSuppressed ? "❌ Mahnstop aktiv bis {$member['reminder_stop_until']}" : "✓ Kein Mahnstop aktiv"
+		];
+		if (!$check2) $result['reason'][] = "Mahnstop aktiv";
+
+		// Check 3: Oldest open bill > 30 days
+		$oldestBill = $this->getOldestOpenBillDate($memberId);
+		$check3 = false;
+		if ($oldestBill) {
+			$daysSinceBill = $now->diff($oldestBill)->days;
+			$check3 = $daysSinceBill >= 30;
+			$result['checks']['bill_age'] = [
+				'passed' => $check3,
+				'value' => $daysSinceBill,
+				'message' => $check3
+					? "✓ Älteste Rechnung: {$daysSinceBill} Tage alt (≥ 30)"
+					: "❌ Älteste Rechnung: {$daysSinceBill} Tage alt (< 30 - zu neu)"
+			];
+			if (!$check3) $result['reason'][] = "Älteste Rechnung noch keine 30 Tage alt ({$daysSinceBill} Tage)";
+		} else {
+			$result['checks']['bill_age'] = [
+				'passed' => false,
+				'value' => null,
+				'message' => "❌ Keine offenen Rechnungen gefunden"
+			];
+			$result['reason'][] = "Keine offenen Rechnungen";
+		}
+
+		// Check 4: Last reminder > 14 days ago
+		$lastReminder = $this->getLastReminderDate($memberId);
+		$check4 = true;
+		if ($lastReminder) {
+			$daysSinceReminder = $now->diff($lastReminder)->days;
+			$check4 = $daysSinceReminder >= 14;
+			$result['checks']['reminder_spacing'] = [
+				'passed' => $check4,
+				'value' => $daysSinceReminder,
+				'message' => $check4
+					? "✓ Letzte Mahnung: {$daysSinceReminder} Tage her (≥ 14)"
+					: "❌ Letzte Mahnung: {$daysSinceReminder} Tage her (< 14 - zu nah beieinander)"
+			];
+			if (!$check4) $result['reason'][] = "Letzte Mahnung noch keine 14 Tage her ({$daysSinceReminder} Tage)";
+		} else {
+			$result['checks']['reminder_spacing'] = [
+				'passed' => true,
+				'value' => null,
+				'message' => "✓ Keine bisherige Mahnung vorhanden"
+			];
+		}
+
+		// Check 5: Recent payment import
+		$lastImportDate = $this->getLastPaymentImportDate();
+		$check5 = false;
+		if ($lastImportDate) {
+			$daysSinceImport = $now->diff($lastImportDate)->days;
+			$check5 = $daysSinceImport <= 7;
+			$result['checks']['recent_import'] = [
+				'passed' => $check5,
+				'value' => $daysSinceImport,
+				'message' => $check5
+					? "✓ Letzter Kontoauszug: {$daysSinceImport} Tage her (≤ 7)"
+					: "❌ Letzter Kontoauszug: {$daysSinceImport} Tage her (> 7 - zu alt)"
+			];
+			if (!$check5) $result['reason'][] = "Kein aktueller Kontoauszug ({$daysSinceImport} Tage alt)";
+		} else {
+			$result['checks']['recent_import'] = [
+				'passed' => false,
+				'value' => null,
+				'message' => "❌ Kein Kontoauszug importiert"
+			];
+			$result['reason'][] = "Kein Kontoauszug importiert";
+		}
+
+		// Final decision
+		$result['can_create_reminder'] = $check1 && $check2 && $check3 && $check4 && $check5;
+
+		if ($result['can_create_reminder']) {
+			$result['message'] = "✅ Mahnung WÜRDE ausgegeben!";
+		} else {
+			$result['message'] = "❌ Mahnung wird NICHT ausgegeben. Gründe: " . implode(", ", $result['reason']);
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Get reminder history for member
 	 */
 	public function getReminderHistory(int $memberId, int $limit = 10): array {

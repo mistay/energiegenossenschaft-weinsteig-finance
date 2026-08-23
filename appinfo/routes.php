@@ -60,5 +60,6 @@ return [
 		['name' => 'api#createReminderManual', 'url' => '/api/member/{memberId}/reminder/create', 'verb' => 'POST'],
 		['name' => 'api#setReminderStop', 'url' => '/api/member/{memberId}/reminder-stop', 'verb' => 'POST'],
 		['name' => 'api#getReminderHistory', 'url' => '/api/member/{memberId}/reminder-history', 'verb' => 'GET'],
+		['name' => 'api#checkReminderConditions', 'url' => '/api/member/{memberId}/reminder-check', 'verb' => 'GET'],
 	],
 ];

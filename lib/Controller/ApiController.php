@@ -2531,4 +2531,24 @@ HTML;
 			], 400);
 		}
 	}
+
+	/**
+	 * Check reminder conditions for a member (for debugging)
+	 */
+	public function checkReminderConditions(int $memberId): DataResponse {
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$check = $this->reminderService->checkReminderConditions($memberId);
+			return new DataResponse($check);
+		} catch (\Exception $e) {
+			return new DataResponse([
+				'error' => $e->getMessage()
+			], 400);
+		}
+	}
 }
