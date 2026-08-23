@@ -169,11 +169,12 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 ### 💻 Benutzeroberfläche & User Experience
 - **Modernes Flat-Design** mit konsistenter Farbpalette (#0082c9, #28a745, #ff9800, etc.)
 - **Responsive Layout** für Desktop, Tablet, Mobile
-- **Sticky Navigation** mit 7 intuitive Menüpunkte:
+- **Sticky Navigation** mit 8 intuitive Menüpunkte:
   - 💳 SEPA Lastschrift (Mandate verwalten & Status)
   - 📋 Vorschreibungen (Rechnungen ansehen)
   - 💰 Zahlungen (Persönliche Payment-Overview)
   - 📊 Journal (Buchhaltung & Kontosaldo)
+  - 💬 Mahnungen (Mahnmanagement für Kassier:innen + Obpersonen)
   - 📥 Admin: Import (Zahlungs-CSV-Import)
   - 👥 Admin: Häuser & Benutzer (Verwaltung & Zuordnung)
   - 👤 Profil (Mein Profil anschauen)
@@ -201,20 +202,24 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Datenschutz-konform** (DSGVO-Konform)
 
 ### 🗄️ Datenbankarchitektur & Integrität
-- **Relationale Datenbank** mit 8 Produktions-Tabellen:
-  - `weinsteig_members` (22 Häuser mit Address, IBAN, BIC, Mandate-Info)
+- **Relationale Datenbank** mit 10 Produktions-Tabellen:
+  - `weinsteig_members` (22 Häuser mit Address, IBAN, BIC, Mandate-Info, reminder_stop_until)
   - `weinsteig_user_members` (Many-to-Many User↔Haus-Zuordnung)
   - `weinsteig_vorschreibungen` (Rechnungen mit Status-Tracking)
   - `weinsteig_zahlungen` (Bank-Transaktionen mit Matching-Info)
   - `weinsteig_zahlung_vorschreibung` (Matching-Junction-Table)
   - `weinsteig_config` (Key/Value-Konfiguration: Creditor ID, IBAN, BIC)
+  - `weinsteig_reminders` (Mahnungs-Verlauf mit Timestamps)
+  - `weinsteig_reminder_texts` (Editierbare Mahnstufen-Texte: Betreff + Body pro Stage)
+  - `weinsteig_mandate_approvals` (Mandat-Genehmigungen mit Audit-Trail)
 - **Foreign Key Constraints** mit CASCADE DELETE für Integrität
 - **Unique Constraints** für Duplikat-Prävention:
   - (member_id, year, month) in Vorschreibungen
   - (zahlung_id, vorschreibung_id) in Matching
+  - (stage) in Reminder-Texte (eine Zeile pro Stage)
 - **Optimierte Indizes** für Query-Performance:
   - member_id, status, period (year/month), valutadatum
-- **11 Migrations** mit IMigrationStep für versioniertes Upgrading
+- **14 Migrations** mit IMigrationStep für versioniertes Upgrading
 - **Transaction-Safety** für kritische Operationen
 
 ### 📱 Responsive Design & Mobile-First
