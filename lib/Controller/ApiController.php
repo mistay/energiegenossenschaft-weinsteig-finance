@@ -11,6 +11,7 @@ use OCA\WeinsteigFinance\Service\MandateService;
 use OCA\WeinsteigFinance\Service\VorschreibungService;
 use OCA\WeinsteigFinance\Service\ZahlungService;
 use OCA\WeinsteigFinance\Service\BackupService;
+use OCA\WeinsteigFinance\Service\ReminderService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -39,6 +40,7 @@ class ApiController extends Controller {
 		private ZahlungService $zahlungService,
 		private ConfigService $configService,
 		private BackupService $backupService,
+		private ReminderService $reminderService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -2427,6 +2429,83 @@ HTML;
 
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => 'Fehler beim PDF-Export: ' . $e->getMessage()], 400);
+		}
+	}
+
+	/**
+	 * Create reminder manually (Kassir:innen & Obpersonen only)
+	 */
+	public function createReminderManual(int $memberId): DataResponse {
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$this->reminderService->createReminderManual($memberId);
+			return new DataResponse([
+				'success' => true,
+				'message' => 'Mahnung erfolgreich erstellt und versendet'
+			]);
+		} catch (\Exception $e) {
+			return new DataResponse([
+				'error' => $e->getMessage()
+			], 400);
+		}
+	}
+
+	/**
+	 * Set reminder stop (Mahnstop) for a member
+	 */
+	public function setReminderStop(int $memberId): DataResponse {
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$stopUntil = $this->request->getParam('stop_until');
+			$until = null;
+
+			if ($stopUntil) {
+				try {
+					$until = new DateTime($stopUntil);
+				} catch (\Exception $e) {
+					return new DataResponse(['error' => 'Invalid date format'], 400);
+				}
+			}
+
+			$this->reminderService->setReminderStop($memberId, $until);
+			return new DataResponse([
+				'success' => true,
+				'message' => $until ? "Mahnstop bis {$until->format('d.m.Y')} gesetzt" : 'Mahnstop aufgehoben'
+			]);
+		} catch (\Exception $e) {
+			return new DataResponse([
+				'error' => $e->getMessage()
+			], 400);
+		}
+	}
+
+	/**
+	 * Get reminder history for member
+	 */
+	public function getReminderHistory(int $memberId): DataResponse {
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			$history = $this->reminderService->getReminderHistory($memberId);
+			return new DataResponse($history);
+		} catch (\Exception $e) {
+			return new DataResponse([
+				'error' => $e->getMessage()
+			], 400);
 		}
 	}
 }

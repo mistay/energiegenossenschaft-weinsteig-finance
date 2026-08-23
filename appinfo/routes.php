@@ -56,5 +56,8 @@ return [
 		['name' => 'api#exportDatabase', 'url' => '/api/backup/export', 'verb' => 'GET'],
 		['name' => 'api#getBackupStatus', 'url' => '/api/backup/status', 'verb' => 'GET'],
 		['name' => 'api#downloadBackup', 'url' => '/api/backup/download/{filename}', 'verb' => 'GET'],
+		['name' => 'api#createReminderManual', 'url' => '/api/member/{memberId}/reminder/create', 'verb' => 'POST'],
+		['name' => 'api#setReminderStop', 'url' => '/api/member/{memberId}/reminder-stop', 'verb' => 'POST'],
+		['name' => 'api#getReminderHistory', 'url' => '/api/member/{memberId}/reminder-history', 'verb' => 'GET'],
 	],
 ];
