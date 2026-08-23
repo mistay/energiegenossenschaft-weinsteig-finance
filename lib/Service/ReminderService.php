@@ -12,7 +12,6 @@ class ReminderService {
 	private const REMINDER_STAGES = [
 		1 => 'Zahlungserinnerung',
 		2 => 'Mahnung',
-		3 => 'Letzte Mahnung',
 	];
 
 	public function __construct(
@@ -79,8 +78,8 @@ class ReminderService {
 
 				// Get next reminder stage
 				$nextStage = $this->getNextReminderStage($member['id']);
-				if ($nextStage > 3) {
-					continue; // Already at stage 3
+				if ($nextStage > 2) {
+					continue; // Already at stage 2 (max stage)
 				}
 
 				// Create reminder
@@ -111,8 +110,8 @@ class ReminderService {
 		}
 
 		$nextStage = $this->getNextReminderStage($memberId);
-		if ($nextStage > 3) {
-			throw new \Exception("Member already at maximum reminder stage (3)");
+		if ($nextStage > 2) {
+			throw new \Exception("Member already at maximum reminder stage (2)");
 		}
 
 		return $this->createReminder($memberId, $nextStage, $member);

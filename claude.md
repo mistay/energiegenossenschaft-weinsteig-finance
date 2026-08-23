@@ -85,7 +85,7 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 - **Menü-Punkte**: Nur in `templates/nav.php` hinzufügen (mit emoji prefix)
 
 ### 8. **Mahnfunktion (Reminders)**
-- **3 Mahnstufen**: Zahlungserinnerung (S1) → Mahnung (S2) → Letzte Mahnung (S3)
+- **2 Mahnstufen**: Zahlungserinnerung (S1) → Mahnung (S2, Letzte)
 - **Bedingungen für automatische Mahnung** (ALLE müssen erfüllt sein):
   1. Kontoauszug aktuell (< 7 Tage alt)
   2. Schuld >= 10€ (d.h. `openAmount <= -10.0`)
@@ -97,18 +97,17 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 - **Manuelle Mahnung**: Jederzeit per Knopfdruck möglich (ignoriert Bedingungen außer Mahnstop)
 - **Editierbare Mahnstufen-Texte**:
   - **Speicherort**: Admin → Einstellungen → Mahnstufen-Texte Sektion
-  - **Tabelle**: `oc_weinsteig_reminder_texts` (stage INT, subject, body, created_at, updated_at)
+  - **Tabelle**: `oc_weinsteig_reminder_texts` (stage INT 1-2, subject, body, created_at, updated_at)
   - **API Endpoints**:
     - `GET /api/reminder-texts` – Alle Texte laden (nur Obpersonen)
-    - `POST /api/reminder-texts/{stage}` – Text speichern (stage 1-3)
+    - `POST /api/reminder-texts/{stage}` – Text speichern (stage 1-2 only)
   - **Platzhalter** (werden bei Versand ersetzt):
     - `{name}` → Zahlungspflichtiger Name
     - `{address}` → Hausadresse
     - `{amount}` → Offener Betrag €
     - `{duedate}` → Ursprüngliches Fälligkeitsdatum
-    - `{finaldate}` → Finales Zahldatum (nur Stage 3)
   - **Datenbank-Migration**: `Version0014Date20260824001300.php` erstellt Tabelle mit Defaults
-  - **Admin-UI**: 3 Textareas (Betreff + Nachrichtentext pro Stufe) mit Live-Speicherung
+  - **Admin-UI**: 2 Textareas (Betreff + Nachrichtentext pro Stufe) mit Live-Speicherung
   - **JavaScript**: `admin-config-reminders.js` für Load/Save mit Toast-Feedback
 - **Saldo-Semantik**: Negatives Saldo = Schuld (siehe Punkt 6 oben!)
 

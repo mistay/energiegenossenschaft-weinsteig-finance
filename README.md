@@ -97,7 +97,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **IBAN/BIC-Extraktion** aus CSV
 
 ### 💬 Automatisiertes Mahnmanagement (Reminders)
-- **3-stufiges Mahnsystem**: Zahlungserinnerung → Mahnung → Letzte Mahnung
+- **2-stufiges Mahnsystem**: Zahlungserinnerung → Mahnung (Letzte)
 - **Intelligente automatische Generierung** (täglich 02:00 Uhr):
   - Nur wenn aktueller Kontoauszug (< 7 Tage alt) vorliegt
   - Nur bei Schuld ≥ 10€ (wirtschaftliches Limit)
@@ -113,14 +113,14 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - Erklärt, warum Mahnung ausgelöst wird/wird nicht
   - Hilft bei Fehlersuche und Verständnis
 - **Intuitive Tabellen-UI** auf `/mahnungen/` Seite:
-  - Farbcodierte Status-Badges (🟢 Keine, 🟡 Stufe 1, 🔴 Stufe 2, ⛔ Stufe 3)
+  - Farbcodierte Status-Badges (🟢 Keine, 🟡 Stufe 1, 🔴 Stufe 2)
   - Aktionen: Mahnung, Verlauf, Stop/Aufheben
   - Nächste Generierung mit Countdown-Timer
 - **Editierbare Mahnstufen-Texte** (Admin-Panel):
-  - 3 Textareas für Betreff + Nachrichtentext pro Stufe
+  - 2 Textareas für Betreff + Nachrichtentext pro Stufe
   - Live-Speicherung mit visueller Bestätigung
   - Datenbank-gespeichert (nicht hardcoded)
-  - Platzhalter: {name}, {address}, {amount}, {duedate}, {finaldate}
+  - Platzhalter: {name}, {address}, {amount}, {duedate}
   - Verfügbar unter Admin → Einstellungen → Mahnstufen-Texte
 - **Saldo-Semantik**:
   - Negatives Saldo = Schuld (z.B. -240€ = Member schuldet +240€)

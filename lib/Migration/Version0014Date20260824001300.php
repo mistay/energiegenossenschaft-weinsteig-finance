@@ -56,7 +56,7 @@ class Version0014Date20260824001300 implements IMigrationStep {
 	}
 
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {
-		// Insert default texts
+		// Insert default texts for 2 reminder stages
 		$connection = $this->connection;
 		$now = date('Y-m-d H:i:s');
 
@@ -91,23 +91,6 @@ Bitte überweisen Sie den ausstehenden Betrag innerhalb von 14 Tagen.
 Bei Fragen: office@langhofer.at
 
 Energiegenossenschaft Weinsteig',
-			],
-			3 => [
-				'subject' => 'Letzte Mahnung - Energiegenossenschaft Weinsteig',
-				'body' => 'Liebe/r {name},
-
-leider haben Sie unsere bisherigen Zahlungsaufforderungen ignoriert.
-
-Haus: {address}
-Offener Betrag: {amount}€
-Jetzt fällig: SOFORT
-
-Falls wir bis {finaldate} keine Zahlung erhalten, sehen wir uns gezwungen, rechtliche Schritte einzuleiten.
-
-Bitte zahlen Sie sofort.
-
-Energiegenossenschaft Weinsteig
-office@langhofer.at',
 			],
 		];
 

@@ -2578,8 +2578,8 @@ HTML;
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
-		if (!in_array($stage, [1, 2, 3])) {
-			return new DataResponse(['error' => 'Invalid stage: must be 1, 2, or 3'], 400);
+		if (!in_array($stage, [1, 2])) {
+			return new DataResponse(['error' => 'Invalid stage: must be 1 or 2'], 400);
 		}
 
 		if (!$subject || !$body) {
