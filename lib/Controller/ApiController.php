@@ -2062,7 +2062,7 @@ HTML;
 			foreach ($members as $member) {
 				$memberId = $member['id'];
 
-				// Prüfe höchste Mandatsversion
+				// Prüfe höchste Mandatsversion (genehmigt)
 				$latestVersion = 0;
 				$folderPath = $this->config->getSystemValue('datadirectory') . '/generated/' . preg_replace('/[^a-zA-Z0-9 ]/', '', $member['address']);
 				if (is_dir($folderPath)) {
@@ -2085,7 +2085,7 @@ HTML;
 						->executeQuery()
 						->fetch();
 
-					$mandateApproved = $approval && $approval['approved'];
+					$mandateApproved = $approval && (bool)$approval['approved'];
 				}
 
 				// Nur Häuser mit IBAN, genehmigtem Mandat und nicht zurückgezogenem Mandat
@@ -2119,50 +2119,48 @@ HTML;
 
 					$openAmount = $totalZahlungen - $openVorschreibungen;
 
-					// Nur wenn offener Betrag > 0
-					if ($openAmount > 0) {
-						$address = $member['address'] ?? '-';
-						$zahlungspflichtig = $member['zahlungspflichtig'] ?? '-';
-						$iban = $member['iban'] ?? '-';
-						$mandateDate = $member['mandate_granted_date'] ? date('d.m.Y', strtotime($member['mandate_granted_date'])) : date('d.m.Y');
-						$mandateRef = $address; // Mandatsreferenz = Hausadresse
+					// Exportiere alle genehmigten Mandate (auch mit Betrag 0 oder negativ)
+					$address = $member['address'] ?? '-';
+					$zahlungspflichtig = $member['zahlungspflichtig'] ?? '-';
+					$iban = $member['iban'] ?? '-';
+					$mandateDate = $member['mandate_granted_date'] ? date('d.m.Y', strtotime($member['mandate_granted_date'])) : date('d.m.Y');
+					$mandateRef = $address; // Mandatsreferenz = Hausadresse
 
-						// Betrag formatieren (mit Komma als Dezimaltrennzeichen)
-						$betragStr = number_format($openAmount, 2, ',', '');
+					// Betrag formatieren (mit Komma als Dezimaltrennzeichen)
+					$betragStr = number_format($openAmount, 2, ',', '');
 
-						// Verwendungszweck: Hausadresse
-						$purpose = 'Energiegenossenschaft ' . $address;
+					// Verwendungszweck: Hausadresse
+					$purpose = 'Energiegenossenschaft ' . $address;
 
-						// CSV-Zeile: George Business Format für Lastschrift
-						$line = "SDD;" . // Auftragsart
-							"\"$orgIban\";" . // Auftraggeber-IBAN
-							"\"$creditorId\";" . // Creditor-ID
-							"CORE;" . // Mandatstyp (CORE = Standard)
-							"$dueDate;" . // Fälligkeitsdatum
-							"J;" . // Bestandsbildung (Ja = Sammelauftrag)
-							"\"$batchName\";" . // Bestandsname
-							"N;" . // Einzelbuchung gewünscht (Nein)
-							"$betragStr;" . // Betrag
-							"\"$iban\";" . // Zahlungspflichtiger-IBAN
-							"\"$zahlungspflichtig\";" . // Zahlungspflichtiger-Name
-							"\"$mandateRef\";" . // Mandatsreferenz
-							"$mandateDate;" . // Mandatsausstellungsdatum
-							"\"$purpose\";" . // Verwendungszweck
-							";" . // Zahlungsreferenz (leer)
-							";" . // Auftraggeberreferenz (leer)
-							";" . // Zahlungspflichtiger-Strasse (leer)
-							";" . // Zahlungspflichtiger-Hausnummer (leer)
-							";" . // Zahlungspflichtiger-Tuernummer (leer)
-							";" . // Zahlungspflichtiger-Postleitzahl (leer)
-							";" . // Zahlungspflichtiger-Stadt (leer)
-							";" . // Zahlungspflichtiger-Land (leer)
-							"ENRG;" . // Category Purpose Code (Energie)
-							"ENRG;" . // Purpose Code (Energie)
-							"\"$orgName\";" . // Abweichender Auftraggeber Name
-							""; // Abweichender Zahlungspflichtiger Name (leer)
+					// CSV-Zeile: George Business Format für Lastschrift
+					$line = "SDD;" . // Auftragsart
+						"\"$orgIban\";" . // Auftraggeber-IBAN
+						"\"$creditorId\";" . // Creditor-ID
+						"CORE;" . // Mandatstyp (CORE = Standard)
+						"$dueDate;" . // Fälligkeitsdatum
+						"J;" . // Bestandsbildung (Ja = Sammelauftrag)
+						"\"$batchName\";" . // Bestandsname
+						"N;" . // Einzelbuchung gewünscht (Nein)
+						"$betragStr;" . // Betrag
+						"\"$iban\";" . // Zahlungspflichtiger-IBAN
+						"\"$zahlungspflichtig\";" . // Zahlungspflichtiger-Name
+						"\"$mandateRef\";" . // Mandatsreferenz
+						"$mandateDate;" . // Mandatsausstellungsdatum
+						"\"$purpose\";" . // Verwendungszweck
+						";" . // Zahlungsreferenz (leer)
+						";" . // Auftraggeberreferenz (leer)
+						";" . // Zahlungspflichtiger-Strasse (leer)
+						";" . // Zahlungspflichtiger-Hausnummer (leer)
+						";" . // Zahlungspflichtiger-Tuernummer (leer)
+						";" . // Zahlungspflichtiger-Postleitzahl (leer)
+						";" . // Zahlungspflichtiger-Stadt (leer)
+						";" . // Zahlungspflichtiger-Land (leer)
+						"ENRG;" . // Category Purpose Code (Energie)
+						"ENRG;" . // Purpose Code (Energie)
+						"\"$orgName\";" . // Abweichender Auftraggeber Name
+						""; // Abweichender Zahlungspflichtiger Name (leer)
 
-						$csvLines[] = $line;
-					}
+					$csvLines[] = $line;
 				}
 			}
 
