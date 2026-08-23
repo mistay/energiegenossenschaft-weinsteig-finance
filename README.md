@@ -96,6 +96,31 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **CSV-Format-Support**: Semikolon-Trennzeichen, DD.MM.YYYY Daten, Komma-Dezimale
 - **IBAN/BIC-Extraktion** aus CSV
 
+### 💬 Automatisiertes Mahnmanagement (Reminders)
+- **3-stufiges Mahnsystem**: Zahlungserinnerung → Mahnung → Letzte Mahnung
+- **Intelligente automatische Generierung** (täglich 02:00 Uhr):
+  - Nur wenn aktueller Kontoauszug (< 7 Tage alt) vorliegt
+  - Nur bei Schuld ≥ 10€ (wirtschaftliches Limit)
+  - Nur wenn Rechnung > 30 Tage alt
+  - Mindestabstand 14 Tage zwischen Mahnungen
+- **Manuelle Mahnungs-Erstellung** jederzeit möglich per Knopfdruck
+- **Mahnstop-Funktionalität** pro Haus:
+  - Manuell setzbar mit optionalem Enddatum
+  - Auto-Aufhebung nach Datum
+- **Mahnverlauf-Tracking** mit Timestamps und Stapelstufen
+- **Debug-Funktion "Warum?"** pro Haus:
+  - Zeigt alle 5 Bedingungen mit Status
+  - Erklärt, warum Mahnung ausgelöst wird/wird nicht
+  - Hilft bei Fehlersuche und Verständnis
+- **Intuitive Tabellen-UI** auf `/mahnungen/` Seite:
+  - Farbcodierte Status-Badges (🟢 Keine, 🟡 Stufe 1, 🔴 Stufe 2, ⛔ Stufe 3)
+  - Aktionen: Mahnung, Verlauf, Stop/Aufheben
+  - Nächste Generierung mit Countdown-Timer
+- **Saldo-Semantik**:
+  - Negatives Saldo = Schuld (z.B. -240€ = Member schuldet +240€)
+  - Positives Saldo = Guthaben (nicht zum Einziehen)
+  - Display: "+240€ Schuld" statt "-240€"
+
 ### 📊 Doppelte Buchführung & Kontojurnal
 - **Echtzeit-Kontosaldo-Berechnung** aus:
   - **Haben**: Summe aller eingegangenen Zahlungen

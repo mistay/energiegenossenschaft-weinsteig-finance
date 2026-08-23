@@ -57,6 +57,23 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 - **Named Parameters**: `$qb->createNamedParameter($value)`
 - **Regex in DB**: Flexibel halten (z.B. `(pdf|jpg|png)`)
 - **Regex im Code**: Immer mit escaped Slashes: `/^pattern$/`
+- **Aggregationen**: Verwende ORDER BY ... LIMIT 1 statt MIN()/MAX()
+  - ❌ `SELECT MIN(year * 100 + month)` → MySQL Fehler
+  - ✅ `SELECT year, month ORDER BY ... ASC LIMIT 1` → Funktioniert überall
+
+### **Saldo-Semantik (WICHTIG!)**
+- **Definition**: `Saldo = Zahlungen - Offene Vorschreibungen`
+- **Negatives Saldo** = Member schuldet Geld (Debt)
+  - `-240€` bedeutet: Member schuldet **+240€**
+  - Anzustrebender Zustand: Einzuziehen per Lastschrift
+- **Positives Saldo** = Member hat Guthaben (Credit)
+  - `+50€` bedeutet: Wir schulden dem Member
+  - Nicht zum Einziehen!
+- **Mahngrenze**: `Saldo <= -10.0` (negativ UND >= 10€ Schuld)
+- **UI-Anzeige**:
+  - `-240€` Saldo → zeige "+240€ Schuld"
+  - `+50€` Saldo → zeige "+50€ Guthaben"
+  - Label per Wert: negative = "Schuld", positive = "Guthaben"
 
 ### 7. **Templates & UI**
 - **Einheitliches Design**:
@@ -67,12 +84,26 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 - **Navigation**: über `nav.php` (wird included)
 - **Menü-Punkte**: Nur in `templates/nav.php` hinzufügen (mit emoji prefix)
 
-### 8. **Dokumentation**
+### 8. **Mahnfunktion (Reminders)**
+- **3 Mahnstufen**: Zahlungserinnerung (S1) → Mahnung (S2) → Letzte Mahnung (S3)
+- **Bedingungen für automatische Mahnung** (ALLE müssen erfüllt sein):
+  1. Kontoauszug aktuell (< 7 Tage alt)
+  2. Schuld >= 10€ (d.h. `openAmount <= -10.0`)
+  3. Älteste Rechnung > 30 Tage alt
+  4. Letzte Mahnung > 14 Tage her
+  5. Kein Mahnstop aktiv
+- **Debug-Feature**: `/mahnungen/` → "ℹ️ Warum?" zeigt alle Bedingungen pro Haus
+- **Mahnstop**: Kann pro Haus mit optionalem Enddatum gesetzt werden
+- **Manuelle Mahnung**: Jederzeit per Knopfdruck möglich (ignoriert Bedingungen außer Mahnstop)
+- **Saldo-Semantik**: Negatives Saldo = Schuld (siehe Punkt 6 oben!)
+
+### 9. **Dokumentation**
 - **Anleitungen für Benutzer**:
   - `ANLEITUNG_MITGLIEDER.md` – für normale Mitglieder
-  - `ANLEITUNG_KASSIERER.md` – für Kassier:innen/Admins
+  - `ANLEITUNG_KASSIERER.md` – für Kassier:innen/Admins (inkl. Kapitel 3.1 George Business CSV)
   - Deutsch, einfache Sprache, Schritt-für-Schritt
-- **README.md**: Technische Übersicht + Feature-Liste
+- **README.md**: Technische Übersicht + Feature-Liste (mit Mahnung + George CSV Doku)
+- **claude.md**: Diese Datei – Entwickler-Richtlinien
 - **Code-Comments**: Auf Deutsch, prägnant
 
 ---
@@ -110,14 +141,16 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 ```
 lib/
   ├── Controller/
-  │   ├── ApiController.php      (REST API, 20+ endpoints)
+  │   ├── ApiController.php      (REST API, 25+ endpoints)
   │   └── PageController.php     (Template-Routen)
   ├── Service/
   │   ├── BackupService.php      (SQL Dump + ZIP-Archivierung)
+  │   ├── ReminderService.php    (3-Stufen Mahnsystem + Bedingungsprüfung)
   │   ├── VorschreibungService.php
   │   └── ...
   └── BackgroundJob/
-      └── GenerateBackupJob.php  (Cron: täglich 02:00 AM)
+      ├── GenerateBackupJob.php  (Cron: täglich 02:00 AM)
+      └── GenerateRemindersJob.php (Cron: täglich 02:00 AM)
 
 templates/
   ├── admin.php                  (Einstellungen)
@@ -181,8 +214,8 @@ Erwartet: JPEG wird als .jpg heruntergeladen, nicht als .pdf
 
 ---
 
-**Version**: 1.0  
-**Letzte Aktualisierung**: 2026-08-21  
+**Version**: 1.1  
+**Letzte Aktualisierung**: 2026-08-24  
 **Für**: Entwicklung mit Claude KI-Assistent
 
 *Richtlinien für nachhaltige, sichere und wartbare Code-Entwicklung* ⚡
