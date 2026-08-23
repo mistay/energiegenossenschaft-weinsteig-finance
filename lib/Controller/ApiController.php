@@ -2041,8 +2041,8 @@ HTML;
 			$csvLines = ['Auftragsart;Auftraggeber-IBAN;Creditor-ID;Mandatstyp;Faelligkeitsdatum;Bestandsbildung;Bestandsname;Einzelbuchung gewuenscht;Betrag;Zahlungspflichtiger-IBAN;Zahlungspflichtiger-Name;Mandatsreferenz;Mandatsausstellungsdatum;Verwendungszweck;Zahlungsreferenz;Auftraggeberreferenz;Zahlungspflichtiger-Strasse;Zahlungspflichtiger-Hausnummer;Zahlungspflichtiger-Tuernummer;Zahlungspflichtiger-Postleitzahl;Zahlungspflichtiger-Stadt;Zahlungspflichtiger-Land;Category Purpose Code;Purpose Code;Abweichender Auftraggeber Name;Abweichender Zahlungspflichtiger Name'];
 
 			// Config laden (Creditor-ID, Genossenschafts-IBAN)
-			$creditorId = $this->configService->getConfig('creditor_id');
-			$orgIban = $this->configService->getConfig('iban');
+			$creditorId = $this->configService->getCreditorId();
+			$orgIban = $this->configService->getCreditorIban();
 			$orgName = 'Energiegenossenschaft Weinsteig';
 
 			// Fälligkeitsdatum: Heute oder nächster Bankgeschäftstag
