@@ -271,6 +271,11 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Journal-Zugriff für Admins**: Schneller Zugriff zu allen Kundenjournalen via 📊-Button
 - **Dynamische Journal-Überschrift**: "Kontojurnal von [Haus]" für bessere Orientierung
 - **SEPA Core Datenträger**: Listet alle gültigen Mandate mit offenen Beträgen + CSV-Export
+- **George Business CSV Export**: Modernes Batch-Processing für Lastschrift-Import (Format: CSV mit 26 Feldern, SEPA-Standard)
+  - Automatische Vorzeichen-Invertierung (negative Salden = positive Lastschriften)
+  - Mindestbetrag 0,10€ für kosteneffiziente Batch-Verarbeitung
+  - Akontozahlung-Markierung (ADVA Purpose Code) für unbestimmte Zahlungsverwendung
+  - Siehe: [George Business Dokumentation](docs/george/) & [Kassier:innen-Anleitung](ANLEITUNG_KASSIERER.md#31-george-business-csv-exportieren)
 - **Smart Payment Matching**: Intelligente Zuordnung von Zahlungen auch ohne manuelle Zuweisung
 - **Echtzeit Saldo-Berechnung**: Offene Beträge = eingegangene Zahlungen - offene Rechnungen
 - **Automatische Backup-Integration**: Mitgliederliste wird in jedem Backup gespeichert für historisches Tracking

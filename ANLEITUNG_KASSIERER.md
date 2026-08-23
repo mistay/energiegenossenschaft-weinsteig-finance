@@ -249,6 +249,11 @@ Das System generiert automatisch:
 
 #### Schritt 1: George CSV generieren
 
+**📚 Referenzmaterialien:**
+- Siehe auch: `docs/george/CSV-Import-Ausfuellhilfe-DE.pdf` (offizielle Bank-Dokumentation)
+- Template: `docs/george/Lastschrift-Vorlage-062025.csv` (leere Vorlage)
+- Dokument: `docs/george/SEPA_Basislastschrift_vorausgefuellt.docx` (SEPA Mandat-Vorlage)
+
 1. Loggt euch ein → **📄 SEPA-Datenträger**
 2. Das System zeigt:
    - 🟡 **Oben**: Häuser mit **ausstehenden Mandaten** (rot = nicht freigegeben)
