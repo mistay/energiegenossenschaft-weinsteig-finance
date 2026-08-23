@@ -95,6 +95,21 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 - **Debug-Feature**: `/mahnungen/` → "ℹ️ Warum?" zeigt alle Bedingungen pro Haus
 - **Mahnstop**: Kann pro Haus mit optionalem Enddatum gesetzt werden
 - **Manuelle Mahnung**: Jederzeit per Knopfdruck möglich (ignoriert Bedingungen außer Mahnstop)
+- **Editierbare Mahnstufen-Texte**:
+  - **Speicherort**: Admin → Einstellungen → Mahnstufen-Texte Sektion
+  - **Tabelle**: `oc_weinsteig_reminder_texts` (stage INT, subject, body, created_at, updated_at)
+  - **API Endpoints**:
+    - `GET /api/reminder-texts` – Alle Texte laden (nur Obpersonen)
+    - `POST /api/reminder-texts/{stage}` – Text speichern (stage 1-3)
+  - **Platzhalter** (werden bei Versand ersetzt):
+    - `{name}` → Zahlungspflichtiger Name
+    - `{address}` → Hausadresse
+    - `{amount}` → Offener Betrag €
+    - `{duedate}` → Ursprüngliches Fälligkeitsdatum
+    - `{finaldate}` → Finales Zahldatum (nur Stage 3)
+  - **Datenbank-Migration**: `Version0014Date20260824001300.php` erstellt Tabelle mit Defaults
+  - **Admin-UI**: 3 Textareas (Betreff + Nachrichtentext pro Stufe) mit Live-Speicherung
+  - **JavaScript**: `admin-config-reminders.js` für Load/Save mit Toast-Feedback
 - **Saldo-Semantik**: Negatives Saldo = Schuld (siehe Punkt 6 oben!)
 
 ### 9. **Dokumentation**
@@ -145,20 +160,24 @@ lib/
   │   └── PageController.php     (Template-Routen)
   ├── Service/
   │   ├── BackupService.php      (SQL Dump + ZIP-Archivierung)
-  │   ├── ReminderService.php    (3-Stufen Mahnsystem + Bedingungsprüfung)
+  │   ├── ReminderService.php    (3-Stufen Mahnsystem + Bedingungsprüfung + Texte aus DB)
   │   ├── VorschreibungService.php
+  │   └── ...
+  ├── Migration/
+  │   ├── Version0014Date20260824001300.php (Reminder-Texte Tabelle + Defaults)
   │   └── ...
   └── BackgroundJob/
       ├── GenerateBackupJob.php  (Cron: täglich 02:00 AM)
       └── GenerateRemindersJob.php (Cron: täglich 02:00 AM)
 
 templates/
-  ├── admin.php                  (Einstellungen)
+  ├── admin.php                  (Einstellungen + Mahnstufen-Texte)
   ├── backup-status.php          (Backup-UI)
   ├── nav.php                    (Navigation - alle Seiten nutzen)
   └── ...
 
 js/
+  ├── admin-config-reminders.js  (Load/Save Reminder-Texte in Admin)
   ├── backup-status.js           (Backup-Status Script)
   └── ...
 
@@ -214,8 +233,8 @@ Erwartet: JPEG wird als .jpg heruntergeladen, nicht als .pdf
 
 ---
 
-**Version**: 1.1  
-**Letzte Aktualisierung**: 2026-08-24  
+**Version**: 1.2  
+**Letzte Aktualisierung**: 2026-08-24 (Editable Reminder Texts Feature)
 **Für**: Entwicklung mit Claude KI-Assistent
 
 *Richtlinien für nachhaltige, sichere und wartbare Code-Entwicklung* ⚡
