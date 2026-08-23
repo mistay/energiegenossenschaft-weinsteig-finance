@@ -145,6 +145,29 @@ class ApiController extends Controller {
 			} catch (\Exception $e) {
 				$row['assigned_users'] = [];
 			}
+
+			// Lade Mahnungs-Informationen
+			try {
+				// Letzte Mahnung
+				$qb = $this->db->getQueryBuilder();
+				$lastReminder = $qb->select('created_at', 'reminder_stage')
+					->from('weinsteig_reminders')
+					->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+					->orderBy('created_at', 'DESC')
+					->setMaxResults(1)
+					->executeQuery()
+					->fetch();
+
+				$row['last_reminder_date'] = $lastReminder ? $lastReminder['created_at'] : null;
+				$row['reminder_stage'] = $lastReminder ? (int)$lastReminder['reminder_stage'] : 0;
+
+				// Mahnstop bis Datum (wird bereits in members-Tabelle gespeichert)
+				$row['reminder_stop_until'] = $row['reminder_stop_until'] ?? null;
+			} catch (\Exception $e) {
+				$row['last_reminder_date'] = null;
+				$row['reminder_stage'] = 0;
+				$row['reminder_stop_until'] = null;
+			}
 		}
 
 		if ($this->request->getParam('loadAssignments') === '1') {
