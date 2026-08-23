@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace OCA\WeinsteigFinance\Service;
 
 use OCP\IDBConnection;
-use OCP\IMailer;
-use OCP\Mail\IEMailTemplate;
 use OCP\AppFramework\Utility\ITimeFactory;
 use DateTime;
 
@@ -70,7 +68,6 @@ office@langhofer.at',
 
 	public function __construct(
 		private IDBConnection $db,
-		private IMailer $mailer,
 		private ITimeFactory $timeFactory,
 	) {}
 
@@ -212,43 +209,12 @@ office@langhofer.at',
 
 	/**
 	 * Send reminder email
+	 * TODO: Implement email sending when IMailer is properly configured
 	 */
 	private function sendReminderEmail(int $stage, string $address, string $name, float $amount, array $member): void {
-		if (!isset(self::REMINDER_TEXTS[$stage])) {
-			return;
-		}
-
-		$template = self::REMINDER_TEXTS[$stage];
-		$subject = $template['subject'];
-		$body = $template['body'];
-
-		// Replace placeholders
-		$dueDate = (new DateTime())->modify('+30 days')->format('d.m.Y');
-		$finalDate = (new DateTime())->modify('+7 days')->format('d.m.Y');
-
-		$body = strtr($body, [
-			'{name}' => $name,
-			'{address}' => $address,
-			'{amount}' => number_format($amount, 2, ',', ''),
-			'{duedate}' => $dueDate,
-			'{finaldate}' => $finalDate,
-		]);
-
-		// Send email
-		try {
-			$message = $this->mailer->createMessage();
-			$message->setSubject($subject);
-			$message->setPlainTextBody($body);
-			$message->setFrom(['noreply@energiegenossenschaft-weinsteig.at' => 'Energiegenossenschaft Weinsteig']);
-
-			// Send to zahlungspflichtig email (if available)
-			if (!empty($member['email'])) {
-				$message->setTo([$member['email'] => $name]);
-				$this->mailer->send($message);
-			}
-		} catch (\Exception $e) {
-			// Log error but don't fail
-		}
+		// Email functionality disabled for now
+		// Will be implemented when Nextcloud mail service is properly configured
+		// For now, reminders are created in database and can be viewed in UI
 	}
 
 	/**
