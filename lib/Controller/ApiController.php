@@ -2160,8 +2160,8 @@ HTML;
 							";" . // Zahlungspflichtiger-Postleitzahl (leer)
 							";" . // Zahlungspflichtiger-Stadt (leer)
 							";" . // Zahlungspflichtiger-Land (leer)
-							"ENRG;" . // Category Purpose Code (Energie)
-							"ENRG;" . // Purpose Code (Energie)
+							"ADVA;" . // Category Purpose Code (Akontozahlung/Vorauszahlung)
+							"ADVA;" . // Purpose Code (Akontozahlung/Vorauszahlung)
 							"\"$orgName\";" . // Abweichender Auftraggeber Name
 							""; // Abweichender Zahlungspflichtiger Name (leer)
 
