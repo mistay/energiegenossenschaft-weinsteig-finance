@@ -212,4 +212,22 @@ class PageController extends Controller {
 
 		return new TemplateResponse(Application::APP_ID, 'backup-status');
 	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function reminders(): TemplateResponse|RedirectResponse {
+		$user = $this->userSession->getUser();
+		$isKassier = $user && $this->groupManager->isInGroup($user->getUID(), 'kassier:innen');
+		$isObperson = $user && $this->groupManager->isInGroup($user->getUID(), 'obpersonen');
+		if (!$user || (!$isObperson && !$isKassier)) {
+			return new RedirectResponse('/index.php');
+		}
+
+		Util::addStyle(Application::APP_ID, 'main');
+		Util::addScript(Application::APP_ID, 'table-wrapper');
+		Util::addScript(Application::APP_ID, 'reminders');
+		Util::addScript(Application::APP_ID, 'user-groups');
+
+		return new TemplateResponse(Application::APP_ID, 'reminders');
+	}
 }
