@@ -2535,6 +2535,7 @@ HTML;
 	/**
 	 * Check reminder conditions for a member (for debugging)
 	 */
+	#[NoCSRFRequired]
 	public function checkReminderConditions(int $memberId): DataResponse {
 		$userId = $this->getUserId();
 		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
