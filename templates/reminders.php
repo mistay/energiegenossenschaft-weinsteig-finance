@@ -15,6 +15,11 @@ script('weinsteigfinance', 'reminders');
 		</button>
 	</div>
 
+	<!-- Access Control Info -->
+	<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #856404;">
+		<strong>🔒 Diese Seite ist nur für Kassier:innen und Obpersonen sichtbar.</strong> Normale Mitglieder können Mahnungen nicht verwalten.
+	</div>
+
 	<!-- Process Explanation -->
 	<div id="process-info" style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
 		<div style="display: flex; gap: 20px; flex-wrap: wrap;">
