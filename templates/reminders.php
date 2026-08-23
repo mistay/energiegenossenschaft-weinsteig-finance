@@ -16,8 +16,20 @@ script('weinsteigfinance', 'reminders');
 	</div>
 
 	<!-- Access Control Info -->
-	<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #856404;">
-		<strong>🔒 Diese Seite ist nur für Kassier:innen und Obpersonen sichtbar.</strong> Normale Mitglieder können Mahnungen nicht verwalten.
+	<?php
+		$groupEmoji = [
+			'obpersonen' => '👑',
+			'kassier:innen' => '💼',
+		];
+		$groupLabel = [
+			'obpersonen' => 'obpersonen',
+			'kassier:innen' => 'kassier:innen',
+		];
+		$emoji = $groupEmoji[$userGroup] ?? '';
+		$label = $groupLabel[$userGroup] ?? $userGroup;
+	?>
+	<div style="background: #e3f2fd; border-left: 4px solid #0082c9; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #01579b;">
+		<strong>ℹ️ Hinweis:</strong> Diese Seite wird angezeigt, weil dieses Nutzerkonto in der Gruppe <strong><?php echo $emoji; ?> <?php p($label); ?></strong> geführt wird.
 	</div>
 
 	<!-- Process Explanation -->

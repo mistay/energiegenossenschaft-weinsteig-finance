@@ -229,6 +229,16 @@ class PageController extends Controller {
 		Util::addScript(Application::APP_ID, 'reminders');
 		Util::addScript(Application::APP_ID, 'user-groups');
 
-		return new TemplateResponse(Application::APP_ID, 'reminders');
+		// Determine which group the user belongs to (for info message)
+		$userGroup = '';
+		if ($isObperson) {
+			$userGroup = 'obpersonen';
+		} elseif ($isKassier) {
+			$userGroup = 'kassier:innen';
+		}
+
+		return new TemplateResponse(Application::APP_ID, 'reminders', [
+			'userGroup' => $userGroup,
+		]);
 	}
 }
