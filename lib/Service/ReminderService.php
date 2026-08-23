@@ -396,30 +396,35 @@ office@langhofer.at',
 	 * Check all conditions for reminder (for debugging)
 	 */
 	public function checkReminderConditions(int $memberId): array {
-		$now = $this->timeFactory->getDateTime();
+		try {
+			$now = $this->timeFactory->getDateTime();
 
-		// Get member
-		$qb = $this->db->getQueryBuilder();
-		$member = $qb->select('*')
-			->from('weinsteig_members')
-			->where($qb->expr()->eq('id', $qb->createNamedParameter($memberId)))
-			->executeQuery()
-			->fetch();
+			// Get member
+			$qb = $this->db->getQueryBuilder();
+			$member = $qb->select('*')
+				->from('weinsteig_members')
+				->where($qb->expr()->eq('id', $qb->createNamedParameter($memberId)))
+				->executeQuery()
+				->fetch();
 
-		if (!$member) {
-			return ['error' => 'Member not found'];
+			if (!$member) {
+				return ['error' => 'Mitglied nicht gefunden'];
+			}
+		} catch (\Exception $e) {
+			return ['error' => 'Datenbankfehler: ' . $e->getMessage()];
 		}
 
 		$result = [
 			'member_id' => $memberId,
-			'address' => $member['address'],
+			'address' => $member['address'] ?? 'Unbekannt',
 			'checks' => [],
 			'can_create_reminder' => false,
 			'reason' => [],
 		];
 
-		// Check 1: Open amount >= 10€
-		$openAmount = $this->calculateOpenAmount($memberId);
+		try {
+			// Check 1: Open amount >= 10€
+			$openAmount = $this->calculateOpenAmount($memberId);
 		$check1 = $openAmount >= 10.0;
 		$result['checks']['open_amount'] = [
 			'passed' => $check1,
@@ -510,16 +515,24 @@ office@langhofer.at',
 			$result['reason'][] = "Kein Kontoauszug importiert";
 		}
 
-		// Final decision
-		$result['can_create_reminder'] = $check1 && $check2 && $check3 && $check4 && $check5;
+			// Final decision
+			$result['can_create_reminder'] = $check1 && $check2 && $check3 && $check4 && $check5;
 
-		if ($result['can_create_reminder']) {
-			$result['message'] = "✅ Mahnung WÜRDE ausgegeben!";
-		} else {
-			$result['message'] = "❌ Mahnung wird NICHT ausgegeben. Gründe: " . implode(", ", $result['reason']);
+			if ($result['can_create_reminder']) {
+				$result['message'] = "✅ Mahnung WÜRDE ausgegeben!";
+			} else {
+				$result['message'] = "❌ Mahnung wird NICHT ausgegeben. Gründe: " . implode(", ", $result['reason']);
+			}
+
+			return $result;
+		} catch (\Exception $e) {
+			return [
+				'error' => 'Fehler beim Prüfen der Bedingungen: ' . $e->getMessage(),
+				'member_id' => $memberId,
+				'checks' => [],
+				'can_create_reminder' => false,
+			];
 		}
-
-		return $result;
 	}
 
 	/**

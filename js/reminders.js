@@ -193,13 +193,24 @@ function openConditionsModal(memberId, address) {
 	fetch(OCA?.generateUrl?.(`/apps/weinsteigfinance/api/member/${memberId}/reminder-check`) ||
 		`/index.php/apps/weinsteigfinance/api/member/${memberId}/reminder-check`,
 		{ credentials: 'include' })
-		.then(r => r.json())
+		.then(r => {
+			if (!r.ok) throw new Error('HTTP ' + r.status);
+			return r.json();
+		})
 		.then(data => {
+			console.log('Reminder check data:', data);
+			if (data.error) {
+				throw new Error(data.error);
+			}
+			if (!data.checks) {
+				throw new Error('Ungültige Datenstruktur: checks nicht vorhanden');
+			}
 			renderConditions(modal, data);
 		})
 		.catch(err => {
+			console.error('Fehler beim Laden der Bedingungen:', err);
 			modal.querySelector('.modal-body').innerHTML =
-				'<p style="color: #dc3545;">Fehler beim Laden: ' + err.message + '</p>';
+				'<p style="color: #dc3545;">Fehler: ' + err.message + '</p>';
 		});
 }
 
