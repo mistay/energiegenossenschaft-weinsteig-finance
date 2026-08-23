@@ -2481,6 +2481,7 @@ HTML;
 	/**
 	 * Set reminder stop (Mahnstop) for a member
 	 */
+	#[NoCSRFRequired]
 	public function setReminderStop(int $memberId): DataResponse {
 		$userId = $this->getUserId();
 		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
