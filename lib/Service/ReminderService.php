@@ -348,17 +348,19 @@ office@langhofer.at',
 	 */
 	private function getLastPaymentImportDate(): ?DateTime {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select('MAX(created_at) as last_import')
+		$result = $qb->select('created_at')
 			->from('weinsteig_zahlungen')
+			->orderBy('created_at', 'DESC')
+			->setMaxResults(1)
 			->executeQuery()
 			->fetch();
 
-		if (!$result || !$result['last_import']) {
+		if (!$result || !$result['created_at']) {
 			return null;
 		}
 
 		try {
-			return new DateTime($result['last_import']);
+			return new DateTime($result['created_at']);
 		} catch (\Exception) {
 			return null;
 		}
