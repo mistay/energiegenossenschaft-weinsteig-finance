@@ -193,7 +193,10 @@ function loadSepaData() {
 	fetch(url, { credentials: 'include' })
 		.then(r => r.json())
 		.then(data => {
-			let html = '<button class="export-btn" onclick="exportCsv()">📥 Als CSV exportieren</button>';
+			let html = '<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">';
+			html += '<button class="export-btn" onclick="exportCsv()">📥 CSV exportieren</button>';
+			html += '<button class="export-btn" style="background: #28a745;" onclick="exportGeorgeCSV()">🏦 George Business (SDD)</button>';
+			html += '</div>';
 
 			if (!data.mandates || data.mandates.length === 0) {
 				html += '<p style="color: #999;">Keine gültigen Mandate mit offenen Beträgen vorhanden.</p>';
@@ -232,6 +235,10 @@ function loadSepaData() {
 
 function exportCsv() {
 	window.location.href = OCA?.generateUrl?.('/apps/weinsteigfinance/api/sepa-datentraeger/export') || '/index.php/apps/weinsteigfinance/api/sepa-datentraeger/export';
+}
+
+function exportGeorgeCSV() {
+	window.location.href = OCA?.generateUrl?.('/apps/weinsteigfinance/api/sepa-datentraeger/export/george') || '/index.php/apps/weinsteigfinance/api/sepa-datentraeger/export/george';
 }
 
 function escapeHtml(text) {

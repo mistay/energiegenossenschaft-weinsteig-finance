@@ -2026,6 +2026,159 @@ HTML;
 		}
 	}
 
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function sepaDataCarrierGeorgeCSV(): Response {
+		// obpersonen und kassier:innen dürfen CSV exportieren
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
+			return new DataResponse(['error' => 'Unauthorized'], 403);
+		}
+
+		try {
+			// George Business SEPA-Lastschrift CSV Header
+			$csvLines = ['Auftragsart;Auftraggeber-IBAN;Creditor-ID;Mandatstyp;Faelligkeitsdatum;Bestandsbildung;Bestandsname;Einzelbuchung gewuenscht;Betrag;Zahlungspflichtiger-IBAN;Zahlungspflichtiger-Name;Mandatsreferenz;Mandatsausstellungsdatum;Verwendungszweck;Zahlungsreferenz;Auftraggeberreferenz;Zahlungspflichtiger-Strasse;Zahlungspflichtiger-Hausnummer;Zahlungspflichtiger-Tuernummer;Zahlungspflichtiger-Postleitzahl;Zahlungspflichtiger-Stadt;Zahlungspflichtiger-Land;Category Purpose Code;Purpose Code;Abweichender Auftraggeber Name;Abweichender Zahlungspflichtiger Name'];
+
+			// Config laden (Creditor-ID, Genossenschafts-IBAN)
+			$creditorId = $this->configService->getConfig('creditor_id');
+			$orgIban = $this->configService->getConfig('iban');
+			$orgName = 'Energiegenossenschaft Weinsteig';
+
+			// Fälligkeitsdatum: Heute oder nächster Bankgeschäftstag
+			$dueDate = date('d.m.Y');
+
+			// Sammelauftrag-Name
+			$batchName = 'Weinsteig ' . date('Y-m');
+
+			// Alle Mitglieder mit genehmigten Mandaten laden
+			$qb = $this->db->getQueryBuilder();
+			$members = $qb->select('*')
+				->from('weinsteig_members')
+				->orderBy('address')
+				->executeQuery()
+				->fetchAll();
+
+			foreach ($members as $member) {
+				$memberId = $member['id'];
+
+				// Prüfe höchste Mandatsversion
+				$latestVersion = 0;
+				$folderPath = $this->config->getSystemValue('datadirectory') . '/generated/' . preg_replace('/[^a-zA-Z0-9 ]/', '', $member['address']);
+				if (is_dir($folderPath)) {
+					$files = scandir($folderPath);
+					foreach ($files as $file) {
+						if (preg_match('/^mandat_unterschrieben_v(\d+)\.(pdf|jpg|jpeg|png)$/', $file, $m)) {
+							$latestVersion = max($latestVersion, (int)$m[1]);
+						}
+					}
+				}
+
+				// Prüfe ob höchste Version genehmigt ist
+				$mandateApproved = false;
+				if ($latestVersion > 0) {
+					$qb = $this->db->getQueryBuilder();
+					$approval = $qb->select('approved', 'version')
+						->from('weinsteig_mandate_approvals')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+						->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($latestVersion)))
+						->executeQuery()
+						->fetch();
+
+					$mandateApproved = $approval && $approval['approved'];
+				}
+
+				// Nur Häuser mit IBAN, genehmigtem Mandat und nicht zurückgezogenem Mandat
+				if ($member['iban'] && !$member['mandate_withdrawn_date'] && $mandateApproved) {
+					// Berechne offene Beträge
+					$qb = $this->db->getQueryBuilder();
+					$zahlungen = $qb->select('*')
+						->from('weinsteig_zahlungen')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+						->executeQuery()
+						->fetchAll();
+
+					$totalZahlungen = 0;
+					foreach ($zahlungen as $z) {
+						$totalZahlungen += (float)$z['betrag'];
+					}
+
+					$qb = $this->db->getQueryBuilder();
+					$vorschreibungen = $qb->select('*')
+						->from('weinsteig_vorschreibungen')
+						->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
+						->executeQuery()
+						->fetchAll();
+
+					$openVorschreibungen = 0;
+					foreach ($vorschreibungen as $v) {
+						if ($v['status'] !== 'paid') {
+							$openVorschreibungen += (float)$v['amount'];
+						}
+					}
+
+					$openAmount = $totalZahlungen - $openVorschreibungen;
+
+					// Nur wenn offener Betrag > 0
+					if ($openAmount > 0) {
+						$address = $member['address'] ?? '-';
+						$zahlungspflichtig = $member['zahlungspflichtig'] ?? '-';
+						$iban = $member['iban'] ?? '-';
+						$mandateDate = $member['mandate_granted_date'] ? date('d.m.Y', strtotime($member['mandate_granted_date'])) : date('d.m.Y');
+						$mandateRef = $address; // Mandatsreferenz = Hausadresse
+
+						// Betrag formatieren (mit Komma als Dezimaltrennzeichen)
+						$betragStr = number_format($openAmount, 2, ',', '');
+
+						// Verwendungszweck: Hausadresse
+						$purpose = 'Energiegenossenschaft ' . $address;
+
+						// CSV-Zeile: George Business Format für Lastschrift
+						$line = "SDD;" . // Auftragsart
+							"\"$orgIban\";" . // Auftraggeber-IBAN
+							"\"$creditorId\";" . // Creditor-ID
+							"CORE;" . // Mandatstyp (CORE = Standard)
+							"$dueDate;" . // Fälligkeitsdatum
+							"J;" . // Bestandsbildung (Ja = Sammelauftrag)
+							"\"$batchName\";" . // Bestandsname
+							"N;" . // Einzelbuchung gewünscht (Nein)
+							"$betragStr;" . // Betrag
+							"\"$iban\";" . // Zahlungspflichtiger-IBAN
+							"\"$zahlungspflichtig\";" . // Zahlungspflichtiger-Name
+							"\"$mandateRef\";" . // Mandatsreferenz
+							"$mandateDate;" . // Mandatsausstellungsdatum
+							"\"$purpose\";" . // Verwendungszweck
+							";" . // Zahlungsreferenz (leer)
+							";" . // Auftraggeberreferenz (leer)
+							";" . // Zahlungspflichtiger-Strasse (leer)
+							";" . // Zahlungspflichtiger-Hausnummer (leer)
+							";" . // Zahlungspflichtiger-Tuernummer (leer)
+							";" . // Zahlungspflichtiger-Postleitzahl (leer)
+							";" . // Zahlungspflichtiger-Stadt (leer)
+							";" . // Zahlungspflichtiger-Land (leer)
+							"ENRG;" . // Category Purpose Code (Energie)
+							"ENRG;" . // Purpose Code (Energie)
+							"\"$orgName\";" . // Abweichender Auftraggeber Name
+							""; // Abweichender Zahlungspflichtiger Name (leer)
+
+						$csvLines[] = $line;
+					}
+				}
+			}
+
+			$csv = implode("\r\n", $csvLines);
+
+			// Header setzen für CSV-Download
+			header('Content-Type: text/csv; charset=utf-8');
+			header('Content-Disposition: attachment; filename="sepa-lastschrift-' . date('Y-m-d') . '.csv"');
+			echo $csv;
+			exit;
+
+		} catch (\Exception $e) {
+			return new DataResponse(['error' => 'Fehler: ' . $e->getMessage()], 400);
+		}
+	}
+
 	private function getUsersWithHouses(): array {
 		$usersData = [];
 
