@@ -276,23 +276,29 @@ office@langhofer.at',
 	 */
 	private function getOldestOpenBillDate(int $memberId): ?DateTime {
 		$qb = $this->db->getQueryBuilder();
-		$result = $qb->select('MIN(year * 100 + month) as yearmonth')
+		$result = $qb->select('year', 'month')
 			->from('weinsteig_vorschreibungen')
 			->where($qb->expr()->eq('member_id', $qb->createNamedParameter($memberId)))
 			->andWhere($qb->expr()->neq('status', $qb->createNamedParameter('paid')))
+			->orderBy('year', 'ASC')
+			->addOrderBy('month', 'ASC')
+			->setMaxResults(1)
 			->executeQuery()
 			->fetch();
 
-		if (!$result || !$result['yearmonth']) {
+		if (!$result) {
 			return null;
 		}
 
-		$yearMonth = (int)$result['yearmonth'];
-		$year = (int)($yearMonth / 100);
-		$month = $yearMonth % 100;
+		$year = (int)$result['year'];
+		$month = (int)$result['month'];
+
+		if ($year <= 0 || $month <= 0 || $month > 12) {
+			return null;
+		}
 
 		try {
-			return new DateTime("$year-$month-01");
+			return new DateTime(sprintf("%04d-%02d-01", $year, $month));
 		} catch (\Exception) {
 			return null;
 		}
