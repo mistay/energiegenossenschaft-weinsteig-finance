@@ -96,11 +96,14 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
 - **Mahnstop**: Kann pro Haus mit optionalem Enddatum gesetzt werden
 - **Manuelle Mahnung**: Jederzeit per Knopfdruck möglich (ignoriert Bedingungen außer Mahnstop)
 - **Editierbare Mahnstufen-Texte**:
-  - **Speicherort**: Admin → Einstellungen → Mahnstufen-Texte Sektion
+  - **Zugriffsrollen**: Obpersonen + Kassier:innen
+  - **Speicherorte**:
+    - Admin (obpersonen only): Admin → Einstellungen → Mahnstufen-Texte Sektion
+    - Mahnungen-Seite: /mahnungen/ → ⚙️ Mahnstufen-Texte Button → Modal
   - **Tabelle**: `oc_weinsteig_reminder_texts` (stage INT 1-2, subject, body, created_at, updated_at)
   - **API Endpoints**:
-    - `GET /api/reminder-texts` – Alle Texte laden (nur Obpersonen)
-    - `POST /api/reminder-texts/{stage}` – Text speichern (stage 1-2 only)
+    - `GET /api/reminder-texts` – Alle Texte laden (Obpersonen + Kassier:innen)
+    - `POST /api/reminder-texts/{stage}` – Text speichern (stage 1-2 only, Obpersonen + Kassier:innen)
   - **Platzhalter** (werden bei Versand ersetzt):
     - `{name}` → Zahlungspflichtiger Name
     - `{address}` → Hausadresse
@@ -108,7 +111,8 @@ Anleitung für Entwicklung mit Claude KI-Assistent.
     - `{duedate}` → Ursprüngliches Fälligkeitsdatum
   - **Datenbank-Migration**: `Version0014Date20260824001300.php` erstellt Tabelle mit Defaults
   - **Admin-UI**: 2 Textareas (Betreff + Nachrichtentext pro Stufe) mit Live-Speicherung
-  - **JavaScript**: `admin-config-reminders.js` für Load/Save mit Toast-Feedback
+  - **Mahnungen-Modal**: ⚙️ Button oben auf /mahnungen/ für schnellen Zugriff
+  - **JavaScript**: `admin-config-reminders.js` für Admin-Seite + Funktionen in `reminders.js` für Modal
 - **Saldo-Semantik**: Negatives Saldo = Schuld (siehe Punkt 6 oben!)
 
 ### 9. **Dokumentation**

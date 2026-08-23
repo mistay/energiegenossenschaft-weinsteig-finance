@@ -92,8 +92,7 @@ function getReminderStatusBadge(stage) {
 	const stages = {
 		0: { text: '🟢 Keine', class: 'badge-none' },
 		1: { text: '🟡 Stufe 1', class: 'badge-stage1' },
-		2: { text: '🔴 Stufe 2', class: 'badge-stage2' },
-		3: { text: '⛔ Stufe 3', class: 'badge-stage3' }
+		2: { text: '🔴 Stufe 2', class: 'badge-stage2' }
 	};
 	const s = stages[stage] || stages[0];
 	return `<span class="reminder-badge ${s.class}">${s.text}</span>`;
@@ -279,7 +278,7 @@ function renderHistory(reminders) {
 	reminders.forEach(reminder => {
 		const createdDate = new Date(reminder.created_at).toLocaleString('de-DE');
 		const sentDate = reminder.sent_at ? new Date(reminder.sent_at).toLocaleString('de-DE') : 'Nicht versendet';
-		const stageName = ['', 'Zahlungserinnerung', 'Mahnung', 'Letzte Mahnung'][reminder.reminder_stage] || '-';
+		const stageName = ['', 'Zahlungserinnerung', 'Mahnung'][reminder.reminder_stage] || '-';
 
 		html += `<div class="reminder-entry">
 			<div class="reminder-entry-date">
@@ -361,6 +360,39 @@ function clearReminderStop(memberId) {
 }
 
 function setupEventListeners() {
+	// Settings button
+	const settingsBtn = document.getElementById('settings-btn');
+	if (settingsBtn) {
+		settingsBtn.addEventListener('click', openSettingsModal);
+	}
+
+	// Settings modal close button
+	const settingsCloseBtn = document.getElementById('settings-close-btn');
+	if (settingsCloseBtn) {
+		settingsCloseBtn.addEventListener('click', closeSettingsModal);
+	}
+
+	// Close settings modal on background click
+	const settingsModal = document.getElementById('settings-modal');
+	if (settingsModal) {
+		settingsModal.addEventListener('click', function(e) {
+			if (e.target === this) {
+				closeSettingsModal();
+			}
+		});
+
+		// Settings save buttons
+		const saveBtns = settingsModal.querySelectorAll('.reminder-save-btn');
+		saveBtns.forEach(btn => {
+			btn.addEventListener('click', function() {
+				const stage = parseInt(this.dataset.stage);
+				const subject = document.getElementById(`reminder-subject-${stage}`).value.trim();
+				const body = document.getElementById(`reminder-body-${stage}`).value.trim();
+				saveReminderText(stage, subject, body);
+			});
+		});
+	}
+
 	// Trigger manual generation button
 	const triggerBtn = document.getElementById('trigger-now-btn');
 	if (triggerBtn) {
@@ -463,4 +495,90 @@ function showNotification(message, type = 'info') {
 		console.log('[' + type.toUpperCase() + ']', message);
 		alert(message);
 	}
+}
+
+function openSettingsModal() {
+	const modal = document.getElementById('settings-modal');
+	if (!modal) return;
+
+	modal.style.display = 'block';
+	loadReminderTextsForModal();
+}
+
+function closeSettingsModal() {
+	const modal = document.getElementById('settings-modal');
+	if (modal) {
+		modal.style.display = 'none';
+	}
+}
+
+function loadReminderTextsForModal() {
+	fetch(OCA?.generateUrl?.('/apps/weinsteigfinance/api/reminder-texts') ||
+		'/index.php/apps/weinsteigfinance/api/reminder-texts',
+		{ credentials: 'include' })
+		.then(r => r.json())
+		.then(data => {
+			if (data && typeof data === 'object') {
+				for (let stage = 1; stage <= 2; stage++) {
+					if (data[stage]) {
+						document.getElementById(`reminder-subject-${stage}`).value = data[stage].subject || '';
+						document.getElementById(`reminder-body-${stage}`).value = data[stage].body || '';
+					}
+				}
+			}
+		})
+		.catch(err => {
+			console.error('Error loading reminder texts:', err);
+			showNotification('❌ Fehler beim Laden der Mahnstufen-Texte', 'error');
+		});
+}
+
+function saveReminderText(stage, subject, body) {
+	if (!subject || !body) {
+		showNotification('⚠️ Betreff und Nachrichtentext sind erforderlich', 'error');
+		return;
+	}
+
+	const statusEl = document.querySelector(`.settings-modal .reminder-status[data-stage="${stage}"]`);
+	if (statusEl) {
+		statusEl.style.display = 'inline-block';
+		statusEl.textContent = '...';
+		statusEl.style.color = '#666';
+	}
+
+	fetch(OCA?.generateUrl?.(`/apps/weinsteigfinance/api/reminder-texts/${stage}`) ||
+		`/index.php/apps/weinsteigfinance/api/reminder-texts/${stage}`,
+		{
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ subject, body })
+		})
+		.then(r => r.json())
+		.then(data => {
+			if (data.success) {
+				if (statusEl) {
+					statusEl.textContent = '✓ Gespeichert';
+					statusEl.style.color = '#28a745';
+				}
+				showNotification('✅ Mahnstufe gespeichert', 'success');
+				setTimeout(() => {
+					if (statusEl) statusEl.style.display = 'none';
+				}, 3000);
+			} else {
+				showNotification('❌ ' + (data.error || 'Fehler beim Speichern'), 'error');
+				if (statusEl) {
+					statusEl.textContent = '✗ Fehler';
+					statusEl.style.color = '#dc3545';
+				}
+			}
+		})
+		.catch(err => {
+			console.error('Error saving reminder text:', err);
+			showNotification('❌ Fehler beim Speichern', 'error');
+			if (statusEl) {
+				statusEl.textContent = '✗ Fehler';
+				statusEl.style.color = '#dc3545';
+			}
+		});
 }

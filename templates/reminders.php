@@ -8,7 +8,12 @@ script('weinsteigfinance', 'reminders');
 <div id="weinsteigfinance-reminders" class="app-weinsteigfinance">
 	<?php include 'nav.php'; ?>
 
-	<h2>💬 Mahnmanagement</h2>
+	<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+		<h2 style="margin: 0;">💬 Mahnmanagement</h2>
+		<button id="settings-btn" style="padding: 8px 16px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: 500; transition: background 0.2s;">
+			⚙️ Mahnstufen-Texte
+		</button>
+	</div>
 
 	<!-- Process Explanation -->
 	<div id="process-info" style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
@@ -24,11 +29,10 @@ script('weinsteigfinance', 'reminders');
 							<li>✓ Letzte Mahnung > 14 Tage her</li>
 						</ul>
 					</li>
-					<li><strong>Mahnung erstellen</strong> (Stufe 1 → 2 → 3)
+					<li><strong>Mahnung erstellen</strong> (Stufe 1 → 2)
 						<ul style="margin: 5px 0; font-size: 12px;">
 							<li>🟡 Stufe 1: Zahlungserinnerung (nett)</li>
-							<li>🔴 Stufe 2: Mahnung (ernster)</li>
-							<li>⛔ Stufe 3: Letzte Mahnung (final)</li>
+							<li>🔴 Stufe 2: Mahnung (ernster/final)</li>
 						</ul>
 					</li>
 					<li><strong>Email versendet</strong> mit entsprechendem Text</li>
@@ -296,6 +300,95 @@ script('weinsteigfinance', 'reminders');
 		margin-top: 10px;
 	}
 }
+
+.settings-modal {
+	display: none;
+	position: fixed;
+	z-index: 1000;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+.settings-modal-content {
+	background-color: white;
+	margin: 5% auto;
+	padding: 30px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	width: 90%;
+	max-width: 800px;
+	max-height: 85vh;
+	overflow-y: auto;
+}
+
+.settings-modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.settings-modal-header h3 {
+	margin: 0;
+}
+
+.reminder-text-stage {
+	margin-bottom: 25px;
+	border: 1px solid #ddd;
+	padding: 15px;
+	border-radius: 3px;
+}
+
+.reminder-text-stage h4 {
+	margin: 0 0 15px 0;
+	color: #333;
+}
+
+.reminder-text-stage input,
+.reminder-text-stage textarea {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	box-sizing: border-box;
+	font-family: monospace;
+	margin-bottom: 10px;
+}
+
+.reminder-text-stage textarea {
+	min-height: 120px;
+	resize: vertical;
+}
+
+.reminder-text-stage small {
+	color: #666;
+	display: block;
+	margin-bottom: 15px;
+}
+
+.settings-modal .reminder-save-btn {
+	padding: 8px 16px;
+	background: #0082c9;
+	color: white;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background 0.2s;
+}
+
+.settings-modal .reminder-save-btn:hover {
+	background: #0066a1;
+}
+
+.settings-modal .reminder-status {
+	margin-left: 10px;
+	display: none;
+	font-weight: 500;
+}
 </style>
 
 <!-- History Modal -->
@@ -311,6 +404,40 @@ script('weinsteigfinance', 'reminders');
 			<button class="modal-close" id="history-modal-close">
 				Schließen
 			</button>
+		</div>
+	</div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="settings-modal">
+	<div class="settings-modal-content">
+		<div class="settings-modal-header">
+			<h3>⚙️ Mahnstufen-Texte konfigurieren</h3>
+			<button id="settings-close-btn" class="modal-close">✕</button>
+		</div>
+
+		<!-- Stage 1: Zahlungserinnerung -->
+		<div class="reminder-text-stage" style="border-left: 4px solid #28a745;">
+			<h4>🟢 Stufe 1: Zahlungserinnerung</h4>
+			<label style="display: block; margin-bottom: 4px; font-weight: 500; color: #333;">Betreff:</label>
+			<input type="text" id="reminder-subject-1" placeholder="Zahlungserinnerung">
+			<label style="display: block; margin-bottom: 4px; font-weight: 500; color: #333;">Nachrichtentext:</label>
+			<textarea id="reminder-body-1" placeholder="Nachrichtentext..."></textarea>
+			<small>Platzhalter: {name}, {address}, {amount}, {duedate}</small>
+			<button class="reminder-save-btn" data-stage="1">💾 Speichern</button>
+			<span class="reminder-status" data-stage="1"></span>
+		</div>
+
+		<!-- Stage 2: Mahnung -->
+		<div class="reminder-text-stage" style="border-left: 4px solid #dc3545;">
+			<h4>🔴 Stufe 2: Mahnung (Letzte)</h4>
+			<label style="display: block; margin-bottom: 4px; font-weight: 500; color: #333;">Betreff:</label>
+			<input type="text" id="reminder-subject-2" placeholder="Mahnung">
+			<label style="display: block; margin-bottom: 4px; font-weight: 500; color: #333;">Nachrichtentext:</label>
+			<textarea id="reminder-body-2" placeholder="Nachrichtentext..."></textarea>
+			<small>Platzhalter: {name}, {address}, {amount}, {duedate}</small>
+			<button class="reminder-save-btn" data-stage="2">💾 Speichern</button>
+			<span class="reminder-status" data-stage="2"></span>
 		</div>
 	</div>
 </div>

@@ -2557,8 +2557,10 @@ HTML;
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function getReminderTexts(): DataResponse {
-		// Nur Obpersonen dürfen Reminder-Texte verwalten
-		if (!$this->isObperson()) {
+		// Obpersonen und Kassier:innen dürfen Reminder-Texte verwalten
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 
@@ -2573,8 +2575,10 @@ HTML;
 	#[NoAdminRequired]
 	#[NoCSRFRequired]
 	public function setReminderText(int $stage, ?string $subject = null, ?string $body = null): DataResponse {
-		// Nur Obpersonen dürfen Reminder-Texte verwalten
-		if (!$this->isObperson()) {
+		// Obpersonen und Kassier:innen dürfen Reminder-Texte verwalten
+		$userId = $this->getUserId();
+		$isKassier = $this->groupManager->isInGroup($userId, 'kassier:innen');
+		if (!$this->isObperson() && !$isKassier) {
 			return new DataResponse(['error' => 'Unauthorized'], 403);
 		}
 

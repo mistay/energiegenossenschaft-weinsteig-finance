@@ -116,12 +116,14 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - Farbcodierte Status-Badges (🟢 Keine, 🟡 Stufe 1, 🔴 Stufe 2)
   - Aktionen: Mahnung, Verlauf, Stop/Aufheben
   - Nächste Generierung mit Countdown-Timer
-- **Editierbare Mahnstufen-Texte** (Admin-Panel):
+- **Editierbare Mahnstufen-Texte**:
   - 2 Textareas für Betreff + Nachrichtentext pro Stufe
   - Live-Speicherung mit visueller Bestätigung
   - Datenbank-gespeichert (nicht hardcoded)
   - Platzhalter: {name}, {address}, {amount}, {duedate}
-  - Verfügbar unter Admin → Einstellungen → Mahnstufen-Texte
+  - **Zwei Zugriffspunkte**:
+    - Admin (obpersonen only): Admin → Einstellungen → Mahnstufen-Texte
+    - Kassier:innen: /mahnungen/ → ⚙️ Mahnstufen-Texte Button (Modal)
 - **Saldo-Semantik**:
   - Negatives Saldo = Schuld (z.B. -240€ = Member schuldet +240€)
   - Positives Saldo = Guthaben (nicht zum Einziehen)
