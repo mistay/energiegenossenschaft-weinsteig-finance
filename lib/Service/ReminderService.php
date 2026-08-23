@@ -230,7 +230,8 @@ office@langhofer.at',
 		$result = [];
 		foreach ($members as $member) {
 			$openAmount = $this->calculateOpenAmount($member['id']);
-			if ($openAmount >= $minAmount) {
+			// Only include if member owes money (negative saldo) >= minAmount
+			if ($openAmount <= -$minAmount) {
 				$member['open_amount'] = $openAmount;
 				$result[] = $member;
 			}
@@ -399,13 +400,14 @@ office@langhofer.at',
 		try {
 			// Check 1: Open amount >= 10€
 			$openAmount = $this->calculateOpenAmount($memberId);
-		$check1 = $openAmount >= 10.0;
+		$check1 = $openAmount <= -10.0;  // Negative = member owes money
+		$debtAmount = abs($openAmount);
 		$result['checks']['open_amount'] = [
 			'passed' => $check1,
 			'value' => $openAmount,
-			'message' => $openAmount >= 10.0 ? "✓ Offener Betrag: {$openAmount}€ (≥ 10€)" : "❌ Offener Betrag: {$openAmount}€ (< 10€ - zu klein)"
+			'message' => $check1 ? "✓ Schuld: {$debtAmount}€ (≥ 10€)" : "❌ Schuld: {$debtAmount}€ (< 10€ - zu klein)"
 		];
-		if (!$check1) $result['reason'][] = "Offener Betrag < 10€";
+		if (!$check1) $result['reason'][] = "Schuld < 10€";
 
 		// Check 2: Suppression
 		$isSuppressed = false;

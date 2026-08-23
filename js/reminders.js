@@ -39,6 +39,7 @@ function renderRemindersTable(members) {
 	// Rows
 	members.forEach((member, idx) => {
 		const openAmount = calculateOpenAmount(member);
+		const debtAmount = Math.abs(openAmount);  // Convert to positive debt value
 		const reminderStage = member.reminder_stage || 0;
 		const statusBadge = getReminderStatusBadge(reminderStage);
 		const lastReminderDate = member.last_reminder_date ? new Date(member.last_reminder_date).toLocaleDateString('de-DE') : '-';
@@ -50,7 +51,8 @@ function renderRemindersTable(members) {
 				${escapeHtml(member.address || '-')}
 			</div>
 			<div class="reminder-cell reminder-amount" style="width: 15%; text-align: right;">
-				<strong>${openAmount.toFixed(2)}€</strong>
+				<strong>${openAmount < 0 ? '+' : ''}${debtAmount.toFixed(2)}€</strong>
+				<div style="font-size: 11px; color: #666;">${openAmount < 0 ? 'Schuld' : 'Guthaben'}</div>
 			</div>
 			<div class="reminder-cell reminder-status" style="width: 20%; text-align: center;">
 				${statusBadge}
