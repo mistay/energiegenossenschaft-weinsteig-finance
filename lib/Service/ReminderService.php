@@ -186,7 +186,7 @@ office@langhofer.at',
 				->setValue('reminder_stage', $qb->createNamedParameter($stage))
 				->setValue('email_address', $qb->createNamedParameter($member['email'] ?? ''))
 				->setValue('created_at', $qb->createNamedParameter($now, 'datetime'))
-				->execute();
+				->executeStatement();
 
 			// Send email
 			$this->sendReminderEmail($stage, $address, $zahlungspflichtig, $openAmount, $member);
@@ -199,7 +199,7 @@ office@langhofer.at',
 				->andWhere($qb->expr()->eq('reminder_stage', $qb->createNamedParameter($stage)))
 				->orderBy('created_at', 'DESC')
 				->setMaxResults(1)
-				->execute();
+				->executeStatement();
 
 			return true;
 		} catch (\Exception $e) {
@@ -533,6 +533,6 @@ office@langhofer.at',
 		$qb->update('weinsteig_members')
 			->set('reminder_stop_until', $qb->createNamedParameter($until, 'datetime'))
 			->where($qb->expr()->eq('id', $qb->createNamedParameter($memberId)))
-			->execute();
+			->executeStatement();
 	}
 }
