@@ -2,14 +2,22 @@ document.addEventListener('DOMContentLoaded', function() {
 	loadPendingMandates();
 	loadSepaData();
 
-	// Bind export button events (event delegation)
-	setTimeout(function() {
-		const csvBtn = document.getElementById('export-csv-btn');
+	// Bind export button events (with retries for dynamically added buttons)
+	let attempts = 0;
+	const bindButtons = function() {
 		const georgeBtn = document.getElementById('export-george-btn');
-		if (csvBtn) csvBtn.addEventListener('click', exportCsv);
-		if (georgeBtn) georgeBtn.addEventListener('click', exportGeorgeCSV);
-	}, 100);
+		if (georgeBtn) {
+			georgeBtn.addEventListener('click', exportGeorgeCSV);
+		} else if (attempts < 50) {
+			attempts++;
+			setTimeout(bindButtons, 50);
+		}
+	};
+	setTimeout(bindButtons, 100);
 });
+
+// Global export functions for direct access
+window.exportGeorgeCSV = exportGeorgeCSV;
 
 function loadPendingMandates() {
 	fetch(OCA?.generateUrl?.('/apps/weinsteigfinance/api/pending-mandate-approvals') || '/index.php/apps/weinsteigfinance/api/pending-mandate-approvals',
@@ -50,8 +58,7 @@ function loadSepaData() {
 		.then(r => r.json())
 		.then(data => {
 			let html = '<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">';
-			html += '<button id="export-csv-btn" class="export-btn">📥 CSV exportieren</button>';
-			html += '<button id="export-george-btn" class="export-btn" style="background: #28a745;">🏦 George Business (SDD)</button>';
+			html += '<button id="export-george-btn" class="export-btn" style="background: #28a745;">🏦 George Business (SDD) exportieren</button>';
 			html += '</div>';
 
 			if (!data.mandates || data.mandates.length === 0) {
@@ -87,10 +94,6 @@ function loadSepaData() {
 		.catch(err => {
 			document.getElementById('sepa-container').innerHTML = '<p style="color: #dc3545;">Fehler beim Laden: ' + err.message + '</p>';
 		});
-}
-
-function exportCsv() {
-	window.location.href = OCA?.generateUrl?.('/apps/weinsteigfinance/api/sepa-datentraeger/export') || '/index.php/apps/weinsteigfinance/api/sepa-datentraeger/export';
 }
 
 function exportGeorgeCSV() {

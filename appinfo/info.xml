@@ -11,7 +11,7 @@ Die App verwaltet die Vorschreibungen für den gemeinsamen Technikraum
 "Brunnenstube" (Strom, Internet), die SEPA-Mandate der Zahlungspflichtigen
 sowie die eingehenden Zahlungen der 22 Häuser.
 	]]></description>
-	<version>1.8.3</version>
+	<version>1.8.4</version>
 	<licence>gpl</licence>
 	<author mail="office@langhofer.at">Armin Langhofer</author>
 	<namespace>WeinsteigFinance</namespace>
