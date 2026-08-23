@@ -61,10 +61,14 @@ function renderRemindersTable(members) {
 			<div class="reminder-cell reminder-actions" style="width: 20%;">
 				<button class="reminder-button ${openAmount < 10 ? 'reminder-button-disabled' : ''}"
 					${openAmount < 10 ? 'disabled' : ''}
-					onclick="createReminderManual(${member.id})">
+					data-action="create-reminder"
+					data-member-id="${member.id}">
 					💬 Mahnung
 				</button>
-				<button class="reminder-button" onclick="openHistoryModal(${member.id}, '${escapeHtml(member.address)}')">
+				<button class="reminder-button"
+					data-action="open-history"
+					data-member-id="${member.id}"
+					data-address="${escapeHtml(member.address)}">
 					📋 Verlauf
 				</button>
 				${getSuppressButton(member.id, isSuppressed, member.reminder_stop_until)}
@@ -90,11 +94,15 @@ function getReminderStatusBadge(stage) {
 function getSuppressButton(memberId, isSuppressed, stopUntil) {
 	if (isSuppressed) {
 		const date = new Date(stopUntil).toLocaleDateString('de-DE');
-		return `<button class="reminder-button reminder-button-danger" onclick="clearReminderStop(${memberId})">
+		return `<button class="reminder-button reminder-button-danger"
+			data-action="clear-reminder-stop"
+			data-member-id="${memberId}">
 			🔓 Stop aufheben (bis ${date})
 		</button>`;
 	} else {
-		return `<button class="reminder-button" onclick="openSuppressDialog(${memberId})">
+		return `<button class="reminder-button"
+			data-action="open-suppress-dialog"
+			data-member-id="${memberId}">
 			🔇 Stop
 		</button>`;
 	}
@@ -241,9 +249,56 @@ function clearReminderStop(memberId) {
 }
 
 function setupEventListeners() {
+	// Trigger manual generation button
 	const triggerBtn = document.getElementById('trigger-now-btn');
 	if (triggerBtn) {
 		triggerBtn.addEventListener('click', triggerManualGeneration);
+	}
+
+	// History modal close button
+	const historyCloseBtn = document.getElementById('history-modal-close');
+	if (historyCloseBtn) {
+		historyCloseBtn.addEventListener('click', function() {
+			document.getElementById('history-modal').classList.remove('active');
+		});
+	}
+
+	// Close modal on background click
+	const historyModal = document.getElementById('history-modal');
+	if (historyModal) {
+		historyModal.addEventListener('click', function(e) {
+			if (e.target === this) {
+				this.classList.remove('active');
+			}
+		});
+	}
+
+	// Event delegation for reminder buttons
+	const container = document.getElementById('reminders-container');
+	if (container) {
+		container.addEventListener('click', function(e) {
+			const btn = e.target.closest('button[data-action]');
+			if (!btn) return;
+
+			const action = btn.dataset.action;
+			const memberId = parseInt(btn.dataset.memberId);
+			const address = btn.dataset.address;
+
+			switch(action) {
+				case 'create-reminder':
+					if (!btn.disabled) createReminderManual(memberId);
+					break;
+				case 'open-history':
+					openHistoryModal(memberId, address);
+					break;
+				case 'open-suppress-dialog':
+					openSuppressDialog(memberId);
+					break;
+				case 'clear-reminder-stop':
+					clearReminderStop(memberId);
+					break;
+			}
+		});
 	}
 }
 

@@ -10,6 +10,54 @@ script('weinsteigfinance', 'reminders');
 
 	<h2>💬 Mahnmanagement</h2>
 
+	<!-- Process Explanation -->
+	<div id="process-info" style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+		<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+			<div style="flex: 1; min-width: 250px;">
+				<h3 style="margin: 0 0 10px 0; color: #2e7d32;">📊 Wie das System funktioniert</h3>
+				<ol style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #333;">
+					<li><strong>Automatische Prüfung</strong> täglich um 02:00 Uhr
+						<ul style="margin: 5px 0; font-size: 12px;">
+							<li>✓ Kontoauszug muss < 7 Tage alt sein</li>
+							<li>✓ Offener Betrag ≥ 10€</li>
+							<li>✓ Rechnung > 30 Tage alt</li>
+							<li>✓ Letzte Mahnung > 14 Tage her</li>
+						</ul>
+					</li>
+					<li><strong>Mahnung erstellen</strong> (Stufe 1 → 2 → 3)
+						<ul style="margin: 5px 0; font-size: 12px;">
+							<li>🟡 Stufe 1: Zahlungserinnerung (nett)</li>
+							<li>🔴 Stufe 2: Mahnung (ernster)</li>
+							<li>⛔ Stufe 3: Letzte Mahnung (final)</li>
+						</ul>
+					</li>
+					<li><strong>Email versendet</strong> mit entsprechendem Text</li>
+					<li><strong>Verlauf gespeichert</strong> (wann, welche Stufe, Email)</li>
+				</ol>
+			</div>
+			<div style="flex: 1; min-width: 250px;">
+				<h3 style="margin: 0 0 10px 0; color: #2e7d32;">⚙️ Manuelle Funktionen</h3>
+				<div style="font-size: 13px; line-height: 1.8; color: #333;">
+					<p style="margin: 0 0 8px 0;">
+						<strong>💬 Mahnung</strong><br>
+						Erstelle sofort eine Mahnung für ein Haus.<br>
+						<em style="color: #666; font-size: 12px;">Springt zur nächsten Stufe, auch wenn Bedingungen nicht erfüllt.</em>
+					</p>
+					<p style="margin: 8px 0;">
+						<strong>📋 Verlauf</strong><br>
+						Zeige alle bisherigen Mahnungen<br>
+						<em style="color: #666; font-size: 12px;">Datum, Stufe, Email-Adresse.</em>
+					</p>
+					<p style="margin: 8px 0;">
+						<strong>🔇 Stop</strong><br>
+						Pausiere Mahnungen für dieses Haus<br>
+						<em style="color: #666; font-size: 12px;">Für N Tage oder unbegrenzt.</em>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Info Box -->
 	<div id="status-box" style="background: #f0f8ff; border-left: 4px solid #0082c9; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
 		<p style="margin: 0; color: #333; font-weight: 600;">
@@ -260,7 +308,7 @@ script('weinsteigfinance', 'reminders');
 			Lädt...
 		</div>
 		<div class="modal-footer">
-			<button class="modal-close" onclick="document.getElementById('history-modal').classList.remove('active')">
+			<button class="modal-close" id="history-modal-close">
 				Schließen
 			</button>
 		</div>
