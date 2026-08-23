@@ -9,6 +9,7 @@ Eine praktische Schritt-für-Schritt-Anleitung zur Verwaltung von SEPA-Mandaten,
 1. [SEPA-Mandate verwalten](#1-sepa-mandate-verwalten)
 2. [Bankdaten importieren](#2-bankdaten-importieren)
 3. [SEPA Datenträger erstellen](#3-sepa-datenträger-erstellen)
+   - [3.1 George Business CSV exportieren](#31-george-business-csv-exportieren)
 4. [Zahlungen abgleichen](#4-zahlungen-abgleichen)
 5. [Journal & Saldo prüfen](#5-journal--saldo-prüfen)
 6. [Häufige Fragen](#häufige-fragen)
@@ -216,6 +217,134 @@ Im Datenträger wird dann die **Lastschrift von 300€** eingezogen.
 
 ---
 
+## 3.1 George Business CSV exportieren
+
+Die moderne Alternative zur XML-Datei: **George Business CSV** für Lastschrift-Batch-Processing.
+
+### 🎯 Wann nutzen?
+
+- **George Business Banking** ist euer Online-Banking-System
+- Ihr könnt Lastschriften direkt im Portal einziehen statt XML-Upload
+- **CSV-Format** ist einfacher zu verarbeiten als XML
+- Jede Zeile = 1 Lastschrift-Auftrag
+
+### 📋 Was wird exportiert?
+
+Das System generiert automatisch:
+- ✅ Alle Häuser mit **genehmigten Mandaten**
+- ✅ Nur Häuser mit **mindestens 0,10€ offenen Betrag**
+- ✅ Korrektes Vorzeichen (Schulden als positive Lastschrift-Beträge)
+- ❌ Häuser mit 0€ Saldo (keine unnötigen Einträge)
+- ❌ Häuser mit Guthaben/Überzahlung (negative Beträge)
+
+**Beispiel-Daten:**
+| Haus | Offener Saldo | Export |
+|------|--------------|--------|
+| Musterstr. 1 | -240€ | ✅ +240,00€ einziehen |
+| Musterstr. 2 | 0€ | ❌ skipped |
+| Musterstr. 3 | +50€ | ❌ skipped (Guthaben) |
+| Musterstr. 4 | -0,05€ | ❌ skipped (< 0,10€) |
+
+### 🔄 Schritt-für-Schritt
+
+#### Schritt 1: George CSV generieren
+
+1. Loggt euch ein → **📄 SEPA-Datenträger**
+2. Das System zeigt:
+   - 🟡 **Oben**: Häuser mit **ausstehenden Mandaten** (rot = nicht freigegeben)
+   - 🟢 **Unten**: Häuser mit **genehmigten Mandaten** (Kartenlayout)
+3. Klickt **"🏦 George Business (SDD) exportieren"**
+   - CSV-Datei wird heruntergeladen
+   - Dateiname: `sepa-lastschrift-YYYY-MM-DD.csv`
+
+#### Schritt 2: CSV in George Business hochladen
+
+1. **George Business Online-Banking öffnen**
+   - https://businessportal.erstegroup.com/ (oder euer Bankinstitut)
+   - Mit Benutzername & PIN anmelden
+2. Navigiert zu: **Zahlungsverkehr** → **Lastschriften** → **SDD-Sammlung importieren**
+3. Klickt **"Datei auswählen"**
+4. Wählt die heruntergeladene CSV-Datei
+5. Klickt **"Hochladen"** oder **"Weiter"**
+
+#### Schritt 3: Prüfen & Bestätigen
+
+George zeigt euch eine Vorschau:
+- **Anzahl Lastschriften**: z.B. "3 Einzüge"
+- **Gesamtbetrag**: z.B. "240,00€"
+- **Fälligkeitsdatum**: Automatisch berechnet (meist nächster Bankgeschäftstag)
+
+**Prüfet vor Bestätigung:**
+- ✓ Anzahl passt (z.B. erwartet ihr 3, seht 3)
+- ✓ Gesamtbetrag passt (z.B. erwartet ihr 240€, seht 240€)
+- ✓ Keine Fehler-Meldungen (rote Warnungen)
+
+Klickt **"Bestätigen"** oder **"Ausführen"**
+
+#### Schritt 4: Lastschriften verarbeiten
+
+George verarbeitet die Sammlung:
+- Status ändert sich zu: **"In Bearbeitung"**
+- oder direkt zu: **"Ausgeführt"**
+- Timeout: Meist **1-2 Bankgeschäftstage**
+
+**Nach Verarbeitung:**
+- George zeigt: **"Lastschrift-Sammlung erfolgreich eingereicht"**
+- Ihr erhaltet eine Bestätigungs-Email
+
+#### Schritt 5: Zahlungen im Journal prüfen
+
+Nach 1-2 Tagen:
+1. Fragt bei eurer Bank den **aktuellen Kontostand** ab
+2. Oder wartet auf **Kontoauszug-Email**
+3. Importiert den neuen Kontoauszug (siehe Kapitel 2)
+4. System ordnet Zahlungen automatisch zu
+5. Im **Journal** seht ihr die eingezogenen Beträge
+
+**Saldo sollte sich erhöhen:**
+```
+VORHER:
+Haus 1: -240€ Schuld
+
+NACHHER (nach Zahlung):
+Haus 1: 0€ (wenn exakt bezahlt) oder +X€ (wenn zu viel gezahlt)
+```
+
+### ❓ Was passiert bei Fehlern?
+
+#### ❌ George lehnt CSV ab: "Invalid Format"
+- CSV ist fehlerhaft → Kontaktiert Technischen Support
+- Oder: Datei wurde mit Excel geöffnet & gespeichert (Zeichencodierung kaputt)
+  - **Lösung**: Neu exportieren, nicht mit Excel öffnen!
+
+#### ❌ George lehnt ab: "Ungültige IBAN"
+- Eine IBAN in der CSV ist fehlerhaft
+- **Lösung**: Prüft im Journal, welches Haus fehlerhafte IBAN hat → korrigiert
+
+#### ❌ George lehnt ab: "Mandat nicht genehmigt"
+- Eine der Lastschriften hat kein genehmigtes Mandat
+- **Lösung**: Das sollte nicht vorkommen! Kontaktiert Technischen Support
+
+#### ❌ George akzeptiert, aber Zahlungen kommen nicht
+- Wahrscheinlich: Konto hat nicht genug Deckung
+- **Lösung**: George zeigt im Portal den Fehler → Konto-Manager kontaktieren
+
+### 💡 Tipps
+
+1. **Vor Export**: Prüft im **Journal**, ob alle Salden korrekt sind
+   - Klickt auf jedes Haus → **"📊 Journal"**
+   - Vergewissert euch, dass die Schulden aktuell sind
+2. **Mehrfach exportieren**: Ihr könnt die gleiche CSV mehrfach exportieren
+   - Aber: **George erkennt Duplikate!** Gleiche Mandats-Referenz = wird skipped
+   - Falls ihr mehrmals das gleiche exportiert: **Mandats-Refs ändern sich nicht** → Duplikate-Schutz
+3. **CSV-Inhalt**: Öffnet die CSV **nie mit Excel**!
+   - Excel zerstört die Zeichencodierung
+   - Nutzt: Notepad++, VS Code, oder direkt in George
+4. **Backup vor Export**: Vor großen Lastschrift-Läufen empfohlen
+   - Geht zu **💾 Backup** → **"Backup jetzt erstellen"**
+
+---
+
 ## 4. Zahlungen abgleichen
 
 Nach dem Lastschrift-Einzug erhaltet ihr einen neuen Kontoauszug.
@@ -329,6 +458,35 @@ Falls nötig, könnt ihr auch manuell generieren:
 ### F: Wo sehe ich alle Backups?
 **A:** Nur Admin/Obpersonen: **📊 Backup-Status** → Zeigt letzte Backups, nächste Backup-Zeit, Download-Optionen.
 
+### F: George CSV vs. SEPA XML Datenträger - was ist der Unterschied?
+**A:** 
+- **SEPA XML**: Standardformat (ISO 20022), meist für automatisierte Bank-Systeme
+- **George CSV**: Modernes Format für George Business Portal, einfacher zu verarbeiten
+- **Beide** ziehen die gleichen Lastschriften ein
+- **Unterschied**: CSV ist benutzerfreundlicher im George Portal, XML ist universeller für alle Banken
+
+### F: Warum werden manche Häuser nicht in der George CSV exportiert?
+**A:**
+- ❌ Kein genehmigtes Mandat (Kassier:in muss erst freigeben)
+- ❌ Keine IBAN hinterlegt
+- ❌ Saldo ist 0€ (keine Schuld)
+- ❌ Saldo ist positiv (Guthaben, wir schulden dem Haus Geld)
+- ❌ Saldo ist zwischen -0,01€ und -0,09€ (unter 0,10€ Mindestbetrag)
+- ✅ Mandat wurde widerrufen (wird nicht exportiert)
+
+### F: Kann ich die George CSV mehrfach hochladen?
+**A:** Ja, aber:
+- George erkennt Duplikate anhand der "Mandatsreferenz" (= Haus-Adresse)
+- Wenn ihr die **gleiche CSV** nächste Woche nochmal hochladet: George blockiert Duplikate
+- **Lösung**: Exportiert eine neue CSV (dann sind die Salden anders und George akzeptiert es)
+
+### F: Was heißt "Akontozahlung" (ADVA) in der George CSV?
+**A:** 
+- ADVA = Vorauszahlung auf unbekannte Rechnung
+- Das Geld ist eine **Allgemeine Akontozahlung** (nicht spezifisch für Energie)
+- Im Gegensatz zu: ENRG = speziell für Energierechnungen
+- **Für Weinsteig**: Nutzen wir ADVA, weil das Geld für diverse Gemeinschaftskosten verwendet wird (Strom, Internet, Wartung, usw.)
+
 ---
 
 ## 💡 Tipps & Tricks
@@ -349,8 +507,8 @@ Bei Fragen oder Problemen:
 
 ---
 
-**Version**: 1.4.7  
-**Letzte Aktualisierung**: 2026-08-19  
+**Version**: 1.5.0  
+**Letzte Aktualisierung**: 2026-08-23  
 **Für**: Kassier:innen der Energiegenossenschaft Weinsteig
 
 *Gebaut mit ❤️ für Energiegenossenschaften*
