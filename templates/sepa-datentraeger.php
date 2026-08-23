@@ -34,51 +34,6 @@ script('weinsteigfinance', 'sepa-datentraeger');
 	<div id="sepa-container" style="margin-top: 20px;">
 		<p style="color: #999;">Lädt...</p>
 	</div>
-
-	<script>
-	document.addEventListener('DOMContentLoaded', function() {
-		loadPendingMandates();
-		loadSepaData();
-	});
-
-	function loadPendingMandates() {
-		fetch(OCA?.generateUrl?.('/apps/weinsteigfinance/api/pending-mandate-approvals') || '/index.php/apps/weinsteigfinance/api/pending-mandate-approvals',
-			{ credentials: 'include' })
-			.then(r => r.json())
-			.then(data => {
-				const section = document.getElementById('pending-section');
-				const tbody = document.getElementById('pending-tbody');
-
-				if (!data.pending || data.pending.length === 0) {
-					section.style.display = 'none';
-					return;
-				}
-
-				section.style.display = 'block';
-				tbody.innerHTML = '';
-
-				data.pending.forEach(item => {
-					const row = document.createElement('tr');
-					row.style.borderBottom = '1px solid #ffe0b3';
-					row.innerHTML = `
-						<td style="padding: 10px;">${escapeHtml(item.address)}</td>
-						<td style="padding: 10px;">${escapeHtml(item.zahlungspflichtig)}</td>
-						<td style="padding: 10px; font-family: monospace; font-size: 12px;">${escapeHtml(item.iban)}</td>
-						<td style="padding: 10px; text-align: center; color: #856404;">📋 v${item.mandate_version}</td>
-					`;
-					tbody.appendChild(row);
-				});
-			})
-			.catch(err => {
-				document.getElementById('pending-tbody').innerHTML = '<tr><td colspan="4" style="padding: 10px; color: #dc3545;">Fehler beim Laden</td></tr>';
-			});
-	}
-
-	function escapeHtml(text) {
-		const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
-		return String(text).replace(/[&<>"']/g, m => map[m]);
-	}
-	</script>
 </div>
 
 <style>
