@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
 	loadPendingMandates();
 	loadSepaData();
+
+	// Bind export button events (event delegation)
+	setTimeout(function() {
+		const csvBtn = document.getElementById('export-csv-btn');
+		const georgeBtn = document.getElementById('export-george-btn');
+		if (csvBtn) csvBtn.addEventListener('click', exportCsv);
+		if (georgeBtn) georgeBtn.addEventListener('click', exportGeorgeCSV);
+	}, 100);
 });
 
 function loadPendingMandates() {
@@ -42,8 +50,8 @@ function loadSepaData() {
 		.then(r => r.json())
 		.then(data => {
 			let html = '<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">';
-			html += '<button class="export-btn" onclick="exportCsv()">📥 CSV exportieren</button>';
-			html += '<button class="export-btn" style="background: #28a745;" onclick="exportGeorgeCSV()">🏦 George Business (SDD)</button>';
+			html += '<button id="export-csv-btn" class="export-btn">📥 CSV exportieren</button>';
+			html += '<button id="export-george-btn" class="export-btn" style="background: #28a745;">🏦 George Business (SDD)</button>';
 			html += '</div>';
 
 			if (!data.mandates || data.mandates.length === 0) {
