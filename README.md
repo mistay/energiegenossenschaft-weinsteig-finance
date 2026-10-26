@@ -399,10 +399,16 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.12.8
+- **Aktuelle Version**: 1.12.9
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 14+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.12.9)** - Real User Display Names:
+  - 👥 **Dropdown zeigt echte Bewohner-Namen** aus `oc_weinsteig_user_members` + `oc_users`
+  - 📋 Format: "Weinsteig 2a — Bettina, Patrick" (aus den zugeordneten Nextcloud-Usern)
+  - 🔄 Immer aktuell - basiert auf echter User-Datenbank, nicht auf manuellen Daten
+  - ✅ Fallback zu `zahlungspflichtig` wenn keine User zugeordnet
+  - 💡 Keine manuelle Wartung des `zahlungspflichtig` Feldes mehr nötig
 - **Neue Features (v1.12.8)** - Data Normalization:
   - 🔄 **Automatische Migration** normalisiert alle Namen zu Komma-Format
   - ✅ "Bettina und Patrick" → "Bettina, Patrick"
