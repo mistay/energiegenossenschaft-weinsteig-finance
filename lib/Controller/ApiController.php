@@ -148,13 +148,16 @@ class ApiController extends Controller {
 
 				$assigned_users = [];
 				$displayNames = [];
+				error_log('DEBUG member ' . $memberId . ': found ' . count($userDetails) . ' users');
 				foreach ($userDetails as $user) {
+					error_log('DEBUG user: ' . json_encode($user));
 					$assigned_users[] = $user['user_id'];
 					$displayNames[] = $user['displayname'] ?: $user['user_id'];
 				}
 				$row['assigned_users'] = $assigned_users;
 				$row['user_display_names'] = $displayNames;
 			} catch (\Exception $e) {
+				error_log('DEBUG Exception: ' . $e->getMessage());
 				$row['assigned_users'] = [];
 				$row['user_display_names'] = [];
 			}
