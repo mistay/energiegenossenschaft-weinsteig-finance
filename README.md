@@ -77,24 +77,38 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 - **Unique Constraint** (member_id + year + month) verhindert Duplikate
 
 ### 💰 Intelligentes Zahlungsmanagement
-- **CSV-Import** mit Validierung und Fehlerbehandlung
-- **Automatische Duplikat-Erkennung** mittels MD5-Hashing (buchungsdatum + betrag + partnername)
+- **CAMT.053 XML-Import** (ISO 20022 Standard Bankkontoauszüge) mit automatischer Transaktionsextraktion
+  - ✅ Ersetzt alte CSV-basierte Importe
+  - Unterstützt alle CAMT.053-Varianten mit robuster Namespace-Verarbeitung
+  - Extrahiert: Buchungsdatum, Valutadatum, Partner, IBAN, Verwendungszweck, Betrag, Währung
+  - Kompatibel mit allen Östereichischen/Europäischen Banken
+- **Intelligente Duplikat-Erkennung** mit MD5-Hashing (buchungsdatum + betrag + partnername)
+  - **db_duplicate**: Zahlung war bereits in der Datenbank (übersprungen)
+  - **import_duplicate**: Doppelt im selben Upload (übersprungen)
+  - **Detaillierte Duplikat-Liste** mit Unterscheidung der Duplikat-Typen
 - **5-stufiges Fuzzy-Matching-System** mit Konfidenz-Scoring:
   1. **95% Confidence**: Exact Address Match in Verwendungszweck
-  2. **89% Confidence**: Nextcloud User DisplayName Exact Match
-  3. **87% Confidence**: Nextcloud User DisplayName Word-Order-Independent Match
-  4. **90% Confidence**: Zahlungspflichtig Exact Match
+  2. **90% Confidence**: Zahlungspflichtig Exact Match
+  3. **89% Confidence**: Nextcloud User DisplayName Exact Match
+  4. **87% Confidence**: Nextcloud User DisplayName Word-Order-Independent Match
   5. **86% Confidence**: Zahlungspflichtig Word-Order-Independent Match
 - **Auto-Match-Button** für alle ausstehenden Zahlungen auf einmal
 - **Manuelle Zuordnung** zu Häusern mit Dropdown-Selektor
 - **Zahlungs-Änderung** oder **Zurückstellung** jederzeit möglich
 - **Status-Indikatoren** mit Farben (⚠️ unzugeordnet, ✓ zugeordnet)
-- **Duplikat-Liste** mit visueller Hervorhebung
-- **Flexible Dateneingabe**: Datei-Upload ODER Copy-Paste CSV
+- **Duplikat-Liste** mit visueller Hervorhebung und Duplikat-Typ-Unterscheidung
 - **Valutadatum-Tracking** für präzise Buchhaltung
 - **Zwei-Tabellen-UI**: Unzugeordnete (Gelb) + Zugeordnete (Grün)
-- **CSV-Format-Support**: Semikolon-Trennzeichen, DD.MM.YYYY Daten, Komma-Dezimale
-- **IBAN/BIC-Extraktion** aus CSV
+- **IBAN-Extraktion** aus CAMT.053 XML
+- **Import-Status-Dashboard**:
+  - 📊 Statistik (Zugeordnet, Ausstehend, Gesamt)
+  - 📅 Letztes erfolgreiches Import-Datum sichtbar
+  - 💡 Reminder: "Importiere neue Auszüge nach diesem Datum"
+  - 🔄 Seite aktualisieren nach Import
+- **Besseres Import-Feedback**:
+  - Grüne Success-Box mit Zusammenfassung
+  - Collapsible Details für übersprungene Einträge
+  - Unterscheidung: "war bereits da" vs. "doppelt im Upload"
 
 ### 💬 Automatisiertes Mahnmanagement (Reminders)
 - **2-stufiges Mahnsystem**: Zahlungserinnerung → Mahnung (Letzte)
@@ -175,7 +189,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - 💰 Zahlungen (Persönliche Payment-Overview)
   - 📊 Journal (Buchhaltung & Kontosaldo)
   - 💬 Mahnungen (Mahnmanagement für Kassier:innen + Obpersonen)
-  - 📥 Admin: Import (Zahlungs-CSV-Import)
+  - 📥 Admin: Import (CAMT.053 XML Kontoauszug-Import)
   - 👥 Admin: Häuser & Benutzer (Verwaltung & Zuordnung)
   - 👤 Profil (Mein Profil anschauen)
 - **Scrollbar-Handling** für breite Tabellen mit Flexbox
@@ -300,7 +314,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
   - 🔤 Semantische Sortierung: "2a" vor "19" (Natural Order alphanumeric)
   - 🕐 Audit-Trail: Exportiere regelmäßig um Name-Änderungen zu verfolgen
 - **Bulk-Operationen**: Mehrere Häuser mit einem Admin-Benutzer
-- **Import-Management**: CSV-Validierung mit Fehlerbehandlung + Duplikat-Detection
+- **Import-Management**: CAMT.053 XML-Validierung mit Fehlerbehandlung + intelligenter Duplikat-Erkennung (db_duplicate vs. import_duplicate)
 - **Statistik-Dashboard**: Überblick über alle Häuser und Zahlungen
 - **Konfigurierbare Akontozahlungen**: Editierbar in der App (Standard: 60€)
 - **Mandate-Verwaltung**: Für alle 22 Mitglieder + Upload/Widerruf
@@ -343,7 +357,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 | **Audit-Log-Einträge** | Unbegrenzt mit Timestamps |
 | **Datenverlust-Risiko** | Zero (via Transactions) |
 | **Uptime-Target** | 99.9% (via Nextcloud) |
-| **Datenbankmigrationen** | 10 Versionssprünge |
+| **Datenbankmigrationen** | 15 Versionssprünge |
 | **API-Endpoints** | 20+ REST-APIs |
 | **Zugriffskontroll-Ebenen** | 2 (obpersonen, mitglieder) |
 
@@ -385,10 +399,21 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.6.4
+- **Aktuelle Version**: 1.12.0
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
-- **Backward-Kompatibilität**: Alle 12+ Migrationen vollständig unterstützt
+- **Backward-Kompatibilität**: Alle 14+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.12.0)** - CAMT.053 XML Import:
+  - 🏦 **CAMT.053 XML-Import** ersetzt CSV-basierte Importe vollständig
+  - ✅ ISO 20022 Standard für Bankkontoauszüge
+  - 📊 Verbesserte Import-UI mit Status-Dashboard oben
+  - 📅 **Letztes Import-Datum prominently angezeigt** ("📅 Letzter erfolgreich importierter Auszug: YYYY-MM-DD")
+  - 💡 Benutzer-Reminder: "→ Importiere neue Auszüge nach diesem Datum"
+  - 🔍 **Duplikat-Unterscheidung**: db_duplicate (war bereits da) vs. import_duplicate (doppelt im Upload)
+  - 📋 Collapsible Details-Liste für übersprungene Duplikate
+  - 🟢 Grüne Success-Box mit Import-Zusammenfassung
+  - 🔧 Robuster CamtParser für alle CAMT.053-Varianten
+  - 🌍 Kompatibel mit österreichischen und europäischen Banken
 - **Neue Features (v1.6.7)**:
   - 🏠 **Haus-Spalte in allen Exporten**: CSV, PDF, Anwesenheitsliste
   - 🔤 **Semantische Sortierung** (Natural Order): "2a" vor "19"
