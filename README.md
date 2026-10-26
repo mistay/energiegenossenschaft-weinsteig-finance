@@ -405,14 +405,14 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 - **Auto-Updates**: Via Nextcloud App-Store
 - **Neue Features (v1.12.8)** - Data Normalization:
   - 🔄 **Automatische Migration** normalisiert alle Namen zu Komma-Format
-  - ✅ "Name1 und Name2" → "Name1, Name2"
-  - ✅ "Name1 oder Name2" → "Name1, Name2"
+  - ✅ "Bettina und Patrick" → "Bettina, Patrick"
+  - ✅ "Manuel oder Zusana" → "Manuel, Zusana"
   - 📊 One-time Migration bei App-Update, danach alle neu modernes Format
   - 💾 Migration 16: `Version0016Date20261026001400.php`
 - **Neue Features (v1.12.7)** - Flexible Name Parsing:
   - 👥 **Unterstützt "und"/"oder" Separatoren** im `zahlungspflichtig` Feld
-  - 📋 Beispiele: "Name1 und Name2" → "Name1, Name2"
-  - 📋 Beispiele: "Name1 oder Name2" → "Name1, Name2"
+  - 📋 Beispiele: "Bettina und Patrick" → "Bettina, Patrick"
+  - 📋 Beispiele: "Manuel oder Zusana" → "Manuel, Zusana"
   - 🔍 Suchbar nach beiden Namen in der Combobox
   - ✅ Automatische Normalisierung zu modernem Komma-Format
 - **Neue Features (v1.12.6)** - Multiple Names Support:
@@ -420,7 +420,7 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
   - 📋 Zeigt alle Namen in Dropdown angezeigt
   - 🔍 Suchbar nach Namen statt nur Adresse
 - **Neue Features (v1.12.5)** - Family Names in Assignment:
-  - 👥 **Familiennamen in Zuordnungs-Dropdowns** (z.B. "Weinsteig 17b — Name Bewohner")
+  - 👥 **Familiennamen in Zuordnungs-Dropdowns** (z.B. "Weinsteig 17b — Bettina, Patrick")
   - 🔍 Benutzer können nach Namen suchen statt nur nach Adressen
   - 💍 Hilfreich bei Namenänderungen (z.B. Heirat) ohne Adressänderung
   - ✅ Beide Dropdowns (unzugeordnete + zugeordnete Zahlungen)
