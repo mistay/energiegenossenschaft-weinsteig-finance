@@ -399,11 +399,19 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.12.2
+- **Aktuelle Version**: 1.12.4
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 14+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
-- **Neue Features (v1.12.2)** - Error Handling & Empty Statements:
+- **Neue Features (v1.12.4)** - Import-Progress Tracking:
+  - 📊 **Jüngster Datensatz-Datum wird angezeigt** ("Auszug bis: YYYY-MM-DD")
+  - 📅 Zwei-Datum-System:
+    - **Letzter Import**: Zeitstempel des letzten Imports
+    - **Daten bis**: Jüngster Transaktionsdatum im importierten File
+  - 💡 User sieht sofort, welcher Auszug als nächster kommt
+  - 🎯 Einfacher Import-Tracking: "Nächster Auszug nach 2026-10-22"
+  - ✅ Zeigt in Status-Dashboard + Import-Feedback (leer & mit Daten)
+- **Neue Features (v1.12.2 & v1.12.3)** - Error Handling & Empty Statements:
   - ✅ **Leere Kontoauszüge werden akzeptiert** (0 Transaktionen = kein Fehler)
   - 🔍 Bessere Fehlerbehandlung: "ungültige XML" vs. "leerer aber valider Auszug"
   - ℹ️ Info-Box für leere Importe statt Fehlermeldung
