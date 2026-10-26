@@ -93,8 +93,11 @@ function load() {
 						html += '<option value="">📍 Wähle Haus...</option>';
 						members.forEach(m => {
 							let names = '';
-							if (m.zahlungspflichtig) {
-								// Split by comma, "und", or "oder" and format cleanly
+							// Use user_display_names from the assigned users, or fall back to zahlungspflichtig
+							if (m.user_display_names && m.user_display_names.length > 0) {
+								names = ' — ' + m.user_display_names.join(', ');
+							} else if (m.zahlungspflichtig) {
+								// Fallback if no users assigned
 								let nameList = m.zahlungspflichtig
 									.replace(/ und /gi, ', ')
 									.replace(/ oder /gi, ', ')

@@ -135,7 +135,7 @@ class ApiController extends Controller {
 			// Saldo = eingegangene Zahlungen - offene Vorschreibungen (wie memberJournal)
 			$row['open_amount'] = round($totalZahlungen - $openVorschreibungen, 2);
 
-			// Lade zugeordnete Benutzer
+			// Lade zugeordnete Benutzer und ihre Display-Namen
 			try {
 				$qb = $this->db->getQueryBuilder();
 				$userRows = $qb->select('um.user_id')
@@ -144,8 +144,25 @@ class ApiController extends Controller {
 					->executeQuery()
 					->fetchAll();
 				$row['assigned_users'] = array_map(fn($u) => $u['user_id'], $userRows);
+
+				// Lade Display-Namen für diese User
+				$displayNames = [];
+				if (!empty($row['assigned_users'])) {
+					$qb = $this->db->getQueryBuilder();
+					$userDetails = $qb->select('uid', 'displayname')
+						->from('users')
+						->where($qb->expr()->in('uid', array_map(fn($u) => $qb->createNamedParameter($u), $row['assigned_users'])))
+						->executeQuery()
+						->fetchAll();
+
+					foreach ($userDetails as $user) {
+						$displayNames[] = $user['displayname'] ?: $user['uid'];
+					}
+				}
+				$row['user_display_names'] = $displayNames;
 			} catch (\Exception $e) {
 				$row['assigned_users'] = [];
+				$row['user_display_names'] = [];
 			}
 
 			// Lade Mahnungs-Informationen
