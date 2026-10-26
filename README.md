@@ -399,10 +399,15 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.12.5
+- **Aktuelle Version**: 1.12.6
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 14+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.12.6)** - Multiple Names Support:
+  - 👥 **Komma-getrennte Namen** in `zahlungspflichtig` Feld (z.B. "Valentin, Petra")
+  - 📋 Alle Namen werden in Dropdown angezeigt: "Weinsteig 17b — Valentin, Petra"
+  - 🔍 Suchbar nach beiden Namen statt nur einem
+  - ✅ Formatierung und Trimmen automatisch
 - **Neue Features (v1.12.5)** - Family Names in Assignment:
   - 👥 **Familiennamen in Zuordnungs-Dropdowns** ("Weinsteig 17b — Valentin Panzenböck")
   - 🔍 Benutzer können nach Namen suchen statt nur nach Adressen
