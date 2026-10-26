@@ -12,6 +12,12 @@ class ZahlungService {
 		private IDBConnection $db,
 	) {}
 
+	private function normalizeText(string $text): string {
+		$text = strtolower($text);
+		$text = str_replace(['ä', 'ö', 'ü', 'ß'], ['ae', 'oe', 'ue', 'ss'], $text);
+		return $text;
+	}
+
 	/**
 	 * Importiert Zahlungen aus CAMT.053 XML und führt Matching durch
 	 */
@@ -130,8 +136,8 @@ class ZahlungService {
 
 		// 1. Exakte Adresse im Text
 		foreach ($members as $member) {
-			$adresse = strtolower($member['address']);
-			if (strpos(strtolower($text), $adresse) !== false) {
+			$adresse = $this->normalizeText($member['address']);
+			if (strpos($this->normalizeText($text), $adresse) !== false) {
 				return [
 					'member_id' => $member['id'],
 					'type' => 'auto_exact_address',
@@ -142,8 +148,8 @@ class ZahlungService {
 
 		// 2a. Partnername exakt gegen zahlungspflichtig
 		foreach ($members as $member) {
-			$zahl = strtolower($member['zahlungspflichtig'] ?? '');
-			$partner = strtolower($zahlung['partnername']);
+			$zahl = $this->normalizeText($member['zahlungspflichtig'] ?? '');
+			$partner = $this->normalizeText($zahlung['partnername']);
 			if (!empty($zahl) && strpos($partner, $zahl) !== false) {
 				return [
 					'member_id' => $member['id'],
@@ -155,8 +161,8 @@ class ZahlungService {
 
 		// 2b. Partnername gegen User-DisplayNames
 		foreach ($userNames as $userId => $displayName) {
-			$partner = strtolower($zahlung['partnername']);
-			$userNameLower = strtolower($displayName);
+			$partner = $this->normalizeText($zahlung['partnername']);
+			$userNameLower = $this->normalizeText($displayName);
 
 			// Exakter Match
 			if ($partner === $userNameLower || strpos($partner, $userNameLower) !== false) {
@@ -197,8 +203,8 @@ class ZahlungService {
 
 		// 2c. Partnername: Alle Wörter gegen zahlungspflichtig (aber nicht in Reihenfolge)
 		foreach ($members as $member) {
-			$zahl = strtolower($member['zahlungspflichtig'] ?? '');
-			$partner = strtolower($zahlung['partnername']);
+			$zahl = $this->normalizeText($member['zahlungspflichtig'] ?? '');
+			$partner = $this->normalizeText($zahlung['partnername']);
 			if (empty($zahl)) continue;
 
 			$partnerWords = preg_split('/[\s,;\/\-]+/', $partner, -1, PREG_SPLIT_NO_EMPTY);
