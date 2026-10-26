@@ -77,7 +77,24 @@ class ZahlungService {
 			$result[] = $zahlung;
 		}
 
+		// Find the most recent transaction date
+		$latestDate = null;
+		foreach ($result as $zahlung) {
+			if ($zahlung['buchungsdatum'] > $latestDate) {
+				$latestDate = $zahlung['buchungsdatum'];
+			}
+		}
+		// Also check duplicates for latest date
+		foreach ($duplicates as $dup) {
+			if ($dup['date'] > $latestDate) {
+				$latestDate = $dup['date'];
+			}
+		}
+
 		$response = ['success' => true, 'count' => count($result), 'zahlungen' => $result];
+		if ($latestDate) {
+			$response['latest_date'] = $latestDate;
+		}
 		if (!empty($duplicates)) {
 			$response['duplicates'] = $duplicates;
 			$response['duplicate_count'] = count($duplicates);

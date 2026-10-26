@@ -831,11 +831,20 @@ class ApiController extends Controller {
 
 			$lastImport = $this->config->getAppValue('weinsteigfinance', 'last_zahlungen_import');
 
+			// Find latest transaction date
+			$latestTransactionDate = null;
+			foreach ($allZahlungen as $zahlung) {
+				if ($zahlung['valutadatum'] > $latestTransactionDate) {
+					$latestTransactionDate = $zahlung['valutadatum'];
+				}
+			}
+
 			return new DataResponse([
 				'unmatched' => $pending,
 				'matched' => $matched,
 				'members' => $members,
 				'lastImport' => $lastImport ?: null,
+				'latestTransactionDate' => $latestTransactionDate ?: null,
 				'stats' => [
 					'pending' => count($pending),
 					'matched' => count($matched),
