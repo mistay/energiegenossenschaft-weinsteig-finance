@@ -135,49 +135,24 @@ class ApiController extends Controller {
 			// Saldo = eingegangene Zahlungen - offene Vorschreibungen (wie memberJournal)
 			$row['open_amount'] = round($totalZahlungen - $openVorschreibungen, 2);
 
-			// Lade zugeordnete Benutzer und ihre Display-Namen
+			// Lade zugeordnete Benutzer und ihre Display-Namen mit JOIN
 			try {
 				$qb = $this->db->getQueryBuilder();
-				$userRows = $qb->select('um.user_id')
+				$userDetails = $qb->select('um.user_id', 'u.displayname')
 					->from('weinsteig_user_members', 'um')
+					->leftJoin('um', 'users', 'u', $qb->expr()->eq('um.user_id', 'u.uid'))
 					->where($qb->expr()->eq('um.member_id', $qb->createNamedParameter($memberId)))
 					->orderBy('um.id', 'ASC')
 					->executeQuery()
 					->fetchAll();
-				$userIds = array_map(fn($u) => $u['user_id'], $userRows);
-				$row['assigned_users'] = $userIds;
 
-				// Lade Display-Namen für diese User (bewahre Reihenfolge)
+				$assigned_users = [];
 				$displayNames = [];
-				if (!empty($userIds)) {
-					// Erstelle neue QueryBuilder für users query
-					$qb2 = $this->db->getQueryBuilder();
-
-					// Erstelle Parameter für IN-Klausel
-					$params = [];
-					foreach ($userIds as $userId) {
-						$params[] = $qb2->createNamedParameter($userId);
-					}
-
-					$userDetails = $qb2->select('uid', 'displayname')
-						->from('users')
-						->where($qb2->expr()->in('uid', $params))
-						->executeQuery()
-						->fetchAll();
-
-					// Erstelle Map von uid -> displayname
-					$userMap = [];
-					foreach ($userDetails as $user) {
-						$userMap[$user['uid']] = $user['displayname'] ?: $user['uid'];
-					}
-
-					// Behalte Reihenfolge aus user_members
-					foreach ($userIds as $userId) {
-						if (isset($userMap[$userId])) {
-							$displayNames[] = $userMap[$userId];
-						}
-					}
+				foreach ($userDetails as $user) {
+					$assigned_users[] = $user['user_id'];
+					$displayNames[] = $user['displayname'] ?: $user['user_id'];
 				}
+				$row['assigned_users'] = $assigned_users;
 				$row['user_display_names'] = $displayNames;
 			} catch (\Exception $e) {
 				$row['assigned_users'] = [];
