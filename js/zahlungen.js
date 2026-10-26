@@ -92,7 +92,15 @@ function load() {
 						html += '<select class="assign-select" id="select-' + z.id + '" style="flex: 1; min-width: 150px; padding: 6px; border: 1px solid #ddd; border-radius: 3px;">';
 						html += '<option value="">📍 Wähle Haus...</option>';
 						members.forEach(m => {
-							const label = escapeHtml(m.address) + (m.zahlungspflichtig ? ' — ' + escapeHtml(m.zahlungspflichtig) : '');
+							let names = '';
+							if (m.zahlungspflichtig) {
+								// Sanitize: trim and format names separated by comma
+								const nameList = m.zahlungspflichtig.split(',').map(n => n.trim()).filter(n => n);
+								if (nameList.length > 0) {
+									names = ' — ' + nameList.join(', ');
+								}
+							}
+							const label = escapeHtml(m.address) + escapeHtml(names);
 							html += '<option value="' + m.id + '">' + label + '</option>';
 						});
 						html += '</select>';
