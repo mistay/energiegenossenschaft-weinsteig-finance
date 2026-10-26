@@ -357,7 +357,7 @@ Die Anwendung bietet eine **sichere, dezentralisierte und intuitiv zu bedienende
 | **Audit-Log-Einträge** | Unbegrenzt mit Timestamps |
 | **Datenverlust-Risiko** | Zero (via Transactions) |
 | **Uptime-Target** | 99.9% (via Nextcloud) |
-| **Datenbankmigrationen** | 15 Versionssprünge |
+| **Datenbankmigrationen** | 16 Versionssprünge |
 | **API-Endpoints** | 20+ REST-APIs |
 | **Zugriffskontroll-Ebenen** | 2 (obpersonen, mitglieder) |
 
@@ -399,10 +399,16 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.12.7
+- **Aktuelle Version**: 1.12.8
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 14+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
+- **Neue Features (v1.12.8)** - Data Normalization:
+  - 🔄 **Automatische Migration** normalisiert alle Namen zu Komma-Format
+  - ✅ "Bettina und Patrick Schütz" → "Bettina, Patrick Schütz"
+  - ✅ "Manuel oder Zusana Häusler" → "Manuel, Zusana Häusler"
+  - 📊 One-time Migration bei App-Update, danach alle neu modernes Format
+  - 💾 Migration 16: `Version0016Date20261026001400.php`
 - **Neue Features (v1.12.7)** - Flexible Name Parsing:
   - 👥 **Unterstützt "und"/"oder" Separatoren** im `zahlungspflichtig` Feld
   - 📋 Beispiele: "Patrick und Bettina Schütz" → "Patrick, Bettina Schütz"
