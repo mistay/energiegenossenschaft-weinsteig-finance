@@ -94,8 +94,13 @@ function load() {
 						members.forEach(m => {
 							let names = '';
 							if (m.zahlungspflichtig) {
-								// Sanitize: trim and format names separated by comma
-								const nameList = m.zahlungspflichtig.split(',').map(n => n.trim()).filter(n => n);
+								// Split by comma, "und", or "oder" and format cleanly
+								let nameList = m.zahlungspflichtig
+									.replace(/ und /gi, ', ')
+									.replace(/ oder /gi, ', ')
+									.split(',')
+									.map(n => n.trim())
+									.filter(n => n);
 								if (nameList.length > 0) {
 									names = ' — ' + nameList.join(', ');
 								}
