@@ -23,9 +23,26 @@ function load() {
 
 				let html = '';
 
+				// Status Bar - oben
+				html += '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 4px; margin-bottom: 20px;">';
+				html += '<div style="font-weight: bold; margin-bottom: 8px;">📊 Import-Status</div>';
+				html += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 13px; margin-bottom: 8px;">';
+				html += '<div>✓ Zugeordnet<br><strong style="font-size: 18px;">' + stats.matched + '</strong></div>';
+				html += '<div>⚠️ Ausstehend<br><strong style="font-size: 18px;">' + stats.pending + '</strong></div>';
+				html += '<div>📝 Gesamt<br><strong style="font-size: 18px;">' + stats.total + '</strong></div>';
+				html += '</div>';
+				if (data.lastImport) {
+					html += '<div style="font-size: 12px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 8px;">📅 Letzter erfolgreich importierter Auszug: <strong>' + escapeHtml(data.lastImport) + '</strong></div>';
+					html += '<div style="font-size: 11px; color: #e0e0ff; margin-top: 4px;">→ Importiere neue Auszüge nach diesem Datum</div>';
+				}
+				html += '</div>';
+
 				// CAMT.053 Import Section
 				html += '<div id="zahlungen-import">';
-				html += '<h3>CAMT.053 Import</h3>';
+				html += '<h3>🔄 Neuen Kontoauszug importieren</h3>';
+				html += '<div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; margin-bottom: 15px; border-radius: 3px; font-size: 12px;">';
+				html += '<strong>💡 Tipp:</strong> Lade nur Auszüge hochgeladen, die nach dem letzten Import-Datum liegen. Doppelte Einträge werden automatisch erkannt und übersprungen.';
+				html += '</div>';
 				html += '<div style="margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 3px;">';
 				html += '<label style="cursor: pointer; display: inline-block; padding: 10px 15px; background: #0082c9; color: white; border-radius: 3px; font-weight: bold;">';
 				html += '📁 XML-Datei auswählen';
@@ -42,16 +59,6 @@ function load() {
 				html += '</div>';
 				html += '<div id="import-status" style="margin-top: 10px;"></div>';
 				html += '</div>';
-
-				// Statistik + Letzter Import
-				if (stats.total > 0) {
-					html += '<div style="background: #f0f8ff; padding: 10px; border-radius: 3px; margin-bottom: 20px; font-size: 12px;">';
-					html += '📊 Total: <strong>' + stats.total + '</strong> | ✓ Zugeordnet: <strong style="color: #28a745;">' + stats.matched + '</strong> | ⚠️ Ausstehend: <strong style="color: #ff9800;">' + stats.pending + '</strong>';
-					if (data.lastImport) {
-						html += '<br>📅 Letzter Import: ' + escapeHtml(data.lastImport);
-					}
-					html += '</div>';
-				}
 
 				// Unmatched Zahlungen - Card Layout
 				if (unmatched.length > 0) {
@@ -179,23 +186,27 @@ function load() {
 							.then(r => r.json())
 							.then(data => {
 								if (data.success) {
-									let msg = '✓ ' + data.count + ' Zahlungen importiert';
+									let html = '<div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 3px; padding: 10px; margin-top: 10px;">';
+									html += '<p style="color: #155724; margin: 0 0 8px 0; font-weight: bold;">✓ Import erfolgreich!</p>';
+									html += '<p style="color: #155724; margin: 0 0 5px 0; font-size: 13px;"><strong>' + data.count + ' neue Zahlungen</strong> importiert und gemergt</p>';
 									if (data.duplicate_count > 0) {
-										msg += ' | ⚠️ ' + data.duplicate_count + ' Duplikate ignoriert';
+										const dupMsg = data.duplicate_count === 1 ? 'Duplikat' : 'Duplikate';
+										html += '<p style="color: #ff9800; margin: 0 0 8px 0; font-size: 12px;">⚠️ <strong>' + data.duplicate_count + ' ' + dupMsg + '</strong> übersprungen (bereits bekannt)</p>';
+										if (data.duplicates && data.duplicates.length > 0) {
+											html += '<details style="font-size: 11px; color: #666;"><summary style="cursor: pointer; margin-bottom: 5px;">📋 Übersprungene Einträge anzeigen</summary>';
+											data.duplicates.forEach(d => {
+												const typeLabel = d.type === 'db_duplicate' ? '(war bereits da)' : '(doppelt im Upload)';
+												html += '<div style="padding: 3px 0; border-bottom: 1px solid #eee;">' +
+													escapeHtml(d.date) + ' | ' + escapeHtml(d.partner) + ' | €' + d.amount.toFixed(2) + ' ' + typeLabel +
+													'</div>';
+											});
+											html += '</details>';
+										}
 									}
-									importStatus.innerHTML = '<p style="color: #28a745;">' + msg + '</p>';
-									if (data.duplicates && data.duplicates.length > 0) {
-										importStatus.innerHTML += '<p style="color: #ff9800; font-size: 11px; margin-top: 5px;">Ignorierte: ';
-										data.duplicates.forEach(d => {
-											importStatus.innerHTML += '<br>' + escapeHtml(d.date) + ' | ' + escapeHtml(d.partner) + ' | ' + d.amount.toFixed(2);
-										});
-										importStatus.innerHTML += '</p>';
-										importStatus.innerHTML += '<button id="reload-btn" style="margin-top: 10px; padding: 6px 12px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer;">↻ Aktualisieren</button>';
-										document.getElementById('reload-btn').addEventListener('click', () => load());
-									} else {
-										xmlInput.value = '';
-										setTimeout(() => load(), 1500);
-									}
+									html += '</div>';
+									importStatus.innerHTML = html;
+									importStatus.innerHTML += '<button id="reload-btn" style="margin-top: 10px; padding: 8px 16px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">↻ Seite aktualisieren</button>';
+									document.getElementById('reload-btn').addEventListener('click', () => { xmlInput.value = ''; load(); });
 								} else {
 									importStatus.innerHTML = '<p style="color: red;">Fehler: ' + escapeHtml(data.error || 'Unbekannter Fehler') + '</p>';
 									importBtn.disabled = false;
