@@ -10,6 +10,7 @@ use OCA\WeinsteigFinance\Service\ConfigService;
 use OCA\WeinsteigFinance\Service\MandateService;
 use OCA\WeinsteigFinance\Service\VorschreibungService;
 use OCA\WeinsteigFinance\Service\ZahlungService;
+use OCA\WeinsteigFinance\Service\CamtParser;
 use OCA\WeinsteigFinance\Service\BackupService;
 use OCA\WeinsteigFinance\Service\ReminderService;
 use OCP\AppFramework\Controller;
@@ -38,6 +39,7 @@ class ApiController extends Controller {
 		private IURLGenerator $urlGenerator,
 		private VorschreibungService $vorschreibungService,
 		private ZahlungService $zahlungService,
+		private CamtParser $camtParser,
 		private ConfigService $configService,
 		private BackupService $backupService,
 		private ReminderService $reminderService,
@@ -782,23 +784,25 @@ class ApiController extends Controller {
 		}
 
 		try {
-			$csvContent = $this->request->getParam('csv');
-			if (!$csvContent) {
-				return new DataResponse(['error' => 'No CSV provided'], 400);
+			$xmlContent = $this->request->getParam('xml');
+			if (!$xmlContent) {
+				return new DataResponse(['error' => 'No XML provided'], 400);
 			}
 
-			// Speichere CSV mit Zeitstempel
+			// Speichere XML mit Zeitstempel
 			$dataDir = $this->config->getSystemValue('datadirectory');
 			$importDir = "$dataDir/imports";
 			@mkdir($importDir, 0750, true);
 			$timestamp = (new DateTime())->format('Y-m-d_H-i-s');
-			$csvFile = "$importDir/zahlungen_$timestamp.csv";
-			file_put_contents($csvFile, $csvContent);
+			$xmlFile = "$importDir/zahlungen_$timestamp.xml";
+			file_put_contents($xmlFile, $xmlContent);
 
 			// Speichere Zeitstempel
 			$this->config->setAppValue('weinsteigfinance', 'last_zahlungen_import', (new DateTime())->format('Y-m-d H:i:s'));
 
-			$result = $this->zahlungService->importFromCsv($csvContent);
+			// Parse CAMT.053 XML
+			$transactions = $this->camtParser->parse($xmlContent);
+			$result = $this->zahlungService->importFromXml($transactions);
 			return new DataResponse($result);
 		} catch (\Exception $e) {
 			return new DataResponse(['error' => $e->getMessage()], 400);

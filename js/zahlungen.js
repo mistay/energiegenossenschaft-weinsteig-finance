@@ -23,17 +23,17 @@ function load() {
 
 				let html = '';
 
-				// CSV Import Section
+				// CAMT.053 Import Section
 				html += '<div id="zahlungen-import">';
-				html += '<h3>CSV-Import</h3>';
+				html += '<h3>CAMT.053 Import</h3>';
 				html += '<div style="margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 3px;">';
 				html += '<label style="cursor: pointer; display: inline-block; padding: 10px 15px; background: #0082c9; color: white; border-radius: 3px; font-weight: bold;">';
-				html += '📁 CSV-Datei auswählen';
-				html += '<input type="file" id="csv-file" accept=".csv" style="display: none;">';
+				html += '📁 XML-Datei auswählen';
+				html += '<input type="file" id="xml-file" accept=".xml" style="display: none;">';
 				html += '</label>';
-				html += '<span style="margin-left: 10px; font-size: 12px; color: #666;">oder Text unten einfügen</span>';
+				html += '<span style="margin-left: 10px; font-size: 12px; color: #666;">Bankkontoauszug im CAMT.053 Format</span>';
 				html += '</div>';
-				html += '<textarea id="csv-input" placeholder="Oder: CSV-Inhalt hierher einfügen (mit Semikolon-Trennzeichen)..."></textarea>';
+				html += '<textarea id="xml-input" placeholder="Oder: XML-Inhalt hierher einfügen..."></textarea>';
 				html += '<div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">';
 				html += '<button class="import-btn" id="import-btn">📤 Importieren</button>';
 				if (stats.pending > 0) {
@@ -135,17 +135,17 @@ function load() {
 				container.innerHTML = html;
 				console.log('HTML set. Container content:', container.innerHTML.length);
 
-				// CSV File Upload Handler
-				const csvFileInput = document.getElementById('csv-file');
-				if (csvFileInput) {
-					csvFileInput.addEventListener('change', function(e) {
+				// XML File Upload Handler
+				const xmlFileInput = document.getElementById('xml-file');
+				if (xmlFileInput) {
+					xmlFileInput.addEventListener('change', function(e) {
 						const file = e.target.files[0];
 						if (!file) return;
 
 						const reader = new FileReader();
 						reader.onload = function(event) {
-							document.getElementById('csv-input').value = event.target.result;
-							importStatus.innerHTML = '<p style="color: #0082c9;">✓ CSV-Datei geladen: ' + escapeHtml(file.name) + '</p>';
+							document.getElementById('xml-input').value = event.target.result;
+							importStatus.innerHTML = '<p style="color: #0082c9;">✓ XML-Datei geladen: ' + escapeHtml(file.name) + '</p>';
 						};
 						reader.onerror = function() {
 							importStatus.innerHTML = '<p style="color: red;">Fehler beim Lesen der Datei</p>';
@@ -157,14 +157,14 @@ function load() {
 				// Import Button Handler
 				const importBtn = document.getElementById('import-btn');
 				const autoMatchBtn = document.getElementById('auto-match-btn');
-				const csvInput = document.getElementById('csv-input');
+				const xmlInput = document.getElementById('xml-input');
 				const importStatus = document.getElementById('import-status');
 
 				if (importBtn) {
 					importBtn.addEventListener('click', function() {
-						const csv = csvInput.value.trim();
-						if (!csv) {
-							importStatus.innerHTML = '<p style="color: red;">CSV-Feld ist leer</p>';
+						const xml = xmlInput.value.trim();
+						if (!xml) {
+							importStatus.innerHTML = '<p style="color: red;">XML-Feld ist leer</p>';
 							return;
 						}
 
@@ -174,7 +174,7 @@ function load() {
 						fetch(OC.generateUrl('/apps/weinsteigfinance/api/zahlungen/import'), {
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
-							body: JSON.stringify({csv: csv})
+							body: JSON.stringify({xml: xml})
 						})
 							.then(r => r.json())
 							.then(data => {
@@ -193,7 +193,7 @@ function load() {
 										importStatus.innerHTML += '<button id="reload-btn" style="margin-top: 10px; padding: 6px 12px; background: #0082c9; color: white; border: none; border-radius: 3px; cursor: pointer;">↻ Aktualisieren</button>';
 										document.getElementById('reload-btn').addEventListener('click', () => load());
 									} else {
-										csvInput.value = '';
+										xmlInput.value = '';
 										setTimeout(() => load(), 1500);
 									}
 								} else {

@@ -13,46 +13,32 @@ class ZahlungService {
 	) {}
 
 	/**
-	 * Importiert Zahlungen aus CSV und führt Matching durch
+	 * Importiert Zahlungen aus CAMT.053 XML und führt Matching durch
 	 */
-	public function importFromCsv(string $csvContent): array {
-		$lines = array_filter(array_map('trim', explode("\n", $csvContent)));
-		if (empty($lines)) {
-			return ['error' => 'Empty CSV'];
+	public function importFromXml(array $transactions): array {
+		if (empty($transactions)) {
+			return ['error' => 'No transactions found in XML'];
 		}
-
-		// Header-Zeile überspringen
-		array_shift($lines);
 
 		$zahlungen = [];
 		$duplicates = [];
 		$seenHashes = [];
 
-		foreach ($lines as $line) {
-			$parts = str_getcsv($line, ';');
-			if (count($parts) < 8) continue;
-
-			$buchungsdatum = $this->parseDate($parts[0]);
-			$valutadatum = $this->parseDate($parts[1]);
-			$partnername = trim($parts[2]);
-			$verwendungszweck = trim($parts[3]);
-			$betrag = (float)str_replace(',', '.', trim($parts[4]));
-			$waehrung = trim($parts[5]);
-			$iban = trim($parts[6]) ?: null;
-			$bic = trim($parts[7]) ?: null;
-
-			if (!$buchungsdatum || !$betrag) continue;
+		foreach ($transactions as $tx) {
+			$buchungsdatum = $tx['buchungsdatum'];
+			$betrag = $tx['betrag'];
+			$partnername = $tx['partnername'];
 
 			// Duplikat-Hash: buchungsdatum + betrag + partnername
 			$hash = hash('md5', "$buchungsdatum|$betrag|$partnername");
 
-			// Prüfe ob bereits in CSV vorhanden
+			// Prüfe ob bereits in Import vorhanden
 			if (isset($seenHashes[$hash])) {
 				$duplicates[] = [
 					'date' => $buchungsdatum,
 					'partner' => $partnername,
 					'amount' => $betrag,
-					'type' => 'csv_duplicate'
+					'type' => 'import_duplicate'
 				];
 				continue;
 			}
@@ -69,16 +55,7 @@ class ZahlungService {
 				continue;
 			}
 
-			$zahlungen[] = [
-				'buchungsdatum' => $buchungsdatum,
-				'valutadatum' => $valutadatum,
-				'partnername' => $partnername,
-				'verwendungszweck' => $verwendungszweck,
-				'betrag' => $betrag,
-				'waehrung' => $waehrung,
-				'iban' => $iban,
-				'bic' => $bic,
-			];
+			$zahlungen[] = $tx;
 		}
 
 		// Alle Members laden für Matching
@@ -276,14 +253,6 @@ class ZahlungService {
 		return (strlen($longer) - $distance) / strlen($longer);
 	}
 
-	private function parseDate(string $date): ?string {
-		try {
-			$d = DateTime::createFromFormat('d.m.Y', trim($date));
-			return $d ? $d->format('Y-m-d') : null;
-		} catch (\Exception) {
-			return null;
-		}
-	}
 
 	private function getAllMembers(): array {
 		$qb = $this->db->getQueryBuilder();

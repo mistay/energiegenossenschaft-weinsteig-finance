@@ -18,7 +18,7 @@ $currentPage = 'zahlungen-import';
 	margin-bottom: 20px;
 }
 
-#csv-input {
+#xml-input {
 	width: 100%;
 	height: 150px;
 	font-family: monospace;
