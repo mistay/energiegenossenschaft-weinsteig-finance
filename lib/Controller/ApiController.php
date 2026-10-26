@@ -141,22 +141,39 @@ class ApiController extends Controller {
 				$userRows = $qb->select('um.user_id')
 					->from('weinsteig_user_members', 'um')
 					->where($qb->expr()->eq('um.member_id', $qb->createNamedParameter($memberId)))
+					->orderBy('um.id', 'ASC')
 					->executeQuery()
 					->fetchAll();
-				$row['assigned_users'] = array_map(fn($u) => $u['user_id'], $userRows);
+				$userIds = array_map(fn($u) => $u['user_id'], $userRows);
+				$row['assigned_users'] = $userIds;
 
-				// Lade Display-Namen für diese User
+				// Lade Display-Namen für diese User (bewahre Reihenfolge)
 				$displayNames = [];
-				if (!empty($row['assigned_users'])) {
+				if (!empty($userIds)) {
+					// Erstelle Parameter für IN-Klausel
+					$params = [];
+					foreach ($userIds as $userId) {
+						$params[] = $qb->createNamedParameter($userId);
+					}
+
 					$qb = $this->db->getQueryBuilder();
 					$userDetails = $qb->select('uid', 'displayname')
 						->from('users')
-						->where($qb->expr()->in('uid', array_map(fn($u) => $qb->createNamedParameter($u), $row['assigned_users'])))
+						->where($qb->expr()->in('uid', $params))
 						->executeQuery()
 						->fetchAll();
 
+					// Erstelle Map von uid -> displayname
+					$userMap = [];
 					foreach ($userDetails as $user) {
-						$displayNames[] = $user['displayname'] ?: $user['uid'];
+						$userMap[$user['uid']] = $user['displayname'] ?: $user['uid'];
+					}
+
+					// Behalte Reihenfolge aus user_members
+					foreach ($userIds as $userId) {
+						if (isset($userMap[$userId])) {
+							$displayNames[] = $userMap[$userId];
+						}
 					}
 				}
 				$row['user_display_names'] = $displayNames;
