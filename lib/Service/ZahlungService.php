@@ -16,13 +16,14 @@ class ZahlungService {
 	 * Importiert Zahlungen aus CAMT.053 XML und führt Matching durch
 	 */
 	public function importFromXml(array $transactions): array {
-		if (empty($transactions)) {
-			return ['error' => 'No transactions found in XML'];
-		}
-
 		$zahlungen = [];
 		$duplicates = [];
 		$seenHashes = [];
+
+		// Empty transaction list is OK (empty statement)
+		if (empty($transactions)) {
+			return ['success' => true, 'count' => 0, 'zahlungen' => []];
+		}
 
 		foreach ($transactions as $tx) {
 			$buchungsdatum = $tx['buchungsdatum'];
