@@ -9,7 +9,7 @@ class CamtParser {
 		try {
 			$xml = new \SimpleXMLElement($xmlContent);
 		} catch (\Exception $e) {
-			throw new \Exception('Invalid XML: ' . $e->getMessage());
+			throw new \Exception('Ungültige XML: ' . $e->getMessage());
 		}
 
 		$transactions = [];
@@ -25,6 +25,23 @@ class CamtParser {
 		$entries = $xml->xpath('//camt:Ntry') ?: [];
 		if (empty($entries)) {
 			$entries = $xml->xpath('//Ntry') ?: [];
+		}
+
+		// If still no entries, provide helpful debug info
+		if (empty($entries)) {
+			// Check if this is a valid CAMT.053 document at all
+			$stmts = $xml->xpath('//camt:Stmt') ?: [];
+			if (empty($stmts)) {
+				$stmts = $xml->xpath('//Stmt') ?: [];
+			}
+
+			if (!empty($stmts)) {
+				// Valid CAMT.053 but no transactions (empty statement)
+				return [];
+			}
+
+			// Not a valid CAMT.053 document
+			throw new \Exception('Keine Transaktionen gefunden. Ist das eine gültige CAMT.053 XML-Datei? (Format: ISO 20022 Bankkontoauszug)');
 		}
 
 		foreach ($entries as $entry) {

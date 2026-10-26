@@ -186,6 +186,17 @@ function load() {
 							.then(r => r.json())
 							.then(data => {
 								if (data.success) {
+									// Empty import handling
+									if (data.count === 0 && data.duplicate_count === 0) {
+										let html = '<div style="background: #e2e3e5; border: 1px solid #d6d8db; border-radius: 3px; padding: 10px; margin-top: 10px;">';
+										html += '<p style="color: #383d41; margin: 0 0 5px 0; font-weight: bold;">ℹ️ Leerer Kontoauszug</p>';
+										html += '<p style="color: #383d41; margin: 0; font-size: 12px;">Dieser Auszug enthält keine Transaktionen. Das ist OK - es wurden keine neuen Zahlungen importiert.</p>';
+										html += '</div>';
+										importStatus.innerHTML = html;
+										setTimeout(() => load(), 2000);
+										return;
+									}
+
 									let html = '<div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 3px; padding: 10px; margin-top: 10px;">';
 									html += '<p style="color: #155724; margin: 0 0 8px 0; font-weight: bold;">✓ Import erfolgreich!</p>';
 									html += '<p style="color: #155724; margin: 0 0 5px 0; font-size: 13px;"><strong>' + data.count + ' neue Zahlungen</strong> importiert und gemergt</p>';
