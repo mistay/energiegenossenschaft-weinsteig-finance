@@ -92,7 +92,8 @@ function load() {
 						html += '<select class="assign-select" id="select-' + z.id + '" style="flex: 1; min-width: 150px; padding: 6px; border: 1px solid #ddd; border-radius: 3px;">';
 						html += '<option value="">📍 Wähle Haus...</option>';
 						members.forEach(m => {
-							html += '<option value="' + m.id + '">' + escapeHtml(m.address) + '</option>';
+							const label = escapeHtml(m.address) + (m.zahlungspflichtig ? ' — ' + escapeHtml(m.zahlungspflichtig) : '');
+							html += '<option value="' + m.id + '">' + label + '</option>';
 						});
 						html += '</select>';
 						html += '<button type="button" class="assign-btn" data-id="' + z.id + '" style="padding: 6px 12px;">✓ Zuordnen</button>';
