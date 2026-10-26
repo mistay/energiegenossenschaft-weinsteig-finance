@@ -150,16 +150,18 @@ class ApiController extends Controller {
 				// Lade Display-Namen für diese User (bewahre Reihenfolge)
 				$displayNames = [];
 				if (!empty($userIds)) {
+					// Erstelle neue QueryBuilder für users query
+					$qb2 = $this->db->getQueryBuilder();
+
 					// Erstelle Parameter für IN-Klausel
 					$params = [];
 					foreach ($userIds as $userId) {
-						$params[] = $qb->createNamedParameter($userId);
+						$params[] = $qb2->createNamedParameter($userId);
 					}
 
-					$qb = $this->db->getQueryBuilder();
-					$userDetails = $qb->select('uid', 'displayname')
+					$userDetails = $qb2->select('uid', 'displayname')
 						->from('users')
-						->where($qb->expr()->in('uid', $params))
+						->where($qb2->expr()->in('uid', $params))
 						->executeQuery()
 						->fetchAll();
 
