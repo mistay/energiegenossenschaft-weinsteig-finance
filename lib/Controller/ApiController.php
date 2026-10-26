@@ -829,12 +829,10 @@ class ApiController extends Controller {
 
 		try {
 			$allZahlungen = $this->zahlungService->getAllPendingAndMatched();
-			$qb = $this->db->getQueryBuilder();
-			$members = $qb->select('*')
-				->from('weinsteig_members')
-				->orderBy('address')
-				->executeQuery()
-				->fetchAll();
+
+			// Nutze die members() Funktion um alle Members mit user_display_names zu laden
+			$membersResponse = $this->members();
+			$members = json_decode(json_encode($membersResponse->getData()), true);
 
 			// Gruppiere nach Status (und neu indizieren)
 			$pending = array_values(array_filter($allZahlungen, fn($z) => $z['status'] === 'pending'));
