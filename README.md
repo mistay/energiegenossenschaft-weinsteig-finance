@@ -399,11 +399,17 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
 
 ## 📈 Version & Release-Information
 
-- **Aktuelle Version**: 1.12.0
+- **Aktuelle Version**: 1.12.2
 - **Release-Zyklus**: Kontinuierlich neue Features und Verbesserungen
 - **Backward-Kompatibilität**: Alle 14+ Migrationen vollständig unterstützt
 - **Auto-Updates**: Via Nextcloud App-Store
-- **Neue Features (v1.12.0)** - CAMT.053 XML Import:
+- **Neue Features (v1.12.2)** - Error Handling & Empty Statements:
+  - ✅ **Leere Kontoauszüge werden akzeptiert** (0 Transaktionen = kein Fehler)
+  - 🔍 Bessere Fehlerbehandlung: "ungültige XML" vs. "leerer aber valider Auszug"
+  - ℹ️ Info-Box für leere Importe statt Fehlermeldung
+  - 🌍 Robusterer Parser für alle CAMT.053-Varianten
+  - 📝 Deutsches Error-Feedback bei tatsächlichen Problemen
+- **Neue Features (v1.12.0 & v1.12.1)** - CAMT.053 XML Import:
   - 🏦 **CAMT.053 XML-Import** ersetzt CSV-basierte Importe vollständig
   - ✅ ISO 20022 Standard für Bankkontoauszüge
   - 📊 Verbesserte Import-UI mit Status-Dashboard oben
@@ -412,8 +418,6 @@ Die App liest automatisch die PHP-Konfiguration (`upload_max_filesize` und `post
   - 🔍 **Duplikat-Unterscheidung**: db_duplicate (war bereits da) vs. import_duplicate (doppelt im Upload)
   - 📋 Collapsible Details-Liste für übersprungene Duplikate
   - 🟢 Grüne Success-Box mit Import-Zusammenfassung
-  - 🔧 Robuster CamtParser für alle CAMT.053-Varianten
-  - 🌍 Kompatibel mit österreichischen und europäischen Banken
 - **Neue Features (v1.6.7)**:
   - 🏠 **Haus-Spalte in allen Exporten**: CSV, PDF, Anwesenheitsliste
   - 🔤 **Semantische Sortierung** (Natural Order): "2a" vor "19"
