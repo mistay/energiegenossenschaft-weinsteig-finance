@@ -25,6 +25,7 @@ use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\IConfig;
 use OCP\IURLGenerator;
+use OCP\Log\ILogFactory;
 use DateTime;
 
 class ApiController extends Controller {
@@ -43,6 +44,7 @@ class ApiController extends Controller {
 		private ConfigService $configService,
 		private BackupService $backupService,
 		private ReminderService $reminderService,
+		private ILogFactory $logFactory,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -148,16 +150,18 @@ class ApiController extends Controller {
 
 				$assigned_users = [];
 				$displayNames = [];
-				error_log('DEBUG member ' . $memberId . ': found ' . count($userDetails) . ' users');
+				$logger = $this->logFactory->getCustomLogger('weinsteigfinance');
+				$logger->info('DEBUG member ' . $memberId . ': found ' . count($userDetails) . ' users');
 				foreach ($userDetails as $user) {
-					error_log('DEBUG user: ' . json_encode($user));
+					$logger->info('DEBUG user: ' . json_encode($user));
 					$assigned_users[] = $user['user_id'];
 					$displayNames[] = $user['displayname'] ?: $user['user_id'];
 				}
 				$row['assigned_users'] = $assigned_users;
 				$row['user_display_names'] = $displayNames;
 			} catch (\Exception $e) {
-				error_log('DEBUG Exception: ' . $e->getMessage());
+				$logger = $this->logFactory->getCustomLogger('weinsteigfinance');
+				$logger->error('DEBUG Exception: ' . $e->getMessage());
 				$row['assigned_users'] = [];
 				$row['user_display_names'] = [];
 			}
